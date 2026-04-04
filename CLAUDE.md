@@ -3,7 +3,7 @@
 ## Project structure
 
 - `_project/` — planning and documentation only (markdown). Never deployed.
-- `app/` — all deployable code. GitHub Actions will target this directory.
+- `app/` — all deployable code. GitHub Actions will target this directory. The living brand kit runs as a **Vite + React** app (`app/package.json`, `npm run dev`); colour presets live in `app/src/themes/palettes.ts`. A static HTML snapshot remains at `app/brand-kit.html` (no theme helper). Production build outputs to `app/dist/`.
 
 ## Git workflow
 

@@ -21,8 +21,15 @@ TylerJamesOS/
 │   ├── app-finance.md         # Finance app planning
 │   └── app-todos.md           # Todos app planning
 │
-├── app/                       # Deployable code
-│   └── brand-kit.html         # Living brand kit and design system
+├── app/                       # Deployable code (Vite + React)
+│   ├── package.json           # npm scripts: dev, build, preview
+│   ├── index.html             # Brand kit entry
+│   ├── src/
+│   │   ├── themes/palettes.ts # Canonical colour palettes (import from future apps)
+│   │   ├── styles/            # brand-kit.css + theme helper
+│   │   └── …                  # Brand kit UI + theme FAB
+│   ├── dist/                  # Production build output (gitignored)
+│   └── brand-kit.html         # Static snapshot (no React theme switcher)
 │
 ├── .github/
 │   └── workflows/             # CI/CD — deploy targets ./app
@@ -39,17 +46,25 @@ TylerJamesOS/
 
 ## Design System
 
-The brand kit (`app/brand-kit.html`) is the single source of truth for all visual decisions — colours, typography, spacing, and components. Open it in a browser to see the full system.
+The **interactive brand kit** (Vite + React) is the primary reference: colours, typography, spacing, components, and a **theme helper** (floating control, bottom-right) to switch palettes. Canonical colour values live in `app/src/themes/palettes.ts` so future apps can import the same map and call `applyPalette()` (or mirror variables in CSS).
 
-**Stack:** Poppins · Teal/Navy palette · 4px grid · Light mode first
+A static export without the theme helper remains at `app/brand-kit.html`.
+
+**Stack:** Inter · Bricolage Grotesque · Geist Mono · Teal/navy palettes (preset-driven) · 4px grid · Light mode first
 
 ## Development
 
-All deployable code lives under `./app`. GitHub Actions workflows target this directory for CI/CD.
+All deployable code lives under `./app`. For static hosting, build first and publish `app/dist/`. GitHub Actions workflows should run `npm ci && npm run build` inside `app/` when deploy is wired up.
 
 ```bash
-# View the brand kit
-open app/brand-kit.html
+cd app
+npm install
+npm run dev
+# http://localhost:5173 — hub home; routes: /brand-kit, /finance, /todos (placeholders)
+# Theme helper (FAB) switches palettes (stored in localStorage)
+
+# Static HTML snapshot (no React)
+open brand-kit.html
 ```
 
 ## Git Workflow

@@ -1,895 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tyler James OS — Brand Kit</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700&family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <style>
-    /* ============================================================
-       DESIGN TOKENS — edit these to restyle the entire system
-       ============================================================ */
-    :root {
-      /*
-       * Colours — brand ramp hue +30° (clockwise on the wheel) from the prior teal system;
-       * neutrals and sidebar tints rotated together so contrast relationships stay balanced.
-       */
-      --color-bg:           #F7F8F9;
-      --color-surface:      #ffffff;
-      --color-surface-2:    #EEF0F2;
-      --color-border:       #DDE1E5;
-      --color-border-soft:  #EBEEF0;
-      --color-primary:      #151B36;
-      --color-accent:       #193C61;
-      --color-accent-hover: #0F2C4B;
-      --color-text:         #151B36;
-      --color-text-muted:   #4A5370;
-      --color-text-subtle:  #8F9AAF;
-      --color-success:      #16a34a;
-      --color-warning:      #d97706;
-      --color-destructive:  #dc2626;
-      --color-info:         #193C61;
-
-      /* Sidebar (dark blue panel, same hue shift as text + accent) */
-      --color-sidebar-bg:      #151B36;
-      --color-sidebar-border:  #1E274A;
-      --color-sidebar-text:    #A8B3CB;
-      --color-sidebar-text-hi: #E8EBF2;
-      --color-sidebar-accent:  #7D8EA0;
-
-      /* Typography */
-      --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-display: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono:  'Geist Mono', 'Fira Code', monospace;
-
-      --text-xs:    11px;
-      --text-sm:    13px;
-      --text-base:  15px;
-      --text-md:    17px;
-      --text-lg:    20px;
-      --text-xl:    24px;
-      --text-2xl:   32px;
-      --text-3xl:   40px;
-      --text-4xl:   56px;
-
-      --weight-light:   300;
-      --weight-regular: 400;
-      --weight-medium:  500;
-      --weight-semi:    600;
-      --weight-bold:    700;
-
-      --leading-tight:  1.2;
-      --leading-snug:   1.4;
-      --leading-normal: 1.6;
-
-      /* Spacing (4px base) */
-      --space-1:  4px;
-      --space-2:  8px;
-      --space-3:  12px;
-      --space-4:  16px;
-      --space-5:  20px;
-      --space-6:  24px;
-      --space-8:  32px;
-      --space-10: 40px;
-      --space-12: 48px;
-      --space-16: 64px;
-      --space-20: 80px;
-      --space-24: 96px;
-
-      /* Radius */
-      --radius-sm:   4px;
-      --radius-md:   8px;
-      --radius-lg:   12px;
-      --radius-xl:   16px;
-      --radius-full: 9999px;
-
-      /* Shadows */
-      --shadow-sm:  0 1px 3px rgba(21,27,54,0.08);
-      --shadow-md:  0 4px 12px rgba(21,27,54,0.10);
-      --shadow-lg:  0 8px 32px rgba(21,27,54,0.12);
-
-      /* Transitions */
-      --ease-default: 150ms ease;
-      --ease-medium:  250ms ease;
-    }
-
-    /* ============================================================
-       RESET & BASE
-       ============================================================ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: var(--font-sans);
-      font-size: var(--text-base);
-      font-weight: var(--weight-regular);
-      line-height: var(--leading-normal);
-      color: var(--color-text);
-      background: var(--color-bg);
-      -webkit-font-smoothing: antialiased;
-    }
-
-    a { color: var(--color-accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    code, pre {
-      font-family: var(--font-mono);
-      font-size: var(--text-sm);
-    }
-
-    /* ============================================================
-       LAYOUT
-       ============================================================ */
-    .layout {
-      display: block;
-      min-height: 100vh;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      width: 220px;
-      background: var(--color-sidebar-bg);
-      border-right: 1px solid var(--color-sidebar-border);
-      padding: var(--space-6);
-      overflow-y: auto;
-      z-index: 10;
-    }
-
-    .sidebar-logo {
-      font-size: var(--text-md);
-      font-weight: var(--weight-bold);
-      font-family: var(--font-display);
-      color: var(--color-sidebar-text-hi);
-      letter-spacing: -0.01em;
-      padding-bottom: var(--space-6);
-      border-bottom: 1px solid var(--color-sidebar-border);
-      margin-bottom: var(--space-6);
-    }
-
-    .sidebar-logo span {
-      color: var(--color-sidebar-accent);
-    }
-
-    .sidebar-section {
-      margin-bottom: var(--space-6);
-    }
-
-    .sidebar-label {
-      font-size: var(--text-xs);
-      font-weight: var(--weight-semi);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--color-sidebar-accent);
-      margin-bottom: var(--space-2);
-    }
-
-    .sidebar-nav a {
-      display: block;
-      font-size: var(--text-sm);
-      color: var(--color-sidebar-text);
-      padding: var(--space-1) 0;
-      transition: color var(--ease-default);
-    }
-
-    .sidebar-nav a:hover {
-      color: var(--color-sidebar-text-hi);
-      text-decoration: none;
-    }
-
-    /* Main content */
-    .main {
-      margin-left: 220px;
-      padding: var(--space-16) var(--space-12);
-      max-width: 960px;
-    }
-
-    /* Sections */
-    .section {
-      margin-bottom: var(--space-24);
-    }
-
-    .section-header {
-      padding-bottom: var(--space-8);
-      border-bottom: 1px solid var(--color-border);
-      margin-bottom: var(--space-8);
-    }
-
-    .section-tag {
-      font-size: var(--text-xs);
-      font-weight: var(--weight-semi);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-accent);
-      margin-bottom: var(--space-2);
-    }
-
-    .section-title {
-      font-size: var(--text-2xl);
-      font-weight: var(--weight-semi);
-      font-family: var(--font-display);
-      color: var(--color-text);
-      line-height: var(--leading-tight);
-    }
-
-    .section-description {
-      margin-top: var(--space-3);
-      font-size: var(--text-base);
-      color: var(--color-text-muted);
-      max-width: 560px;
-    }
-
-    /* Token grid */
-    .token-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: var(--space-3);
-    }
-
-    .token-item {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-    }
-
-    .token-swatch {
-      height: 64px;
-      width: 100%;
-    }
-
-    .token-info {
-      padding: var(--space-3);
-    }
-
-    .token-name {
-      font-size: var(--text-sm);
-      font-weight: var(--weight-medium);
-      color: var(--color-text);
-    }
-
-    .token-value {
-      font-size: var(--text-xs);
-      font-family: var(--font-mono);
-      color: var(--color-text-muted);
-      margin-top: var(--space-1);
-    }
-
-    .token-var {
-      font-size: var(--text-xs);
-      font-family: var(--font-mono);
-      color: var(--color-text-subtle);
-    }
-
-    /* ============================================================
-       TYPOGRAPHY SPECIMENS
-       ============================================================ */
-    .type-specimen {
-      display: flex;
-      align-items: baseline;
-      gap: var(--space-6);
-      padding: var(--space-4) 0;
-      border-bottom: 1px solid var(--color-border-soft);
-    }
-
-    .type-meta {
-      width: 160px;
-      flex-shrink: 0;
-    }
-
-    .type-meta-name {
-      font-size: var(--text-xs);
-      font-weight: var(--weight-medium);
-      color: var(--color-text-muted);
-      font-family: var(--font-mono);
-    }
-
-    .type-meta-value {
-      font-size: var(--text-xs);
-      color: var(--color-text-subtle);
-      font-family: var(--font-mono);
-      margin-top: 2px;
-    }
-
-    /* ============================================================
-       SPACING SCALE
-       ============================================================ */
-    .spacing-row {
-      display: flex;
-      align-items: center;
-      gap: var(--space-4);
-      padding: var(--space-2) 0;
-      border-bottom: 1px solid var(--color-border-soft);
-    }
-
-    .spacing-bar-wrap {
-      width: 200px;
-    }
-
-    .spacing-bar {
-      height: 8px;
-      background: var(--color-accent);
-      border-radius: var(--radius-sm);
-      opacity: 0.7;
-    }
-
-    .spacing-label {
-      font-size: var(--text-xs);
-      font-family: var(--font-mono);
-      color: var(--color-text-muted);
-      width: 80px;
-    }
-
-    .spacing-value {
-      font-size: var(--text-xs);
-      font-family: var(--font-mono);
-      color: var(--color-text-subtle);
-    }
-
-    /* ============================================================
-       COMPONENT DEMOS
-       ============================================================ */
-    .component-group {
-      margin-bottom: var(--space-10);
-    }
-
-    .component-group-label {
-      font-size: var(--text-xs);
-      font-weight: var(--weight-semi);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--color-text-subtle);
-      margin-bottom: var(--space-4);
-    }
-
-    .demo-surface {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: var(--space-6);
-    }
-
-    .demo-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: var(--space-3);
-    }
-
-    /* Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-2);
-      padding: 0 var(--space-4);
-      height: 36px;
-      border-radius: var(--radius-md);
-      font-family: var(--font-sans);
-      font-size: var(--text-sm);
-      font-weight: var(--weight-medium);
-      cursor: pointer;
-      border: none;
-      transition: background var(--ease-default), opacity var(--ease-default);
-      white-space: nowrap;
-    }
-
-    .btn-primary {
-      background: var(--color-accent);
-      color: #fff;
-    }
-    .btn-primary:hover { background: var(--color-accent-hover); }
-
-    .btn-secondary {
-      background: var(--color-surface-2);
-      color: var(--color-text);
-      border: 1px solid var(--color-border);
-    }
-    .btn-secondary:hover { background: #DDE3E8; }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--color-text-muted);
-      border: 1px solid transparent;
-    }
-    .btn-ghost:hover {
-      background: var(--color-surface-2);
-      color: var(--color-text);
-    }
-
-    .btn-destructive {
-      background: transparent;
-      color: var(--color-destructive);
-      border: 1px solid var(--color-destructive);
-    }
-    .btn-destructive:hover {
-      background: rgba(220,38,38,0.08);
-    }
-
-    .btn-sm {
-      height: 28px;
-      padding: 0 var(--space-3);
-      font-size: var(--text-xs);
-    }
-
-    .btn-lg {
-      height: 44px;
-      padding: 0 var(--space-6);
-      font-size: var(--text-md);
-    }
-
-    .btn:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
-
-    /* Badges */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px var(--space-2);
-      border-radius: var(--radius-full);
-      font-size: var(--text-xs);
-      font-weight: var(--weight-medium);
-      line-height: 1.6;
-    }
-
-    .badge-default  { background: var(--color-surface-2); color: var(--color-text-muted); border: 1px solid var(--color-border); }
-    .badge-accent   { background: rgba(25,60,97,0.12); color: var(--color-accent); }
-    .badge-success  { background: rgba(22,163,74,0.10); color: var(--color-success); }
-    .badge-warning  { background: rgba(217,119,6,0.10); color: var(--color-warning); }
-    .badge-danger   { background: rgba(220,38,38,0.10); color: var(--color-destructive); }
-
-    /* Cards */
-    .card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: var(--space-6);
-    }
-
-    .card-title {
-      font-size: var(--text-md);
-      font-weight: var(--weight-semi);
-      font-family: var(--font-display);
-      color: var(--color-text);
-      margin-bottom: var(--space-1);
-    }
-
-    .card-subtitle {
-      font-size: var(--text-sm);
-      color: var(--color-text-muted);
-      margin-bottom: var(--space-4);
-    }
-
-    .card-value {
-      font-size: var(--text-3xl);
-      font-weight: var(--weight-semi);
-      font-family: var(--font-display);
-      color: var(--color-text);
-      line-height: 1;
-    }
-
-    .card-delta {
-      font-size: var(--text-sm);
-      color: var(--color-success);
-      margin-top: var(--space-2);
-    }
-
-    .card-delta.negative { color: var(--color-destructive); }
-
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--space-4);
-    }
-
-    /* Form inputs */
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-1);
-      margin-bottom: var(--space-4);
-    }
-
-    .input-label {
-      font-size: var(--text-sm);
-      font-weight: var(--weight-medium);
-      color: var(--color-text-muted);
-    }
-
-    .input {
-      height: 38px;
-      padding: 0 var(--space-3);
-      background: var(--color-surface-2);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      font-family: var(--font-sans);
-      font-size: var(--text-sm);
-      color: var(--color-text);
-      outline: none;
-      transition: border-color var(--ease-default);
-      width: 100%;
-    }
-
-    .input:focus {
-      border-color: var(--color-accent);
-    }
-
-    .input::placeholder { color: var(--color-text-subtle); }
-
-    .input-hint {
-      font-size: var(--text-xs);
-      color: var(--color-text-subtle);
-    }
-
-    .input-error {
-      border-color: var(--color-destructive) !important;
-    }
-
-    .input-error-msg {
-      font-size: var(--text-xs);
-      color: var(--color-destructive);
-    }
-
-    textarea.input {
-      height: auto;
-      padding: var(--space-3);
-      resize: vertical;
-      line-height: var(--leading-normal);
-    }
-
-    /* Tags */
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-1);
-      padding: 3px var(--space-2);
-      background: var(--color-surface-2);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-full);
-      font-size: var(--text-xs);
-      color: var(--color-text-muted);
-      cursor: pointer;
-    }
-
-    .tag:hover { border-color: var(--color-accent); color: var(--color-text); }
-
-    .tag-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-    }
-
-    /* Transaction row */
-    .tx-row {
-      display: flex;
-      align-items: center;
-      gap: var(--space-4);
-      padding: var(--space-3) var(--space-4);
-      border-bottom: 1px solid var(--color-border-soft);
-      transition: background var(--ease-default);
-    }
-
-    .tx-row:hover { background: var(--color-surface-2); border-radius: var(--radius-md); }
-
-    .tx-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: var(--radius-md);
-      background: var(--color-surface-2);
-      border: 1px solid var(--color-border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-
-    .tx-info { flex: 1; min-width: 0; }
-
-    .tx-name {
-      font-size: var(--text-sm);
-      font-weight: var(--weight-medium);
-      color: var(--color-text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .tx-meta {
-      font-size: var(--text-xs);
-      color: var(--color-text-subtle);
-      margin-top: 2px;
-    }
-
-    .tx-amount {
-      font-size: var(--text-sm);
-      font-weight: var(--weight-medium);
-      font-family: var(--font-mono);
-      text-align: right;
-      flex-shrink: 0;
-    }
-
-    .tx-amount.debit  { color: var(--color-text); }
-    .tx-amount.credit { color: var(--color-success); }
-
-    /* Task row */
-    .task-row {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      padding: var(--space-3) 0;
-      border-bottom: 1px solid var(--color-border-soft);
-    }
-
-    .task-check {
-      width: 18px;
-      height: 18px;
-      border: 1.5px solid var(--color-border);
-      border-radius: var(--radius-sm);
-      flex-shrink: 0;
-      cursor: pointer;
-      transition: border-color var(--ease-default), background var(--ease-default);
-    }
-
-    .task-check:hover { border-color: var(--color-accent); }
-    .task-check.done  { background: var(--color-accent); border-color: var(--color-accent); }
-
-    .task-title {
-      flex: 1;
-      font-size: var(--text-sm);
-      color: var(--color-text);
-    }
-
-    .task-title.done {
-      text-decoration: line-through;
-      color: var(--color-text-subtle);
-    }
-
-    .task-due {
-      font-size: var(--text-xs);
-      font-family: var(--font-mono);
-      color: var(--color-text-subtle);
-    }
-
-    .task-due.overdue { color: var(--color-destructive); }
-    .task-due.today   { color: var(--color-warning); }
-
-    .priority-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    /* Avatar */
-    .avatar {
-      border-radius: var(--radius-full);
-      overflow: hidden;
-      background: var(--color-accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: var(--weight-semi);
-      color: #fff;
-      flex-shrink: 0;
-    }
-
-    .avatar-sm { width: 28px; height: 28px; font-size: var(--text-xs); }
-    .avatar-md { width: 36px; height: 36px; font-size: var(--text-sm); }
-    .avatar-lg { width: 48px; height: 48px; font-size: var(--text-md); }
-
-    /* Code block */
-    .code-block {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: var(--space-4);
-      font-family: var(--font-mono);
-      font-size: var(--text-xs);
-      color: var(--color-text-muted);
-      line-height: var(--leading-normal);
-      overflow-x: auto;
-    }
-
-    .code-comment { color: var(--color-text-subtle); }
-    .code-key     { color: var(--color-accent); }
-    .code-value   { color: #16a34a; }
-    .code-string  { color: #b45309; }
-
-    /* Radius demo */
-    .radius-demo {
-      display: flex;
-      gap: var(--space-6);
-      align-items: flex-end;
-      flex-wrap: wrap;
-    }
-
-    .radius-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: var(--space-2);
-    }
-
-    .radius-shape {
-      width: 64px;
-      height: 64px;
-      background: var(--color-surface-2);
-      border: 1px solid var(--color-border);
-    }
-
-    .radius-label {
-      font-size: var(--text-xs);
-      font-family: var(--font-mono);
-      color: var(--color-text-subtle);
-    }
-
-    /* Hero banner */
-    .hero {
-      padding: var(--space-16) 0 var(--space-12);
-      border-bottom: 1px solid var(--color-border);
-      margin-bottom: var(--space-16);
-    }
-
-    .hero-eyebrow {
-      font-size: var(--text-xs);
-      font-weight: var(--weight-semi);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-accent);
-      margin-bottom: var(--space-4);
-    }
-
-    .hero-title {
-      font-size: var(--text-4xl);
-      font-weight: var(--weight-semi);
-      font-family: var(--font-display);
-      color: var(--color-text);
-      line-height: var(--leading-tight);
-      letter-spacing: -0.02em;
-      margin-bottom: var(--space-4);
-    }
-
-    .hero-title span { color: var(--color-accent); }
-
-    .hero-subtitle {
-      font-size: var(--text-lg);
-      color: var(--color-text-muted);
-      max-width: 480px;
-      line-height: var(--leading-snug);
-    }
-
-    /* Alert / Banner */
-    .alert {
-      display: flex;
-      gap: var(--space-3);
-      padding: var(--space-4);
-      border-radius: var(--radius-md);
-      font-size: var(--text-sm);
-      border: 1px solid;
-    }
-
-    .alert-info        { background: rgba(25,60,97,0.07);   border-color: rgba(25,60,97,0.2);   color: var(--color-info); }
-    .alert-success     { background: rgba(22,163,74,0.07);  border-color: rgba(22,163,74,0.2);  color: var(--color-success); }
-    .alert-warning     { background: rgba(217,119,6,0.07);  border-color: rgba(217,119,6,0.2);  color: var(--color-warning); }
-    .alert-destructive { background: rgba(220,38,38,0.07);  border-color: rgba(220,38,38,0.2);  color: var(--color-destructive); }
-
-    .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-
-    .alert-title {
-      font-weight: var(--weight-semi);
-      margin-bottom: 2px;
-      color: inherit;
-    }
-
-    .alert-body { color: var(--color-text-muted); }
-
-    /* Divider */
-    hr.divider {
-      border: none;
-      border-top: 1px solid var(--color-border);
-      margin: var(--space-8) 0;
-    }
-
-    /* Stat card */
-    .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--space-4); }
-    .stat-card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: var(--space-5);
-    }
-    .stat-label { font-size: var(--text-xs); color: var(--color-text-subtle); text-transform: uppercase; letter-spacing: 0.06em; font-weight: var(--weight-semi); }
-    .stat-value { font-size: var(--text-2xl); font-weight: var(--weight-semi); font-family: var(--font-display); color: var(--color-text); margin: var(--space-1) 0; line-height: 1; }
-    .stat-change { font-size: var(--text-xs); color: var(--color-text-muted); }
-    .stat-change .up   { color: var(--color-success); }
-    .stat-change .down { color: var(--color-destructive); }
-
-    /* Nav shell preview */
-    .nav-preview {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-    }
-
-    .nav-bar {
-      display: flex;
-      align-items: center;
-      gap: var(--space-6);
-      padding: 0 var(--space-6);
-      height: 52px;
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .nav-brand {
-      font-size: var(--text-sm);
-      font-weight: var(--weight-semi);
-      font-family: var(--font-display);
-      color: var(--color-text);
-      letter-spacing: 0.06em;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: var(--space-1);
-      flex: 1;
-    }
-
-    .nav-link {
-      padding: var(--space-2) var(--space-3);
-      font-size: var(--text-sm);
-      color: var(--color-text-muted);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      transition: color var(--ease-default), background var(--ease-default);
-    }
-
-    .nav-link:hover { color: var(--color-text); background: var(--color-surface-2); }
-    .nav-link.active { color: var(--color-text); background: var(--color-surface-2); }
-
-    .nav-body {
-      padding: var(--space-6);
-      min-height: 80px;
-      color: var(--color-text-subtle);
-      font-size: var(--text-sm);
-    }
-
-    /* Miscellaneous */
-    .flex { display: flex; }
-    .items-center { align-items: center; }
-    .gap-3 { gap: var(--space-3); }
-    .gap-4 { gap: var(--space-4); }
-    .mt-4 { margin-top: var(--space-4); }
-    .mt-6 { margin-top: var(--space-6); }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
-
-    @media (max-width: 1100px) {
-      .main { padding: var(--space-10) var(--space-8); }
-      .card-grid, .stat-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    @media (max-width: 1024px) {
-      .sidebar { display: none; }
-      .main { margin-left: 0; padding: var(--space-10) var(--space-8); max-width: 100%; }
-      .card-grid, .stat-grid, .grid-2 { grid-template-columns: 1fr; }
-      .hero-title { font-size: var(--text-3xl); }
-    }
-
-    @media (max-width: 640px) {
-      .main { padding: var(--space-6) var(--space-4); }
-      .hero-title { font-size: var(--text-2xl); }
-    }
-  </style>
-</head>
-<body>
 <div class="layout">
 
   <!-- ============================================================
@@ -917,6 +25,7 @@
         <a href="#inputs">Form Inputs</a>
         <a href="#alerts">Alerts</a>
         <a href="#avatars">Avatars</a>
+        <a href="#popout-dock">Pop-out dock</a>
       </nav>
     </div>
 
@@ -963,41 +72,41 @@
       <div class="section-header">
         <div class="section-tag">Foundation</div>
         <h2 class="section-title">Colours</h2>
-        <p class="section-description">All colours are defined as CSS custom properties. The current ramp is the teal system shifted +30° on the hue wheel toward blue; change <code>:root</code> to retune.</p>
+        <p class="section-description">Colours come from CSS variables. Use the <strong>theme helper</strong> (bottom right) to switch saved palettes; values update across this page and any app that imports the same token map from <code>src/themes/palettes.ts</code>.</p>
       </div>
 
       <div class="component-group">
         <div class="component-group-label">Backgrounds & Surfaces</div>
         <div class="token-grid">
           <div class="token-item">
-            <div class="token-swatch" style="background:#F7F8F9;border-bottom:1px solid #DDE1E5"></div>
+            <div class="token-swatch" style="background:var(--color-bg);border-bottom:1px solid var(--color-border)"></div>
             <div class="token-info">
               <div class="token-name">Background</div>
-              <div class="token-value">#F7F8F9</div>
+              <div class="token-value" data-sync-token="--color-bg"></div>
               <div class="token-var">--color-bg</div>
             </div>
           </div>
           <div class="token-item">
-            <div class="token-swatch" style="background:#ffffff;border-bottom:1px solid #DDE1E5"></div>
+            <div class="token-swatch" style="background:var(--color-surface);border-bottom:1px solid var(--color-border)"></div>
             <div class="token-info">
               <div class="token-name">Surface</div>
-              <div class="token-value">#ffffff</div>
+              <div class="token-value" data-sync-token="--color-surface"></div>
               <div class="token-var">--color-surface</div>
             </div>
           </div>
           <div class="token-item">
-            <div class="token-swatch" style="background:#EEF0F2;border-bottom:1px solid #DDE1E5"></div>
+            <div class="token-swatch" style="background:var(--color-surface-2);border-bottom:1px solid var(--color-border)"></div>
             <div class="token-info">
               <div class="token-name">Surface 2</div>
-              <div class="token-value">#EEF0F2</div>
+              <div class="token-value" data-sync-token="--color-surface-2"></div>
               <div class="token-var">--color-surface-2</div>
             </div>
           </div>
           <div class="token-item">
-            <div class="token-swatch" style="background:#DDE1E5;border-bottom:1px solid #DDE1E5"></div>
+            <div class="token-swatch" style="background:var(--color-border);border-bottom:1px solid var(--color-border)"></div>
             <div class="token-info">
               <div class="token-name">Border</div>
-              <div class="token-value">#DDE1E5</div>
+              <div class="token-value" data-sync-token="--color-border"></div>
               <div class="token-var">--color-border</div>
             </div>
           </div>
@@ -1008,34 +117,34 @@
         <div class="component-group-label">Brand & Accent</div>
         <div class="token-grid">
           <div class="token-item">
-            <div class="token-swatch" style="background:#151B36"></div>
+            <div class="token-swatch" style="background:var(--color-primary)"></div>
             <div class="token-info">
               <div class="token-name">Primary</div>
-              <div class="token-value">#151B36</div>
+              <div class="token-value" data-sync-token="--color-primary"></div>
               <div class="token-var">--color-primary</div>
             </div>
           </div>
           <div class="token-item">
-            <div class="token-swatch" style="background:#193C61"></div>
+            <div class="token-swatch" style="background:var(--color-accent)"></div>
             <div class="token-info">
               <div class="token-name">Accent</div>
-              <div class="token-value">#193C61</div>
+              <div class="token-value" data-sync-token="--color-accent"></div>
               <div class="token-var">--color-accent</div>
             </div>
           </div>
           <div class="token-item">
-            <div class="token-swatch" style="background:#0F2C4B"></div>
+            <div class="token-swatch" style="background:var(--color-accent-hover)"></div>
             <div class="token-info">
               <div class="token-name">Accent Hover</div>
-              <div class="token-value">#0F2C4B</div>
+              <div class="token-value" data-sync-token="--color-accent-hover"></div>
               <div class="token-var">--color-accent-hover</div>
             </div>
           </div>
           <div class="token-item">
-            <div class="token-swatch" style="background:#7D8EA0"></div>
+            <div class="token-swatch" style="background:var(--color-sidebar-accent)"></div>
             <div class="token-info">
               <div class="token-name">Secondary</div>
-              <div class="token-value">#7D8EA0</div>
+              <div class="token-value" data-sync-token="--color-sidebar-accent"></div>
               <div class="token-var">--color-sidebar-accent</div>
             </div>
           </div>
@@ -1046,26 +155,26 @@
         <div class="component-group-label">Text</div>
         <div class="token-grid">
           <div class="token-item">
-            <div class="token-swatch" style="background:#151B36"></div>
+            <div class="token-swatch" style="background:var(--color-text)"></div>
             <div class="token-info">
               <div class="token-name">Text</div>
-              <div class="token-value">#151B36</div>
+              <div class="token-value" data-sync-token="--color-text"></div>
               <div class="token-var">--color-text</div>
             </div>
           </div>
           <div class="token-item">
-            <div class="token-swatch" style="background:#4A5370"></div>
+            <div class="token-swatch" style="background:var(--color-text-muted)"></div>
             <div class="token-info">
               <div class="token-name">Text Muted</div>
-              <div class="token-value">#4A5370</div>
+              <div class="token-value" data-sync-token="--color-text-muted"></div>
               <div class="token-var">--color-text-muted</div>
             </div>
           </div>
           <div class="token-item">
-            <div class="token-swatch" style="background:#8F9AAF"></div>
+            <div class="token-swatch" style="background:var(--color-text-subtle)"></div>
             <div class="token-info">
               <div class="token-name">Text Subtle</div>
-              <div class="token-value">#8F9AAF</div>
+              <div class="token-value" data-sync-token="--color-text-subtle"></div>
               <div class="token-var">--color-text-subtle</div>
             </div>
           </div>
@@ -1076,34 +185,34 @@
         <div class="component-group-label">Semantic</div>
         <div class="token-grid">
           <div class="token-item">
-            <div class="token-swatch" style="background:#16a34a"></div>
+            <div class="token-swatch" style="background:var(--color-success)"></div>
             <div class="token-info">
               <div class="token-name">Success</div>
-              <div class="token-value">#16a34a</div>
+              <div class="token-value" data-sync-token="--color-success"></div>
               <div class="token-var">--color-success</div>
             </div>
           </div>
           <div class="token-item">
-            <div class="token-swatch" style="background:#d97706"></div>
+            <div class="token-swatch" style="background:var(--color-warning)"></div>
             <div class="token-info">
               <div class="token-name">Warning</div>
-              <div class="token-value">#d97706</div>
+              <div class="token-value" data-sync-token="--color-warning"></div>
               <div class="token-var">--color-warning</div>
             </div>
           </div>
           <div class="token-item">
-            <div class="token-swatch" style="background:#dc2626"></div>
+            <div class="token-swatch" style="background:var(--color-destructive)"></div>
             <div class="token-info">
               <div class="token-name">Destructive</div>
-              <div class="token-value">#dc2626</div>
+              <div class="token-value" data-sync-token="--color-destructive"></div>
               <div class="token-var">--color-destructive</div>
             </div>
           </div>
           <div class="token-item">
-            <div class="token-swatch" style="background:#193C61"></div>
+            <div class="token-swatch" style="background:var(--color-info)"></div>
             <div class="token-info">
               <div class="token-name">Info</div>
-              <div class="token-value">#193C61</div>
+              <div class="token-value" data-sync-token="--color-info"></div>
               <div class="token-var">--color-info</div>
             </div>
           </div>
@@ -1370,7 +479,7 @@
         <div class="component-group-label">Transaction tags (tap to filter)</div>
         <div class="demo-surface">
           <div class="demo-row">
-            <span class="tag"><span class="tag-dot" style="background:#975bf8"></span>Bali 2025</span>
+            <span class="tag"><span class="tag-dot tag-dot--palette-accent"></span>Bali 2025</span>
             <span class="tag"><span class="tag-dot" style="background:#22c55e"></span>groceries</span>
             <span class="tag"><span class="tag-dot" style="background:#f59e0b"></span>bills</span>
             <span class="tag"><span class="tag-dot" style="background:#888"></span>work expense</span>
@@ -1502,6 +611,46 @@
           <div class="avatar avatar-sm">TJ</div>
           <div class="avatar avatar-md">TJ</div>
           <div class="avatar avatar-lg">TJ</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         POP-OUT DOCK
+         ============================================================ -->
+    <section class="section" id="popout-dock">
+      <div class="section-header">
+        <div class="section-tag">Components</div>
+        <h2 class="section-title">Pop-out dock</h2>
+        <p class="section-description">Floating actions (e.g. theme helper) open a <strong>dock</strong>: a narrow sheet slides out beside a wider anchor panel. The pair shares one visual seam — rounded outer corners only, no double border between them. Use this for secondary steps without a full modal. Short feedback belongs <em>inside</em> the sheet as a compact notice (<code>role="status"</code>, <code>aria-live="polite"</code>), not a browser <code>alert</code>.</p>
+      </div>
+
+      <div class="component-group">
+        <div class="component-group-label">Anatomy (scaled)</div>
+        <div class="demo-surface">
+          <div class="popout-dock-demo">
+            <div class="popout-dock" aria-hidden="true">
+              <div class="popout-slide">
+                <div class="popout-slide-inner">
+                  <div class="popout-slide-head">
+                    <span class="popout-slide-title">Sheet</span>
+                    <span class="popout-slide-close">×</span>
+                  </div>
+                  <p class="popout-slide-copy">Optional step: extra fields, harmony picks, or filters.</p>
+                  <div class="popout-slide-notice" role="status">Accent applied — theme saved.</div>
+                  <button type="button" class="btn btn-primary btn-sm" tabindex="-1">Done</button>
+                </div>
+              </div>
+              <div class="popout-panel">
+                <div class="popout-slide-head">
+                  <span class="popout-slide-title">Anchor</span>
+                  <span class="popout-slide-close">×</span>
+                </div>
+                <p class="popout-panel-hint">Primary list or presets. Opens the sheet when the user goes deeper.</p>
+              </div>
+            </div>
+          </div>
+          <p class="popout-dock-meta">Live implementation: <code>ThemeHelperFab.tsx</code> · styles: <code>theme-helper.css</code> (<code>.theme-helper-dock</code>, <code>.theme-helper-slide</code>, <code>.theme-helper-slide-notice</code>).</p>
         </div>
       </div>
     </section>
@@ -1648,68 +797,11 @@
       <div class="section-header">
         <div class="section-tag">Reference</div>
         <h2 class="section-title">CSS Tokens</h2>
-        <p class="section-description">All design tokens are defined in <code>:root</code> at the top of this file. Edit the values in one place and they propagate everywhere.</p>
+        <p class="section-description">Structural tokens live in <code>src/styles/brand-kit.css</code>; colour tokens are defined in <code>src/themes/palettes.ts</code> and applied to <code>:root</code> at runtime. The snippet below reflects the active palette.</p>
       </div>
 
-      <div class="code-block">
-<span class="code-comment">/* Paste into your app stylesheet — matches :root above (brand hue +30°) */</span>
-<br><br>
-<span class="code-key">:root</span> {
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-bg</span>: <span class="code-value">#F7F8F9</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-surface</span>: <span class="code-value">#ffffff</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-surface-2</span>: <span class="code-value">#EEF0F2</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-border</span>: <span class="code-value">#DDE1E5</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-border-soft</span>: <span class="code-value">#EBEEF0</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-primary</span>: <span class="code-value">#151B36</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-accent</span>: <span class="code-value">#193C61</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-accent-hover</span>: <span class="code-value">#0F2C4B</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-text</span>: <span class="code-value">#151B36</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-text-muted</span>: <span class="code-value">#4A5370</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-text-subtle</span>: <span class="code-value">#8F9AAF</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-info</span>: <span class="code-value">#193C61</span>;
-<br><br>
-&nbsp;&nbsp;<span class="code-key">--color-sidebar-bg</span>: <span class="code-value">#151B36</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-sidebar-border</span>: <span class="code-value">#1E274A</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-sidebar-text</span>: <span class="code-value">#A8B3CB</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-sidebar-text-hi</span>: <span class="code-value">#E8EBF2</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-sidebar-accent</span>: <span class="code-value">#7D8EA0</span>;
-<br><br>
-&nbsp;&nbsp;<span class="code-comment">/* Semantic */</span>
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-success</span>: <span class="code-value">#16a34a</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-warning</span>: <span class="code-value">#d97706</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--color-destructive</span>: <span class="code-value">#dc2626</span>;
-<br><br>
-&nbsp;&nbsp;<span class="code-comment">/* Fonts */</span>
-<br>
-&nbsp;&nbsp;<span class="code-key">--font-display</span>: <span class="code-string">'Bricolage Grotesque', sans-serif</span>;
-&nbsp;&nbsp;<span class="code-key">--font-sans</span>: <span class="code-string">'Inter', -apple-system, sans-serif</span>;
-<br>
-&nbsp;&nbsp;<span class="code-key">--font-mono</span>: <span class="code-string">'Geist Mono', monospace</span>;
-<br>
-}
-      </div>
+      <div id="tokens-snippet-root"></div>
     </section>
 
   </main>
 </div>
-</body>
-</html>

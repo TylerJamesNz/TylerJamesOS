@@ -1,0 +1,24 @@
+.brand-kit-back {
+  position: fixed;
+  top: 14px;
+  left: 236px;
+  z-index: 20;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.brand-kit-back a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.brand-kit-back a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1024px) {
+  .brand-kit-back {
+    left: 16px;
+    top: 12px;
+  }
+}

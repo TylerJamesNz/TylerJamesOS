@@ -6,6 +6,13 @@ This file will evolve into the single source of truth for all visual decisions. 
 
 ---
 
+## Theme palettes (colour source of truth)
+
+- **File:** `app/src/themes/palettes.ts` — named presets (`origin_teal`, `hue_shift_30`, …). Each preset is a flat map of CSS custom property names → values (including `--accent-rgb`, shadows, and demo tag accent).
+- **Runtime:** `applyPalette()` in `app/src/lib/applyPalette.ts` writes those keys to `document.documentElement`. New apps should import the same module (or a shared package later) so styling stays aligned.
+- **UI:** The React brand kit includes a floating **theme helper** to switch presets without a backend; the choice is cached in `localStorage` under `tjos-theme-palette-id`.
+- **Custom:** The **Custom** row opens a slide-out from that panel. Two seeds (primary + secondary) are stored in `localStorage` under `tjos-custom-palette-seeds`; `deriveCustomPalette()` in `app/src/lib/deriveCustomPalette.ts` builds the rest of the token map and **nudges colours for contrast** (body text on page bg, sidebar labels on sidebar bg, white on accent buttons) so loud primaries stay legible without changing the fixed presets. Re-saving overwrites the same slot (no duplicate presets).
+
 ## Purpose of the brand kit page
 
 The brand kit lives at `/brand` (or similar) within Tyler James OS. It serves as:
@@ -87,6 +94,7 @@ Based on a 4px base unit. All spacing should be multiples of 4.
 - **Cards:** Consistent padding, border, shadow treatment
 - **Forms:** Label position, input height, focus ring style
 - **Navigation:** Sidebar vs. top nav — TBD
+- **Pop-out dock:** Floating control opens a horizontal dock — slide sheet (left) + anchor panel (right), shared seam, `max-width` / opacity transition on the sheet. Inline notices for confirmation live inside the sheet (`role="status"`, `aria-live="polite"`), not `window.alert`. Documented on the live brand kit under **Pop-out dock**; implementation reference `ThemeHelperFab` + `theme-helper.css`.
 - **Icons:** Library TBD (Lucide is a strong candidate — lightweight, consistent)
 
 ---
