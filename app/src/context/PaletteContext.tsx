@@ -7,66 +7,25 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { invertHex, normalizeHex } from '../lib/colorSpace'
-import { applyPalette, syncTokenLabels } from '../lib/applyPalette'
+import { useLocation } from 'react-router-dom'
+import { normalizeHex } from '../lib/colorSpace'
+import { computeActiveThemePalette } from '../lib/computeActiveThemePalette'
 import {
-  CUSTOM_DEFAULT_PRIMARY,
-  CUSTOM_DEFAULT_SECONDARY,
-  deriveCustomPalette,
-} from '../lib/deriveCustomPalette'
+  CUSTOM_SEEDS_KEY,
+  DARK_MODE_KEY,
+  PALETTE_STORAGE_KEY,
+  readCustomSeeds,
+  readDarkMode,
+  readInitialPaletteId,
+} from '../lib/paletteStorage'
+import { syncDocumentTheme } from '../lib/syncDocumentTheme'
 import { pickNearestSecondary } from '../lib/proposeComplementarySecondaries'
 import {
   CUSTOM_PALETTE_ID,
-  DEFAULT_THEME_ID,
-  PALETTE_STORAGE_KEY,
   THEME_PALETTES,
   THEME_PALETTES_BY_ID,
-  paletteCustom,
   type ThemePalette,
 } from '../themes/palettes'
-
-const CUSTOM_SEEDS_KEY = 'tjos-custom-palette-seeds'
-const DARK_MODE_KEY = 'tjos-dark-mode'
-
-function readDarkMode(): boolean {
-  if (typeof window === 'undefined') return false
-  try {
-    return window.localStorage.getItem(DARK_MODE_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-
-function readCustomSeeds(): { primary: string; secondary: string } {
-  if (typeof window === 'undefined') {
-    return { primary: CUSTOM_DEFAULT_PRIMARY, secondary: CUSTOM_DEFAULT_SECONDARY }
-  }
-  try {
-    const raw = window.localStorage.getItem(CUSTOM_SEEDS_KEY)
-    if (raw) {
-      const j = JSON.parse(raw) as { primary?: string; secondary?: string }
-      if (j.primary && j.secondary) {
-        const primary = normalizeHex(j.primary)
-        const secondary = pickNearestSecondary(primary, normalizeHex(j.secondary))
-        return { primary, secondary }
-      }
-    }
-  } catch {
-    /* ignore */
-  }
-  return { primary: CUSTOM_DEFAULT_PRIMARY, secondary: CUSTOM_DEFAULT_SECONDARY }
-}
-
-function readInitialPaletteId(): string {
-  if (typeof window === 'undefined') return DEFAULT_THEME_ID
-  try {
-    const stored = window.localStorage.getItem(PALETTE_STORAGE_KEY)
-    if (stored && THEME_PALETTES_BY_ID[stored]) return stored
-  } catch {
-    /* ignore */
-  }
-  return DEFAULT_THEME_ID
-}
 
 type PaletteContextValue = {
   activePalette: ThemePalette
@@ -84,41 +43,14 @@ type PaletteContextValue = {
 const PaletteContext = createContext<PaletteContextValue | null>(null)
 
 export function PaletteProvider({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation()
   const [paletteId, setPaletteIdState] = useState(readInitialPaletteId)
   const [customSeeds, setCustomSeeds] = useState(readCustomSeeds)
   const [darkMode, setDarkModeState] = useState(readDarkMode)
 
-  const customDerived = useMemo(
-    () => deriveCustomPalette(customSeeds.primary, customSeeds.secondary),
-    [customSeeds]
-  )
-
-  const basePalette = useMemo((): ThemePalette => {
-    if (paletteId !== CUSTOM_PALETTE_ID) {
-      return THEME_PALETTES_BY_ID[paletteId] ?? THEME_PALETTES[0]
-    }
-    return {
-      ...paletteCustom,
-      cssVars: customDerived,
-    }
-  }, [paletteId, customDerived])
-
-  const appliedCssVars = useMemo(() => {
-    if (!darkMode || basePalette.id !== CUSTOM_PALETTE_ID) return basePalette.cssVars
-    const ip = invertHex(customSeeds.primary)
-    const is = pickNearestSecondary(ip, invertHex(customSeeds.secondary))
-    return deriveCustomPalette(ip, is, {
-      appearance: 'dark',
-      pageTintHueFrom: customSeeds.primary,
-    })
-  }, [darkMode, basePalette, customSeeds])
-
   const activePalette = useMemo(
-    (): ThemePalette => ({
-      ...basePalette,
-      cssVars: appliedCssVars,
-    }),
-    [basePalette, appliedCssVars]
+    () => computeActiveThemePalette({ paletteId, customSeeds, darkMode }),
+    [paletteId, customSeeds, darkMode]
   )
 
   const setPaletteId = useCallback((id: string) => {
@@ -154,11 +86,8 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useLayoutEffect(() => {
-    applyPalette(activePalette.cssVars)
-    syncTokenLabels(activePalette.cssVars)
-    document.documentElement.dataset.darkMode =
-      darkMode && activePalette.id === CUSTOM_PALETTE_ID ? 'true' : 'false'
-  }, [activePalette, darkMode])
+    syncDocumentTheme(activePalette, darkMode)
+  }, [activePalette, darkMode, pathname])
 
   const value = useMemo(
     () => ({

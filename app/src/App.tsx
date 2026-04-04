@@ -7,8 +7,8 @@ import PlaceholderAppPage from './pages/PlaceholderAppPage'
 
 export default function App() {
   return (
-    <PaletteProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <PaletteProvider>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/brand-kit" element={<BrandKitPage />} />
@@ -33,7 +33,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <ThemeHelperFab />
-      </BrowserRouter>
-    </PaletteProvider>
+      </PaletteProvider>
+    </BrowserRouter>
   )
 }

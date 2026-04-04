@@ -525,8 +525,7 @@ export const CUSTOM_PALETTE_ID = 'custom' as const
 export const paletteCustom: ThemePalette = {
   id: CUSTOM_PALETTE_ID,
   label: 'Custom',
-  description:
-    'Mix your own colours for the whole app. We nudge contrast so everything stays easy to read.',
+  description: 'Mix your own colour for the whole app.',
   source: 'Your colours',
   cssVars: deriveCustomPalette(CUSTOM_DEFAULT_PRIMARY, CUSTOM_DEFAULT_SECONDARY),
 }

@@ -182,8 +182,7 @@ export default function ThemeHelperFab() {
 
               <p className="theme-helper-hint theme-helper-custom-intro">
                 Pick a <strong>primary</strong> and a <strong>secondary</strong> from fifteen swatches we build to
-                harmonise with your pick. <strong>Dark mode</strong> below inverts this palette for night, other themes
-                keep their usual look.
+                harmonise with your pick.
               </p>
 
               <div className="theme-helper-field">
@@ -298,8 +297,7 @@ export default function ThemeHelperFab() {
               </button>
             </div>
             <p className="theme-helper-hint">
-              <strong>Choose a colour theme</strong> for the whole operating system. Built in palettes and{' '}
-              <strong>Custom</strong> live in <code>src/themes/palettes.ts</code>.
+              <strong>Choose a colour theme</strong> for the whole operating system.
             </p>
             <ul className="theme-helper-list">
               {palettes.map((p) => {
