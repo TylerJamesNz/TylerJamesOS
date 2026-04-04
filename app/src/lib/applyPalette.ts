@@ -21,6 +21,13 @@ export function mergeSidebarPresentation(cssVars: Record<string, string>): Recor
   }
 }
 
+/**
+ * Custom palettes set `--color-sidebar-label`; several built-in presets omit it and rely on
+ * `var(--color-sidebar-label, var(--color-sidebar-accent))`. Without removal, the previous theme’s
+ * inline value on `:root` would stick while other tokens update.
+ */
+const PALETTE_VARS_CLEAR_WHEN_ABSENT = ['--color-sidebar-label'] as const
+
 /** Writes palette CSS variables to :root (the document element). */
 export function applyPalette(cssVars: ThemePalette['cssVars']): void {
   const merged = mergeSidebarPresentation({ ...(cssVars as Record<string, string>) })
@@ -30,6 +37,11 @@ export function applyPalette(cssVars: ThemePalette['cssVars']): void {
   const root = document.documentElement
   for (const [key, value] of Object.entries(merged)) {
     root.style.setProperty(key, value)
+  }
+  for (const key of PALETTE_VARS_CLEAR_WHEN_ABSENT) {
+    if (!(key in merged)) {
+      root.style.removeProperty(key)
+    }
   }
 }
 
