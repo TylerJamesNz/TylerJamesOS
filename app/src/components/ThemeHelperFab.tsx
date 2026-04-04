@@ -180,6 +180,13 @@ export default function ThemeHelperFab() {
                 </button>
               </div>
 
+              <p className="theme-helper-hint theme-helper-custom-intro">
+                <strong>Fifteen harmony secondaries</strong> are derived from your <strong>primary</strong>—close
+                wheel neighbours first, then complements, split-complements, triads, and square corners. When primary
+                settles we suggest a random match; tap a swatch to choose. <strong>Dark mode</strong> (toggle below) is{' '}
+                <strong>Custom-only</strong>; presets stay light. Live tokens via <code>deriveCustomPalette()</code>.
+              </p>
+
               <div className="theme-helper-field">
                 <label htmlFor="tjos-custom-primary">Primary</label>
                 <div className="theme-helper-color-row">
@@ -227,9 +234,6 @@ export default function ThemeHelperFab() {
                     )
                   })}
                 </div>
-                <label htmlFor="tjos-custom-secondary-readout" className="theme-helper-secondary-readout-label">
-                  Colour
-                </label>
                 <div className="theme-helper-secondary-readout">
                   <input
                     id="tjos-custom-secondary-readout"
@@ -238,7 +242,8 @@ export default function ThemeHelperFab() {
                     tabIndex={-1}
                     className="theme-helper-hex-input theme-helper-hex-input--readonly"
                     value={effectiveSecondary}
-                    aria-label={`Selected secondary colour ${effectiveSecondary}`}
+                    aria-describedby="tjos-custom-secondary-heading"
+                    aria-label={`Selected secondary accent ${effectiveSecondary}`}
                   />
                 </div>
               </div>
@@ -294,10 +299,10 @@ export default function ThemeHelperFab() {
               </button>
             </div>
             <p className="theme-helper-hint">
-              Presets live in <code>src/themes/palettes.ts</code>. <strong>Custom</strong> uses{' '}
-              <code>deriveCustomPalette()</code> — primary updates live; changing primary picks a random harmony
-              secondary; tap a swatch to choose yourself. <strong>Dark mode</strong> only affects Custom (slide-out
-              switch); preset themes always use their light ramp.
+              Presets live in <code>src/themes/palettes.ts</code>. Choose a ready-made scheme—Tyler James rotations
+              and wildcards first; ten <strong>product-vibe</strong> ramps (Jira / Confluence / Slack / Google adjacent,
+              unofficial) sit at the <strong>bottom</strong> of the list. Open <strong>Custom</strong> for the
+              slide-out editor.
             </p>
             <ul className="theme-helper-list">
               {palettes.map((p) => {
