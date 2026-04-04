@@ -163,177 +163,199 @@ export default function ThemeHelperFab() {
     >
       {open && (
         <div className="theme-helper-dock">
-          <div
-            className={`theme-helper-slide${customEditorOpen ? ' theme-helper-slide--open' : ''}`}
-            aria-hidden={!customEditorOpen}
-          >
-            <div className="theme-helper-slide-inner">
-              <div className="theme-helper-custom-header">
-                <span className="theme-helper-custom-title">Custom</span>
-                <button
-                  type="button"
-                  className="theme-helper-close"
-                  onClick={() => setCustomEditorOpen(false)}
-                  aria-label="Close custom editor"
+          <div className="theme-helper-dock-body">
+            <div
+              className={`theme-helper-slide${customEditorOpen ? ' theme-helper-slide--open' : ''}`}
+              aria-hidden={!customEditorOpen}
+            >
+              <div className="theme-helper-slide-inner">
+                <nav
+                  className="theme-helper-slide-tabs"
+                  aria-label="Theme helper navigation"
                 >
+                  <button
+                    type="button"
+                    className="theme-helper-slide-tab theme-helper-slide-tab--parent"
+                    onClick={() => setCustomEditorOpen(false)}
+                  >
+                    Theme
+                  </button>
+                  <span className="theme-helper-slide-tab-caret" aria-hidden>
+                    ›
+                  </span>
+                  <span className="theme-helper-slide-tab theme-helper-slide-tab--current" aria-current="page">
+                    Custom
+                  </span>
+                </nav>
+                <div className="theme-helper-slide-scroll">
+                  <div className="theme-helper-custom-header">
+                    <span className="theme-helper-custom-title">Custom</span>
+                    <button
+                      type="button"
+                      className="theme-helper-close"
+                      onClick={() => setCustomEditorOpen(false)}
+                      aria-label="Close custom editor"
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <p className="theme-helper-hint theme-helper-custom-intro">
+                    Pick a <strong>primary</strong> and a <strong>secondary</strong> from fifteen swatches we build to
+                    harmonise with your pick.
+                  </p>
+
+                  <div className="theme-helper-field">
+                    <label htmlFor="tjos-custom-primary">Primary</label>
+                    <div className="theme-helper-color-row">
+                      <input
+                        id="tjos-custom-primary"
+                        type="color"
+                        value={HEX6.test(draftPrimary) ? draftPrimary : CUSTOM_DEFAULT_PRIMARY}
+                        onChange={(e) => syncPrimaryFromColor(e.target.value)}
+                        aria-label="Primary colour"
+                      />
+                      <input
+                        type="text"
+                        className="theme-helper-hex-input"
+                        value={draftPrimary}
+                        onChange={(e) => setDraftPrimary(e.target.value)}
+                        onBlur={() => setDraftPrimary(normalizeHex(draftPrimary))}
+                        spellCheck={false}
+                        autoComplete="off"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="theme-helper-field">
+                    <p id="tjos-custom-secondary-heading" className="theme-helper-field-heading">
+                      Secondary (accent family)
+                    </p>
+                    <div
+                      className="theme-helper-secondary-grid"
+                      role="group"
+                      aria-labelledby="tjos-custom-secondary-heading"
+                    >
+                      {complementarySwatches.map((hex) => {
+                        const selected = normalizeHex(draftSecondary) === hex
+                        return (
+                          <button
+                            key={hex}
+                            type="button"
+                            className="theme-helper-secondary-swatch"
+                            style={{ backgroundColor: hex }}
+                            aria-pressed={selected}
+                            aria-label={`Secondary accent ${hex}`}
+                            title={hex}
+                            onClick={() => handleSecondaryPick(hex)}
+                          />
+                        )
+                      })}
+                    </div>
+                    <div className="theme-helper-secondary-readout">
+                      <input
+                        id="tjos-custom-secondary-readout"
+                        type="text"
+                        readOnly
+                        tabIndex={-1}
+                        className="theme-helper-hex-input theme-helper-hex-input--readonly"
+                        value={effectiveSecondary}
+                        aria-describedby="tjos-custom-secondary-heading"
+                        aria-label={`Selected secondary accent ${effectiveSecondary}`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="theme-helper-slide-dark">
+                    <label className="theme-helper-dark-switch">
+                      <span className="theme-helper-dark-switch-label">Dark mode</span>
+                      <span className="theme-helper-dark-switch-control">
+                        <input
+                          type="checkbox"
+                          role="switch"
+                          aria-checked={darkMode}
+                          className="theme-helper-dark-switch-input"
+                          checked={darkMode}
+                          onChange={(e) => setDarkMode(e.target.checked)}
+                        />
+                        <span className="theme-helper-dark-switch-track">
+                          <span className="theme-helper-dark-switch-thumb" />
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+
+                  {slideToast ? (
+                    <div
+                      key={slideToast.key}
+                      className="theme-helper-slide-notice"
+                      role="status"
+                      aria-live="polite"
+                      aria-atomic="true"
+                    >
+                      {slideToast.message}
+                    </div>
+                  ) : null}
+
+                  <div className="theme-helper-custom-actions">
+                    <button
+                      type="button"
+                      className="theme-helper-btn theme-helper-btn-primary"
+                      onClick={() => setCustomEditorOpen(false)}
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="theme-helper-panel theme-helper-panel--main" role="dialog" aria-label="Colour palettes">
+              <div className="theme-helper-panel-header">
+                <span>Theme</span>
+                <button type="button" className="theme-helper-close" onClick={closeAll} aria-label="Close">
                   ×
                 </button>
               </div>
-
-              <p className="theme-helper-hint theme-helper-custom-intro">
-                Pick a <strong>primary</strong> and a <strong>secondary</strong> from fifteen swatches we build to
-                harmonise with your pick.
+              <p className="theme-helper-hint">
+                <strong>Choose a colour theme</strong> for the whole operating system.
               </p>
-
-              <div className="theme-helper-field">
-                <label htmlFor="tjos-custom-primary">Primary</label>
-                <div className="theme-helper-color-row">
-                  <input
-                    id="tjos-custom-primary"
-                    type="color"
-                    value={HEX6.test(draftPrimary) ? draftPrimary : CUSTOM_DEFAULT_PRIMARY}
-                    onChange={(e) => syncPrimaryFromColor(e.target.value)}
-                    aria-label="Primary colour"
-                  />
-                  <input
-                    type="text"
-                    className="theme-helper-hex-input"
-                    value={draftPrimary}
-                    onChange={(e) => setDraftPrimary(e.target.value)}
-                    onBlur={() => setDraftPrimary(normalizeHex(draftPrimary))}
-                    spellCheck={false}
-                    autoComplete="off"
-                  />
-                </div>
-              </div>
-
-              <div className="theme-helper-field">
-                <p id="tjos-custom-secondary-heading" className="theme-helper-field-heading">
-                  Secondary (accent family)
-                </p>
-                <div
-                  className="theme-helper-secondary-grid"
-                  role="group"
-                  aria-labelledby="tjos-custom-secondary-heading"
-                >
-                  {complementarySwatches.map((hex) => {
-                    const selected = normalizeHex(draftSecondary) === hex
-                    return (
+              <ul className="theme-helper-list">
+                {palettes.map((p) => {
+                  const active = p.id === activePalette.id
+                  const opensSlide = p.id === CUSTOM_PALETTE_ID
+                  const swatch =
+                    p.id === CUSTOM_PALETTE_ID ? customAccentPreview : p.cssVars['--color-accent']
+                  return (
+                    <li key={p.id}>
                       <button
-                        key={hex}
                         type="button"
-                        className="theme-helper-secondary-swatch"
-                        style={{ backgroundColor: hex }}
-                        aria-pressed={selected}
-                        aria-label={`Secondary accent ${hex}`}
-                        title={hex}
-                        onClick={() => handleSecondaryPick(hex)}
-                      />
-                    )
-                  })}
-                </div>
-                <div className="theme-helper-secondary-readout">
-                  <input
-                    id="tjos-custom-secondary-readout"
-                    type="text"
-                    readOnly
-                    tabIndex={-1}
-                    className="theme-helper-hex-input theme-helper-hex-input--readonly"
-                    value={effectiveSecondary}
-                    aria-describedby="tjos-custom-secondary-heading"
-                    aria-label={`Selected secondary accent ${effectiveSecondary}`}
-                  />
-                </div>
-              </div>
-
-              <div className="theme-helper-slide-dark">
-                <label className="theme-helper-dark-switch">
-                  <span className="theme-helper-dark-switch-label">Dark mode</span>
-                  <span className="theme-helper-dark-switch-control">
-                    <input
-                      type="checkbox"
-                      role="switch"
-                      aria-checked={darkMode}
-                      className="theme-helper-dark-switch-input"
-                      checked={darkMode}
-                      onChange={(e) => setDarkMode(e.target.checked)}
-                    />
-                    <span className="theme-helper-dark-switch-track">
-                      <span className="theme-helper-dark-switch-thumb" />
-                    </span>
-                  </span>
-                </label>
-              </div>
-
-              {slideToast ? (
-                <div
-                  key={slideToast.key}
-                  className="theme-helper-slide-notice"
-                  role="status"
-                  aria-live="polite"
-                  aria-atomic="true"
-                >
-                  {slideToast.message}
-                </div>
-              ) : null}
-
-              <div className="theme-helper-custom-actions">
-                <button
-                  type="button"
-                  className="theme-helper-btn theme-helper-btn-primary"
-                  onClick={() => setCustomEditorOpen(false)}
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="theme-helper-panel theme-helper-panel--main" role="dialog" aria-label="Colour palettes">
-            <div className="theme-helper-panel-header">
-              <span>Theme</span>
-              <button type="button" className="theme-helper-close" onClick={closeAll} aria-label="Close">
-                ×
-              </button>
-            </div>
-            <p className="theme-helper-hint">
-              <strong>Choose a colour theme</strong> for the whole operating system.
-            </p>
-            <ul className="theme-helper-list">
-              {palettes.map((p) => {
-                const active = p.id === activePalette.id
-                const opensSlide = p.id === CUSTOM_PALETTE_ID
-                const swatch =
-                  p.id === CUSTOM_PALETTE_ID ? customAccentPreview : p.cssVars['--color-accent']
-                return (
-                  <li key={p.id}>
-                    <button
-                      type="button"
-                      className={`theme-helper-option${opensSlide ? ' theme-helper-option--opens-slide' : ''}`}
-                      data-active={active ? 'true' : 'false'}
-                      data-opens-slide={opensSlide ? 'true' : 'false'}
-                      aria-haspopup={opensSlide ? 'dialog' : undefined}
-                      aria-expanded={
-                        opensSlide ? (active && customEditorOpen ? 'true' : 'false') : undefined
-                      }
-                      onClick={() => handlePaletteClick(p.id)}
-                    >
-                      <span className="theme-helper-swatch" style={{ background: swatch }} aria-hidden />
-                      <span className="theme-helper-option-text">
-                        <span className="theme-helper-option-label">{p.label}</span>
-                        <span className="theme-helper-option-desc">{p.description}</span>
-                        <span className="theme-helper-option-source">{p.source}</span>
-                      </span>
-                      {opensSlide ? (
-                        <span className="theme-helper-option-slide-cue" aria-hidden>
-                          <span className="theme-helper-option-slide-cue-arrow">‹</span>
+                        className={`theme-helper-option${opensSlide ? ' theme-helper-option--opens-slide' : ''}`}
+                        data-active={active ? 'true' : 'false'}
+                        data-opens-slide={opensSlide ? 'true' : 'false'}
+                        aria-haspopup={opensSlide ? 'dialog' : undefined}
+                        aria-expanded={
+                          opensSlide ? (active && customEditorOpen ? 'true' : 'false') : undefined
+                        }
+                        onClick={() => handlePaletteClick(p.id)}
+                      >
+                        <span className="theme-helper-swatch" style={{ background: swatch }} aria-hidden />
+                        <span className="theme-helper-option-text">
+                          <span className="theme-helper-option-label">{p.label}</span>
+                          <span className="theme-helper-option-desc">{p.description}</span>
+                          <span className="theme-helper-option-source">{p.source}</span>
                         </span>
-                      ) : null}
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
+                        {opensSlide ? (
+                          <span className="theme-helper-option-slide-cue" aria-hidden>
+                            <span className="theme-helper-option-slide-cue-arrow">‹</span>
+                          </span>
+                        ) : null}
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
           </div>
         </div>
       )}

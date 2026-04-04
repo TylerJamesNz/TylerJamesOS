@@ -29,7 +29,7 @@
 **After pushing to `main`**
 - Use `gh` (GitHub CLI) to watch the active deploy workflow and report progress.
 - Summarise outcome — success or failure — with next steps.
-- No deploy workflow exists yet — skip this step until `.github/workflows/` is set up.
+- Workflow is `.github/workflows/deploy.yml` (name: `Deploy to Vercel`). Watch it with `gh run watch` after every push to main.
 
 ## Code standards
 
