@@ -101,10 +101,39 @@ Based on a 4px base unit. All spacing should be multiples of 4.
 
 ## Motion & animation
 
-- Prefer subtle, functional animation only
-- Page transitions: minimal fade or none
-- Loading states: skeleton screens over spinners where possible
-- Duration guideline: 150ms for micro-interactions, 300ms for larger transitions
+- Prefer subtle, **functional** animation — feedback and hierarchy, not distraction.
+- **Global utilities** live in `app/src/styles/brand-kit.css` (imported from `main.tsx`). Add classes to any markup; tune defaults on `:root` with `--tj-motion-*` variables.
+- **Live reference:** brand kit page **Reference → Motion** (`#motion`) shows examples.
+- **`prefers-reduced-motion: reduce`:** enter / stagger / hover motion utilities and glyph typing are disabled or reduced; content stays visible.
+
+### CSS classes (drop-in)
+
+| Class | Purpose |
+| --- | --- |
+| `.tj-motion-enter` | After load: fade + rise. Optional `style="--tj-motion-delay: 120ms"` to sequence. |
+| `.tj-motion-enter-left` | Same, from the left. |
+| `.tj-motion-reveal-cover` | “Curtain” reveal using `clip-path` + fade. |
+| `.tj-motion-stagger-children` | Wrapper: staggers **direct children** (up to 10) with `--tj-motion-stagger-step` between starts. |
+| `.tj-motion-hover-surface` | Hover: border mix + `--shadow-sm` (element should already have a border). |
+| `.tj-motion-hover-lift` | Hover: lift (`translateY`) + stronger shadow (respects reduced motion). |
+| `.tj-motion-hover-pop` | Hover: light `scale` (e.g. icon tiles). |
+
+### `:root` tokens (optional overrides)
+
+| Variable | Role |
+| --- | --- |
+| `--tj-motion-enter-dur` | Enter / stagger animation length (default ~0.48s). |
+| `--tj-motion-enter-ease` | Easing curve for enter animations. |
+| `--tj-motion-stagger-step` | Delay between staggered siblings (default ~55ms). |
+| `--tj-motion-hover-dur` | Hover transition duration (~155ms). |
+| `--tj-motion-hover-ease-out` / `--tj-motion-hover-pop` | Hover easing. |
+
+### Typing-style glyph stagger (H1 & display only)
+
+- Add **`class="tj-motion-type"`** to a single **`<h1>`** or **display-sized** line (not body copy).
+- After fonts load, **`initTjMotionTypeHeadings()`** in `app/src/lib/tjMotion.ts` splits text into **`.tj-motion-type__char`** spans with a short stagger (see `STAGGER_MS` in that file). Already invoked from **`App.tsx`** (any route) and **`BrandKitShell.tsx`** after HTML injection so client-navigated brand kit still runs.
+- Preserve accent colour with nested `<span>` inside the heading; `CODE` / `PRE` subtrees are not split.
+- Use **`aria-label`** on the heading when the visible text is split for motion, so the accessible name stays a single phrase.
 
 ---
 

@@ -42,6 +42,7 @@
     <div class="sidebar-section">
       <div class="sidebar-label">Reference</div>
       <nav class="sidebar-nav">
+        <a href="#motion">Motion</a>
         <a href="#tokens">CSS Tokens</a>
       </nav>
     </div>
@@ -55,7 +56,7 @@
     <!-- Hero -->
     <div class="hero">
       <div class="hero-eyebrow">TylerJames<span style="color:var(--color-accent-on-surface)">OS</span></div>
-      <h1 class="hero-title">Brand <span>Kit</span></h1>
+      <h1 class="hero-title tj-motion-type" aria-label="Brand Kit">Brand <span>Kit</span></h1>
       <p class="hero-subtitle">The single source of truth for visual decisions. Every component, colour, and spacing value used across the system lives here.</p>
       <div class="flex gap-3 mt-6">
         <span class="badge badge-accent">Dark mode first</span>
@@ -254,7 +255,7 @@
             <div class="type-meta-name">4xl / Display</div>
             <div class="type-meta-value">56px · 700 · -0.02em</div>
           </div>
-          <div class="type-specimen-sample--display" style="font-size:var(--text-4xl);font-weight:var(--weight-bold);line-height:var(--leading-tight);letter-spacing:-0.02em;color:var(--color-text)">TylerJames<span style="color:var(--color-accent-on-surface)">OS</span></div>
+          <div class="type-specimen-sample--display tj-motion-type" style="font-size:var(--text-4xl);font-weight:var(--weight-bold);line-height:var(--leading-tight);letter-spacing:-0.02em;color:var(--color-text)">TylerJames<span style="color:var(--color-accent-on-surface)">OS</span></div>
         </div>
 
         <div class="type-specimen">
@@ -262,7 +263,7 @@
             <div class="type-meta-name">3xl / H1</div>
             <div class="type-meta-value">40px · 600 · -0.01em</div>
           </div>
-          <div class="type-specimen-sample--display" style="font-size:var(--text-3xl);font-weight:var(--weight-semi);line-height:var(--leading-tight);letter-spacing:-0.01em;color:var(--color-text)">Financial Overview</div>
+          <div class="type-specimen-sample--display tj-motion-type" style="font-size:var(--text-3xl);font-weight:var(--weight-semi);line-height:var(--leading-tight);letter-spacing:-0.01em;color:var(--color-text)">Financial Overview</div>
         </div>
 
         <div class="type-specimen">
@@ -938,6 +939,184 @@
           <div class="task-check"></div>
           <div class="task-title">Finalise brand kit colours</div>
           <div class="task-due overdue">2 days ago</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         MOTION UTILITIES (global classes)
+         ============================================================ -->
+    <section class="section" id="motion">
+      <div class="section-header">
+        <div class="section-tag">Reference</div>
+        <h2 class="section-title">Motion utilities</h2>
+        <p class="section-description">
+          Drop-in classes from <code>src/styles/brand-kit.css</code> (loaded globally). Tune timing via
+          <code>:root</code> variables such as <code>--tj-motion-enter-dur</code> and
+          <code>--tj-motion-stagger-step</code>. <strong>Reduced motion:</strong> animations are disabled when
+          <code>prefers-reduced-motion: reduce</code>.
+        </p>
+      </div>
+
+      <div class="component-group">
+        <div class="component-group-label">On load — single elements</div>
+        <p class="section-description" style="margin-top: 0">
+          Use <code>--tj-motion-delay</code> to sequence (e.g. <code>style="--tj-motion-delay: 100ms"</code>).
+        </p>
+        <div class="demo-surface">
+          <div class="demo-row" style="flex-wrap: wrap; align-items: stretch">
+            <div
+              class="tj-motion-enter"
+              style="
+                padding: var(--space-4);
+                background: var(--color-surface-2);
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-md);
+                font-size: var(--text-sm);
+              "
+            >
+              .tj-motion-enter
+            </div>
+            <div
+              class="tj-motion-enter-left"
+              style="
+                --tj-motion-delay: 90ms;
+                padding: var(--space-4);
+                background: var(--color-surface-2);
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-md);
+                font-size: var(--text-sm);
+              "
+            >
+              .tj-motion-enter-left
+            </div>
+            <div
+              class="tj-motion-reveal-cover"
+              style="
+                --tj-motion-delay: 180ms;
+                padding: var(--space-4);
+                background: var(--color-surface-2);
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-md);
+                font-size: var(--text-sm);
+              "
+            >
+              .tj-motion-reveal-cover
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-group">
+        <div class="component-group-label">On load — stagger children</div>
+        <div class="demo-surface">
+          <div class="tj-motion-stagger-children demo-row" style="flex-wrap: wrap">
+            <div
+              style="
+                padding: var(--space-3) var(--space-4);
+                background: var(--color-surface-2);
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-md);
+                font-size: var(--text-xs);
+              "
+            >
+              Child 1
+            </div>
+            <div
+              style="
+                padding: var(--space-3) var(--space-4);
+                background: var(--color-surface-2);
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-md);
+                font-size: var(--text-xs);
+              "
+            >
+              Child 2
+            </div>
+            <div
+              style="
+                padding: var(--space-3) var(--space-4);
+                background: var(--color-surface-2);
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-md);
+                font-size: var(--text-xs);
+              "
+            >
+              Child 3
+            </div>
+          </div>
+          <p class="section-description" style="margin-top: var(--space-4); margin-bottom: 0">
+            Wrapper class: <code>.tj-motion-stagger-children</code> (delays up to 10 direct children).
+          </p>
+        </div>
+      </div>
+
+      <div class="component-group">
+        <div class="component-group-label">Hover — surface & lift</div>
+        <div class="demo-surface">
+          <div class="demo-row" style="flex-wrap: wrap; gap: var(--space-4)">
+            <div
+              class="tj-motion-hover-surface"
+              style="
+                padding: var(--space-5);
+                background: var(--color-surface);
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-lg);
+                font-size: var(--text-sm);
+              "
+            >
+              .tj-motion-hover-surface
+            </div>
+            <div
+              class="tj-motion-hover-lift"
+              style="
+                padding: var(--space-5);
+                background: var(--color-surface);
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-lg);
+                font-size: var(--text-sm);
+              "
+            >
+              .tj-motion-hover-lift
+            </div>
+            <div
+              class="tj-motion-hover-pop"
+              style="
+                width: 48px;
+                height: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: var(--color-surface-2);
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-md);
+                font-size: var(--text-lg);
+              "
+              aria-hidden="true"
+            >
+              ◎
+            </div>
+          </div>
+          <p class="section-description" style="margin-top: var(--space-4); margin-bottom: 0">
+            Hover tile: <code>.tj-motion-hover-pop</code> (scale). Combine with your own border / radius /
+            padding.
+          </p>
+        </div>
+      </div>
+
+      <div class="component-group">
+        <div class="component-group-label">Typing-style — H1 &amp; display only</div>
+        <p class="section-description" style="margin-top: 0">
+          Add <code>class="tj-motion-type"</code> to a single heading or display line. After fonts load,
+          <code>initTjMotionTypeHeadings()</code> in <code>App.tsx</code> wraps glyphs in
+          <code>.tj-motion-type__char</code> with a short stagger. Nested <code>&lt;span&gt;</code> for accent
+          colour is preserved. Use on <strong>h1</strong> or <strong>display-sized</strong> type only — not on
+          body copy.
+        </p>
+        <div class="code-block">
+          <span class="code-comment">// Already wired in App.tsx — add the class in JSX or HTML:</span><br />
+          &lt;h1 class="hero-title <span class="code-key">tj-motion-type</span>" aria-label="..."&gt;...&lt;/h1&gt;<br />
+          &lt;div class="display <span class="code-key">tj-motion-type</span>"&gt;Large display line&lt;/div&gt;
         </div>
       </div>
     </section>

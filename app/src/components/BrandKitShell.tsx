@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import brandBody from '../content/brand-kit-body.html?raw'
+import { initTjMotionTypeHeadings } from '../lib/tjMotion'
 import TokensSnippet from './TokensSnippet'
 
 export default function BrandKitShell() {
@@ -12,6 +13,9 @@ export default function BrandKitShell() {
     if (!el) return
     el.innerHTML = brandBody
     setPortalTarget(document.getElementById('tokens-snippet-root'))
+    void document.fonts.ready.then(() => {
+      requestAnimationFrame(() => initTjMotionTypeHeadings(el))
+    })
   }, [])
 
   return (
