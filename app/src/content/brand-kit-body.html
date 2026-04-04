@@ -649,13 +649,13 @@
               <div class="popout-dock-slide">
                 <div class="theme-helper-slide-inner popout-dock-sheet-inner">
                   <div class="theme-helper-custom-header">
-                    <span class="theme-helper-custom-title">Custom colours</span>
+                    <span class="theme-helper-custom-title">Custom</span>
                     <span class="theme-helper-close" aria-hidden="true">×</span>
                   </div>
                   <p class="theme-helper-hint theme-helper-custom-intro">
-                    <strong>Secondary</strong> harmonises with primary: <strong>fifteen</strong> swatches (analogous,
-                    then complement / triad / square). Random suggestion when primary settles; tap to pick.{' '}
-                    <strong>Dark mode</strong> below is Custom-only.
+                    Pick a <strong>primary</strong> and a <strong>secondary</strong> from fifteen swatches we build to
+                    harmonise with your pick. <strong>Dark mode</strong> below inverts this palette for night, other
+                    themes keep their usual look.
                   </p>
                   <div class="theme-helper-field">
                     <label for="brandkit-demo-primary">Primary</label>
@@ -742,7 +742,7 @@
                       </span>
                     </div>
                   </div>
-                  <div class="theme-helper-slide-notice" role="status">Accent applied — theme saved.</div>
+                  <div class="theme-helper-slide-notice" role="status">Accent applied, theme saved.</div>
                   <div class="theme-helper-custom-actions">
                     <button type="button" class="theme-helper-btn theme-helper-btn-primary" tabindex="-1">
                       Done
@@ -756,20 +756,27 @@
                   <span class="theme-helper-close" aria-hidden="true">×</span>
                 </div>
                 <p class="theme-helper-hint">
-                  Presets live in <code>src/themes/palettes.ts</code>. Rotations and wildcards first; ten{' '}
-                  <strong>product-vibe</strong> ramps at the <strong>bottom</strong>. Open <strong>Custom</strong> for
-                  the slide-out editor.
+                  <strong>Choose a colour theme</strong> for the whole operating system. Built in palettes and{' '}
+                  <strong>Custom</strong> live in <code>src/themes/palettes.ts</code>.
                 </p>
                 <ul class="theme-helper-list">
                   <li>
-                    <div class="theme-helper-option" data-active="true" role="presentation">
+                    <div
+                      class="theme-helper-option theme-helper-option--opens-slide"
+                      data-active="true"
+                      data-opens-slide="true"
+                      role="presentation"
+                    >
                       <span class="theme-helper-swatch" style="background: var(--color-accent)" aria-hidden="true"></span>
                       <span class="theme-helper-option-text">
                         <span class="theme-helper-option-label">Custom</span>
                         <span class="theme-helper-option-desc"
-                          >Choose your own eye colours for the UI—we nudge contrast so nothing goes full
-                          laser-tag.</span>
+                          >Mix your own colours for the whole app. We nudge contrast so everything stays easy to
+                          read.</span>
                         <span class="theme-helper-option-source">Your colours</span>
+                      </span>
+                      <span class="theme-helper-option-slide-cue" aria-hidden="true">
+                        <span class="theme-helper-option-slide-cue-arrow">‹</span>
                       </span>
                     </div>
                   </li>

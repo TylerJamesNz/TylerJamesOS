@@ -150,7 +150,7 @@ export default function ThemeHelperFab() {
       setDraftSecondary(hex)
       const pri = HEX6.test(draftPrimary) ? normalizeHex(draftPrimary) : normalizeHex(customPrimary)
       saveCustomPalette(pri, hex)
-      showSlideToast('Accent applied — theme saved.')
+      showSlideToast('Accent applied, theme saved.')
     },
     [customPrimary, draftPrimary, saveCustomPalette, showSlideToast]
   )
@@ -169,7 +169,7 @@ export default function ThemeHelperFab() {
           >
             <div className="theme-helper-slide-inner">
               <div className="theme-helper-custom-header">
-                <span className="theme-helper-custom-title">Custom colours</span>
+                <span className="theme-helper-custom-title">Custom</span>
                 <button
                   type="button"
                   className="theme-helper-close"
@@ -181,10 +181,9 @@ export default function ThemeHelperFab() {
               </div>
 
               <p className="theme-helper-hint theme-helper-custom-intro">
-                <strong>Fifteen harmony secondaries</strong> are derived from your <strong>primary</strong>—close
-                wheel neighbours first, then complements, split-complements, triads, and square corners. When primary
-                settles we suggest a random match; tap a swatch to choose. <strong>Dark mode</strong> (toggle below) is{' '}
-                <strong>Custom-only</strong>; presets stay light. Live tokens via <code>deriveCustomPalette()</code>.
+                Pick a <strong>primary</strong> and a <strong>secondary</strong> from fifteen swatches we build to
+                harmonise with your pick. <strong>Dark mode</strong> below inverts this palette for night, other themes
+                keep their usual look.
               </p>
 
               <div className="theme-helper-field">
@@ -299,22 +298,26 @@ export default function ThemeHelperFab() {
               </button>
             </div>
             <p className="theme-helper-hint">
-              Presets live in <code>src/themes/palettes.ts</code>. Choose a ready-made scheme—Tyler James rotations
-              and wildcards first; ten <strong>product-vibe</strong> ramps (Jira / Confluence / Slack / Google adjacent,
-              unofficial) sit at the <strong>bottom</strong> of the list. Open <strong>Custom</strong> for the
-              slide-out editor.
+              <strong>Choose a colour theme</strong> for the whole operating system. Built in palettes and{' '}
+              <strong>Custom</strong> live in <code>src/themes/palettes.ts</code>.
             </p>
             <ul className="theme-helper-list">
               {palettes.map((p) => {
                 const active = p.id === activePalette.id
+                const opensSlide = p.id === CUSTOM_PALETTE_ID
                 const swatch =
                   p.id === CUSTOM_PALETTE_ID ? customAccentPreview : p.cssVars['--color-accent']
                 return (
                   <li key={p.id}>
                     <button
                       type="button"
-                      className="theme-helper-option"
+                      className={`theme-helper-option${opensSlide ? ' theme-helper-option--opens-slide' : ''}`}
                       data-active={active ? 'true' : 'false'}
+                      data-opens-slide={opensSlide ? 'true' : 'false'}
+                      aria-haspopup={opensSlide ? 'dialog' : undefined}
+                      aria-expanded={
+                        opensSlide ? (active && customEditorOpen ? 'true' : 'false') : undefined
+                      }
                       onClick={() => handlePaletteClick(p.id)}
                     >
                       <span className="theme-helper-swatch" style={{ background: swatch }} aria-hidden />
@@ -323,6 +326,11 @@ export default function ThemeHelperFab() {
                         <span className="theme-helper-option-desc">{p.description}</span>
                         <span className="theme-helper-option-source">{p.source}</span>
                       </span>
+                      {opensSlide ? (
+                        <span className="theme-helper-option-slide-cue" aria-hidden>
+                          <span className="theme-helper-option-slide-cue-arrow">‹</span>
+                        </span>
+                      ) : null}
                     </button>
                   </li>
                 )
