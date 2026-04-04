@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#343779" />
   <title>Tyler James OS — Brand Kit</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -276,6 +280,7 @@
       gap: var(--space-6);
       padding: var(--space-4) 0;
       border-bottom: 1px solid var(--color-border-soft);
+      overflow: hidden;
     }
 
     /* 4xl Display + 3xl H1 specimens; section H2s use .section-title → --font-sans */
@@ -892,6 +897,12 @@
     @media (max-width: 640px) {
       .main { padding: var(--space-6) var(--space-4); }
       .hero-title { font-size: var(--text-2xl); }
+      .type-specimen {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+      }
+      .type-meta { width: 100%; }
     }
   </style>
 </head>
@@ -973,44 +984,6 @@
       </div>
 
       <div class="component-group">
-        <div class="component-group-label">Backgrounds & Surfaces</div>
-        <div class="token-grid">
-          <div class="token-item">
-            <div class="token-swatch" style="background:#F7F8F9;border-bottom:1px solid #DDE1E5"></div>
-            <div class="token-info">
-              <div class="token-name">Background</div>
-              <div class="token-value">#F7F8F9</div>
-              <div class="token-var">--color-bg</div>
-            </div>
-          </div>
-          <div class="token-item">
-            <div class="token-swatch" style="background:#ffffff;border-bottom:1px solid #DDE1E5"></div>
-            <div class="token-info">
-              <div class="token-name">Surface</div>
-              <div class="token-value">#ffffff</div>
-              <div class="token-var">--color-surface</div>
-            </div>
-          </div>
-          <div class="token-item">
-            <div class="token-swatch" style="background:#EEF0F2;border-bottom:1px solid #DDE1E5"></div>
-            <div class="token-info">
-              <div class="token-name">Surface 2</div>
-              <div class="token-value">#EEF0F2</div>
-              <div class="token-var">--color-surface-2</div>
-            </div>
-          </div>
-          <div class="token-item">
-            <div class="token-swatch" style="background:#DDE1E5;border-bottom:1px solid #DDE1E5"></div>
-            <div class="token-info">
-              <div class="token-name">Border</div>
-              <div class="token-value">#DDE1E5</div>
-              <div class="token-var">--color-border</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="component-group">
         <div class="component-group-label">Brand & Accent</div>
         <div class="token-grid">
           <div class="token-item">
@@ -1043,6 +1016,44 @@
               <div class="token-name">Secondary</div>
               <div class="token-value">#7D8EA0</div>
               <div class="token-var">--color-sidebar-accent</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-group">
+        <div class="component-group-label">Backgrounds & Surfaces</div>
+        <div class="token-grid">
+          <div class="token-item">
+            <div class="token-swatch" style="background:#F7F8F9;border-bottom:1px solid #DDE1E5"></div>
+            <div class="token-info">
+              <div class="token-name">Background</div>
+              <div class="token-value">#F7F8F9</div>
+              <div class="token-var">--color-bg</div>
+            </div>
+          </div>
+          <div class="token-item">
+            <div class="token-swatch" style="background:#ffffff;border-bottom:1px solid #DDE1E5"></div>
+            <div class="token-info">
+              <div class="token-name">Surface</div>
+              <div class="token-value">#ffffff</div>
+              <div class="token-var">--color-surface</div>
+            </div>
+          </div>
+          <div class="token-item">
+            <div class="token-swatch" style="background:#EEF0F2;border-bottom:1px solid #DDE1E5"></div>
+            <div class="token-info">
+              <div class="token-name">Surface 2</div>
+              <div class="token-value">#EEF0F2</div>
+              <div class="token-var">--color-surface-2</div>
+            </div>
+          </div>
+          <div class="token-item">
+            <div class="token-swatch" style="background:#DDE1E5;border-bottom:1px solid #DDE1E5"></div>
+            <div class="token-info">
+              <div class="token-name">Border</div>
+              <div class="token-value">#DDE1E5</div>
+              <div class="token-var">--color-border</div>
             </div>
           </div>
         </div>
