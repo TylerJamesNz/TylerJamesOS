@@ -194,6 +194,41 @@
       max-width: 560px;
     }
 
+    /**
+     * After a heading (or heading + short paragraph): bulletless list with accent caret.
+     * Spacing: `margin-top` matches gap from title to body; consistent gaps between items.
+     */
+    .tj-list-caret {
+      list-style: none;
+      padding-left: 0;
+      margin: var(--space-4) 0 0;
+      max-width: 560px;
+    }
+
+    .tj-list-caret li {
+      position: relative;
+      padding-left: var(--space-5);
+      margin-bottom: var(--space-3);
+      font-size: var(--text-base);
+      color: var(--color-text-muted);
+      line-height: var(--leading-normal);
+    }
+
+    .tj-list-caret li:last-child {
+      margin-bottom: 0;
+    }
+
+    .tj-list-caret li::before {
+      content: '\203A';
+      position: absolute;
+      left: 0;
+      top: 0.1em;
+      color: var(--color-accent-on-surface);
+      font-weight: var(--weight-semi);
+      font-size: var(--text-md);
+      line-height: var(--leading-normal);
+    }
+
     /* Token grid */
     .token-grid {
       display: grid;
@@ -1073,6 +1108,96 @@
     @media (prefers-reduced-motion: reduce) {
       .tj-motion-hover-pop {
         transition: none;
+      }
+    }
+
+    /**
+     * Large app-hub / destination tiles (e.g. homepage `<Link class="home-card">`).
+     * Border + shadow (surface) + subtle scale using `--tj-motion-hover-pop` easing.
+     * Suppresses global `a:hover { text-decoration: underline }` on link-styled tiles.
+     */
+    .tj-motion-hover-macro-tile {
+      text-decoration: none;
+      transition:
+        border-color var(--tj-motion-hover-dur) var(--tj-motion-hover-ease-out),
+        box-shadow var(--tj-motion-hover-dur) var(--tj-motion-hover-ease-out),
+        transform var(--tj-motion-hover-dur) var(--tj-motion-hover-pop);
+    }
+
+    .tj-motion-hover-macro-tile:hover,
+    .tj-motion-hover-macro-tile:focus,
+    .tj-motion-hover-macro-tile:focus-visible,
+    .tj-motion-hover-macro-tile:active {
+      text-decoration: none;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .tj-motion-hover-macro-tile:hover {
+        border-color: color-mix(in srgb, var(--color-accent) 16%, var(--color-border));
+        box-shadow: var(--shadow-sm);
+        transform: scale(1.02);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tj-motion-hover-macro-tile {
+        transition:
+          border-color var(--tj-motion-hover-dur) var(--tj-motion-hover-ease-out),
+          box-shadow var(--tj-motion-hover-dur) var(--tj-motion-hover-ease-out);
+      }
+
+      .tj-motion-hover-macro-tile:hover {
+        border-color: color-mix(in srgb, var(--color-accent) 16%, var(--color-border));
+        box-shadow: var(--shadow-sm);
+      }
+    }
+
+    /** Hub route (`/`) section title — same class in `HomePage.tsx`. */
+    .home-apps-title {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semi);
+      line-height: var(--leading-tight);
+      letter-spacing: -0.02em;
+      color: var(--color-text);
+      margin-bottom: var(--space-8);
+    }
+
+    /** Live brand-kit demo — same surface treatment as homepage hub tiles (border on page bg). */
+    .demo-hub-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      padding: var(--space-6);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      background: transparent;
+      color: inherit;
+      cursor: default;
+      min-width: 0;
+    }
+
+    /** Specimen row matching .home-hub on the hub route (no demo-surface chrome). */
+    .demo-home-hub {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-6);
+      align-items: stretch;
+    }
+
+    .demo-home-hub .demo-hub-tile {
+      flex: 1 1 100%;
+    }
+
+    @media (min-width: 960px) {
+      .demo-home-hub {
+        flex-wrap: nowrap;
+      }
+
+      .demo-home-hub .demo-hub-tile {
+        flex: 1 1 0;
+        min-width: 0;
       }
     }
 

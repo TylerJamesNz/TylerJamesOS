@@ -54,6 +54,8 @@ The brand kit lives at `/brand` (or similar) within Tyler James OS. It serves as
 | Caption / Label | TBD | TBD | TBD |
 | Monospace (code) | TBD | TBD | TBD |
 
+**Lists — accent carets:** Reference specimen on the live brand kit (**Typography → Lists**, `#typography-lists`) under that group label — “Before you ship”. Section title, one short muted line, then supporting lines with accent **›** markers and muted body copy. For prose checklists and “what’s included” blocks, not dense data tables.
+
 **Font loading strategy:** Google Fonts or self-hosted via `next/font` (preferred — no external requests, no layout shift).
 
 ---
@@ -117,6 +119,9 @@ Based on a 4px base unit. All spacing should be multiples of 4.
 | `.tj-motion-hover-surface` | Hover: border mix + `--shadow-sm` (element should already have a border). |
 | `.tj-motion-hover-lift` | Hover: lift (`translateY`) + stronger shadow (respects reduced motion). |
 | `.tj-motion-hover-pop` | Hover: light `scale` (e.g. icon tiles). |
+| `.tj-motion-hover-macro-tile` | Large link tiles (hub homepage): border + `--shadow-sm` + subtle `scale` using `--tj-motion-hover-pop` easing; keeps `text-decoration: none` on hover (overrides global link underline). |
+
+**App hub tiles:** Reference specimen under brand kit **Cards → App hub tiles** — same pattern as other card groups (label + demo row), matching the hub route `/`.
 
 ### `:root` tokens (optional overrides)
 
