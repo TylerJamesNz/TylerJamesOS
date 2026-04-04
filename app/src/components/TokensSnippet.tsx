@@ -9,6 +9,7 @@ const SNIPPET_KEYS = [
   '--color-primary',
   '--color-accent',
   '--color-accent-hover',
+  '--color-accent-on-surface',
   '--color-text',
   '--color-text-muted',
   '--color-text-subtle',
@@ -43,6 +44,13 @@ export default function TokensSnippet() {
           <br />
         </span>
       ))}
+      {v['--color-sidebar-label'] ? (
+        <span>
+          &nbsp;&nbsp;<span className="code-key">--color-sidebar-label</span>:{' '}
+          <span className="code-value">{v['--color-sidebar-label']}</span>;
+          <br />
+        </span>
+      ) : null}
       <br />
       &nbsp;&nbsp;<span className="code-comment">{'/* Semantic */'}</span>
       <br />

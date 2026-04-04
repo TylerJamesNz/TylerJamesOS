@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { normalizeHex } from '../lib/colorSpace'
+import { invertHex, normalizeHex } from '../lib/colorSpace'
 import { applyPalette, syncTokenLabels } from '../lib/applyPalette'
 import {
   CUSTOM_DEFAULT_PRIMARY,
@@ -26,6 +26,16 @@ import {
 } from '../themes/palettes'
 
 const CUSTOM_SEEDS_KEY = 'tjos-custom-palette-seeds'
+const DARK_MODE_KEY = 'tjos-dark-mode'
+
+function readDarkMode(): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    return window.localStorage.getItem(DARK_MODE_KEY) === '1'
+  } catch {
+    return false
+  }
+}
 
 function readCustomSeeds(): { primary: string; secondary: string } {
   if (typeof window === 'undefined') {
@@ -67,6 +77,8 @@ type PaletteContextValue = {
   /** Accent derived from current custom seeds (for list swatch). */
   customAccentPreview: string
   saveCustomPalette: (primary: string, secondary: string) => void
+  darkMode: boolean
+  setDarkMode: (on: boolean) => void
 }
 
 const PaletteContext = createContext<PaletteContextValue | null>(null)
@@ -74,13 +86,14 @@ const PaletteContext = createContext<PaletteContextValue | null>(null)
 export function PaletteProvider({ children }: { children: ReactNode }) {
   const [paletteId, setPaletteIdState] = useState(readInitialPaletteId)
   const [customSeeds, setCustomSeeds] = useState(readCustomSeeds)
+  const [darkMode, setDarkModeState] = useState(readDarkMode)
 
   const customDerived = useMemo(
     () => deriveCustomPalette(customSeeds.primary, customSeeds.secondary),
     [customSeeds]
   )
 
-  const activePalette = useMemo((): ThemePalette => {
+  const basePalette = useMemo((): ThemePalette => {
     if (paletteId !== CUSTOM_PALETTE_ID) {
       return THEME_PALETTES_BY_ID[paletteId] ?? THEME_PALETTES[0]
     }
@@ -90,11 +103,38 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
     }
   }, [paletteId, customDerived])
 
+  const appliedCssVars = useMemo(() => {
+    if (!darkMode || basePalette.id !== CUSTOM_PALETTE_ID) return basePalette.cssVars
+    const ip = invertHex(customSeeds.primary)
+    const is = pickNearestSecondary(ip, invertHex(customSeeds.secondary))
+    return deriveCustomPalette(ip, is, {
+      appearance: 'dark',
+      pageTintHueFrom: customSeeds.primary,
+    })
+  }, [darkMode, basePalette, customSeeds])
+
+  const activePalette = useMemo(
+    (): ThemePalette => ({
+      ...basePalette,
+      cssVars: appliedCssVars,
+    }),
+    [basePalette, appliedCssVars]
+  )
+
   const setPaletteId = useCallback((id: string) => {
     if (!THEME_PALETTES_BY_ID[id]) return
     setPaletteIdState(id)
     try {
       window.localStorage.setItem(PALETTE_STORAGE_KEY, id)
+    } catch {
+      /* ignore */
+    }
+  }, [])
+
+  const setDarkMode = useCallback((on: boolean) => {
+    setDarkModeState(on)
+    try {
+      window.localStorage.setItem(DARK_MODE_KEY, on ? '1' : '0')
     } catch {
       /* ignore */
     }
@@ -116,7 +156,9 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
   useLayoutEffect(() => {
     applyPalette(activePalette.cssVars)
     syncTokenLabels(activePalette.cssVars)
-  }, [activePalette])
+    document.documentElement.dataset.darkMode =
+      darkMode && activePalette.id === CUSTOM_PALETTE_ID ? 'true' : 'false'
+  }, [activePalette, darkMode])
 
   const value = useMemo(
     () => ({
@@ -125,10 +167,12 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
       palettes: THEME_PALETTES,
       customPrimary: customSeeds.primary,
       customSecondary: customSeeds.secondary,
-      customAccentPreview: customDerived['--color-accent'] ?? '#196061',
+      customAccentPreview: activePalette.cssVars['--color-accent'] ?? '#196061',
       saveCustomPalette,
+      darkMode,
+      setDarkMode,
     }),
-    [activePalette, customSeeds, customDerived, saveCustomPalette, setPaletteId]
+    [activePalette, customSeeds, saveCustomPalette, setPaletteId, darkMode, setDarkMode]
   )
 
   return <PaletteContext.Provider value={value}>{children}</PaletteContext.Provider>

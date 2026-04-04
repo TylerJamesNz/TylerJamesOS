@@ -2,11 +2,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { usePalette } from '../context/PaletteContext'
 import { normalizeHex } from '../lib/colorSpace'
 import { CUSTOM_DEFAULT_PRIMARY } from '../lib/deriveCustomPalette'
-import { pickNearestSecondary, proposeComplementarySecondaries } from '../lib/proposeComplementarySecondaries'
+import {
+  pickNearestSecondary,
+  proposeComplementarySecondaries,
+  randomHarmonySecondary,
+} from '../lib/proposeComplementarySecondaries'
 import { CUSTOM_PALETTE_ID } from '../themes/palettes'
 
 const HEX6 = /^#[0-9a-fA-F]{6}$/
 const SLIDE_TOAST_MS = 2800
+/** After primary stops changing (picker drag / hex), pick a random harmony secondary. */
+const PRIMARY_AUTO_SECONDARY_MS = 320
 
 export default function ThemeHelperFab() {
   const {
@@ -17,6 +23,8 @@ export default function ThemeHelperFab() {
     customSecondary,
     customAccentPreview,
     saveCustomPalette,
+    darkMode,
+    setDarkMode,
   } = usePalette()
 
   const [open, setOpen] = useState(false)
@@ -25,6 +33,10 @@ export default function ThemeHelperFab() {
   const [draftSecondary, setDraftSecondary] = useState(customSecondary)
   const [slideToast, setSlideToast] = useState<{ key: number; message: string } | null>(null)
   const slideToastClearRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const primaryAutoSecondaryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  /** Primary we last synced without auto-randomizing (open state + after each random). */
+  const lastPrimaryForAutoSecondaryRef = useRef<string | null>(null)
+  const prevCustomEditorOpenRef = useRef(false)
 
   const closeAll = useCallback(() => {
     setOpen(false)
@@ -50,8 +62,20 @@ export default function ThemeHelperFab() {
         clearTimeout(slideToastClearRef.current)
         slideToastClearRef.current = null
       }
+      if (primaryAutoSecondaryTimerRef.current) {
+        clearTimeout(primaryAutoSecondaryTimerRef.current)
+        primaryAutoSecondaryTimerRef.current = null
+      }
+      lastPrimaryForAutoSecondaryRef.current = null
     }
   }, [customEditorOpen])
+
+  useEffect(() => {
+    if (customEditorOpen && !prevCustomEditorOpenRef.current && HEX6.test(draftPrimary)) {
+      lastPrimaryForAutoSecondaryRef.current = normalizeHex(draftPrimary)
+    }
+    prevCustomEditorOpenRef.current = customEditorOpen
+  }, [customEditorOpen, draftPrimary])
 
   const openCustomEditorFromList = useCallback(() => {
     setDraftPrimary(customPrimary)
@@ -81,11 +105,23 @@ export default function ThemeHelperFab() {
 
   useEffect(() => {
     if (!customEditorOpen) return
-    setDraftSecondary((prev) => {
-      const n = normalizeHex(prev)
-      return complementarySwatches.includes(n) ? n : pickNearestSecondary(draftPrimary, prev)
-    })
-  }, [customEditorOpen, draftPrimary, complementarySwatches])
+    if (!HEX6.test(draftPrimary)) return
+    const n = normalizeHex(draftPrimary)
+    if (lastPrimaryForAutoSecondaryRef.current === n) return
+    if (primaryAutoSecondaryTimerRef.current) clearTimeout(primaryAutoSecondaryTimerRef.current)
+    primaryAutoSecondaryTimerRef.current = setTimeout(() => {
+      primaryAutoSecondaryTimerRef.current = null
+      const next = randomHarmonySecondary(n)
+      setDraftSecondary(next)
+      lastPrimaryForAutoSecondaryRef.current = n
+    }, PRIMARY_AUTO_SECONDARY_MS)
+    return () => {
+      if (primaryAutoSecondaryTimerRef.current) {
+        clearTimeout(primaryAutoSecondaryTimerRef.current)
+        primaryAutoSecondaryTimerRef.current = null
+      }
+    }
+  }, [customEditorOpen, draftPrimary])
 
   useEffect(() => {
     if (!customEditorOpen) return
@@ -143,12 +179,6 @@ export default function ThemeHelperFab() {
                   ×
                 </button>
               </div>
-              <p className="theme-helper-custom-hint">
-                <strong>Primary</strong> fills the sidebar and tints neutrals; <strong>secondary</strong> is chosen from
-                a harmony grid (complements, triads, and related rotations) so accents stay coherent. Changes apply as
-                you edit; picking a secondary shows a short notice in this panel. Body copy and sidebar type auto-adjust for
-                contrast (WCAG-style), so bright primaries stay readable.
-              </p>
 
               <div className="theme-helper-field">
                 <label htmlFor="tjos-custom-primary">Primary</label>
@@ -176,9 +206,6 @@ export default function ThemeHelperFab() {
                 <p id="tjos-custom-secondary-heading" className="theme-helper-field-heading">
                   Secondary (accent family)
                 </p>
-                <p className="theme-helper-secondary-caption">
-                  Ten options from your primary — complement, split-complement, and triads. Tap one to apply.
-                </p>
                 <div
                   className="theme-helper-secondary-grid"
                   role="group"
@@ -200,6 +227,39 @@ export default function ThemeHelperFab() {
                     )
                   })}
                 </div>
+                <label htmlFor="tjos-custom-secondary-readout" className="theme-helper-secondary-readout-label">
+                  Colour
+                </label>
+                <div className="theme-helper-secondary-readout">
+                  <input
+                    id="tjos-custom-secondary-readout"
+                    type="text"
+                    readOnly
+                    tabIndex={-1}
+                    className="theme-helper-hex-input theme-helper-hex-input--readonly"
+                    value={effectiveSecondary}
+                    aria-label={`Selected secondary colour ${effectiveSecondary}`}
+                  />
+                </div>
+              </div>
+
+              <div className="theme-helper-slide-dark">
+                <label className="theme-helper-dark-switch">
+                  <span className="theme-helper-dark-switch-label">Dark mode</span>
+                  <span className="theme-helper-dark-switch-control">
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      aria-checked={darkMode}
+                      className="theme-helper-dark-switch-input"
+                      checked={darkMode}
+                      onChange={(e) => setDarkMode(e.target.checked)}
+                    />
+                    <span className="theme-helper-dark-switch-track">
+                      <span className="theme-helper-dark-switch-thumb" />
+                    </span>
+                  </span>
+                </label>
               </div>
 
               {slideToast ? (
@@ -235,7 +295,9 @@ export default function ThemeHelperFab() {
             </div>
             <p className="theme-helper-hint">
               Presets live in <code>src/themes/palettes.ts</code>. <strong>Custom</strong> uses{' '}
-              <code>deriveCustomPalette()</code> — primary updates live; secondary applies when you tap a swatch.
+              <code>deriveCustomPalette()</code> — primary updates live; changing primary picks a random harmony
+              secondary; tap a swatch to choose yourself. <strong>Dark mode</strong> only affects Custom (slide-out
+              switch); preset themes always use their light ramp.
             </p>
             <ul className="theme-helper-list">
               {palettes.map((p) => {

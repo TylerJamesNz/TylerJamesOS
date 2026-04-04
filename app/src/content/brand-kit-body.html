@@ -54,7 +54,7 @@
 
     <!-- Hero -->
     <div class="hero">
-      <div class="hero-eyebrow">TylerJames<span style="color:var(--color-accent)">OS</span></div>
+      <div class="hero-eyebrow">TylerJames<span style="color:var(--color-accent-on-surface)">OS</span></div>
       <h1 class="hero-title">Brand <span>Kit</span></h1>
       <p class="hero-subtitle">The single source of truth for visual decisions. Every component, colour, and spacing value used across the system lives here.</p>
       <div class="flex gap-3 mt-6">
@@ -141,11 +141,27 @@
             </div>
           </div>
           <div class="token-item">
+            <div class="token-swatch" style="background:var(--color-accent-on-surface)"></div>
+            <div class="token-info">
+              <div class="token-name">Accent on surface</div>
+              <div class="token-value" data-sync-token="--color-accent-on-surface"></div>
+              <div class="token-var">--color-accent-on-surface</div>
+            </div>
+          </div>
+          <div class="token-item">
             <div class="token-swatch" style="background:var(--color-sidebar-accent)"></div>
             <div class="token-info">
               <div class="token-name">Secondary</div>
               <div class="token-value" data-sync-token="--color-sidebar-accent"></div>
               <div class="token-var">--color-sidebar-accent</div>
+            </div>
+          </div>
+          <div class="token-item">
+            <div class="token-swatch" style="background:var(--color-sidebar-label, var(--color-sidebar-accent))"></div>
+            <div class="token-info">
+              <div class="token-name">Sidebar sections</div>
+              <div class="token-value" data-sync-token="--color-sidebar-label"></div>
+              <div class="token-var">--color-sidebar-label</div>
             </div>
           </div>
         </div>
@@ -238,7 +254,7 @@
             <div class="type-meta-name">4xl / Display</div>
             <div class="type-meta-value">56px · 700 · -0.02em</div>
           </div>
-          <div style="font-size:var(--text-4xl);font-weight:var(--weight-bold);line-height:var(--leading-tight);letter-spacing:-0.02em;color:var(--color-text)">TylerJames<span style="color:var(--color-accent)">OS</span></div>
+          <div style="font-size:var(--text-4xl);font-weight:var(--weight-bold);line-height:var(--leading-tight);letter-spacing:-0.02em;color:var(--color-text)">TylerJames<span style="color:var(--color-accent-on-surface)">OS</span></div>
         </div>
 
         <div class="type-specimen">
@@ -622,35 +638,164 @@
       <div class="section-header">
         <div class="section-tag">Components</div>
         <h2 class="section-title">Pop-out dock</h2>
-        <p class="section-description">Floating actions (e.g. theme helper) open a <strong>dock</strong>: a narrow sheet slides out beside a wider anchor panel. The pair shares one visual seam — rounded outer corners only, no double border between them. Use this for secondary steps without a full modal. Short feedback belongs <em>inside</em> the sheet as a compact notice (<code>role="status"</code>, <code>aria-live="polite"</code>), not a browser <code>alert</code>.</p>
+        <p class="section-description">Floating actions (e.g. theme helper) open a <strong>dock</strong>: a narrow sheet slides out beside a wider anchor panel. The pair shares one visual seam — rounded outer corners only, no double border between them. Use this for secondary steps without a full modal. Short feedback belongs <em>inside</em> the sheet as a compact notice (<code>role="status"</code>, <code>aria-live="polite"</code>), not a browser <code>alert</code>. The live sheet mirrors <code>theme-helper.css</code> classes; <strong>dark mode</strong> in the app applies only to the Custom theme.</p>
       </div>
 
       <div class="component-group">
-        <div class="component-group-label">Anatomy (scaled)</div>
+        <div class="component-group-label">Theme helper dock (same classes as production)</div>
         <div class="demo-surface">
           <div class="popout-dock-demo">
-            <div class="popout-dock" aria-hidden="true">
-              <div class="popout-slide">
-                <div class="popout-slide-inner">
-                  <div class="popout-slide-head">
-                    <span class="popout-slide-title">Sheet</span>
-                    <span class="popout-slide-close">×</span>
+            <div class="popout-dock-theme-helper" aria-hidden="true">
+              <div class="popout-dock-slide">
+                <div class="theme-helper-slide-inner popout-dock-sheet-inner">
+                  <div class="theme-helper-custom-header">
+                    <span class="theme-helper-custom-title">Custom colours</span>
+                    <span class="theme-helper-close" aria-hidden="true">×</span>
                   </div>
-                  <p class="popout-slide-copy">Optional step: extra fields, harmony picks, or filters.</p>
-                  <div class="popout-slide-notice" role="status">Accent applied — theme saved.</div>
-                  <button type="button" class="btn btn-primary btn-sm" tabindex="-1">Done</button>
+                  <div class="theme-helper-field">
+                    <label for="brandkit-demo-primary">Primary</label>
+                    <div class="theme-helper-color-row">
+                      <input
+                        id="brandkit-demo-primary"
+                        type="color"
+                        value="#196061"
+                        tabindex="-1"
+                        disabled
+                        aria-hidden="true"
+                      />
+                      <input
+                        type="text"
+                        class="theme-helper-hex-input"
+                        value="#196061"
+                        tabindex="-1"
+                        disabled
+                        aria-hidden="true"
+                      />
+                    </div>
+                  </div>
+                  <div class="theme-helper-field">
+                    <p id="brandkit-demo-secondary-heading" class="theme-helper-field-heading">
+                      Secondary (accent family)
+                    </p>
+                    <div
+                      class="theme-helper-secondary-grid"
+                      role="group"
+                      aria-labelledby="brandkit-demo-secondary-heading"
+                    >
+                      <span
+                        class="theme-helper-secondary-swatch"
+                        style="background-color: #5b8f8f"
+                        aria-hidden="true"
+                      ></span>
+                      <span
+                        class="theme-helper-secondary-swatch"
+                        style="background-color: #4a6fa5"
+                        aria-hidden="true"
+                      ></span>
+                      <span
+                        class="theme-helper-secondary-swatch"
+                        style="background-color: #6b5b95"
+                        aria-hidden="true"
+                      ></span>
+                      <span
+                        class="theme-helper-secondary-swatch"
+                        style="background-color: #8f6b6b"
+                        aria-hidden="true"
+                      ></span>
+                      <span
+                        class="theme-helper-secondary-swatch"
+                        style="background-color: #196061"
+                        aria-pressed="true"
+                        aria-hidden="true"
+                      ></span>
+                    </div>
+                    <label class="theme-helper-secondary-readout-label" for="brandkit-demo-secondary-readout"
+                      >Colour</label
+                    >
+                    <div class="theme-helper-secondary-readout">
+                      <input
+                        id="brandkit-demo-secondary-readout"
+                        type="text"
+                        class="theme-helper-hex-input theme-helper-hex-input--readonly"
+                        value="#196061"
+                        readonly
+                        tabindex="-1"
+                        aria-hidden="true"
+                      />
+                    </div>
+                  </div>
+                  <div class="theme-helper-slide-dark">
+                    <div class="theme-helper-dark-switch" aria-hidden="true">
+                      <span class="theme-helper-dark-switch-label">Dark mode</span>
+                      <span class="theme-helper-dark-switch-control">
+                        <input
+                          type="checkbox"
+                          class="theme-helper-dark-switch-input"
+                          tabindex="-1"
+                          disabled
+                        />
+                        <span class="theme-helper-dark-switch-track">
+                          <span class="theme-helper-dark-switch-thumb"></span>
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="theme-helper-slide-notice" role="status">Accent applied — theme saved.</div>
+                  <div class="theme-helper-custom-actions">
+                    <button type="button" class="theme-helper-btn theme-helper-btn-primary" tabindex="-1">
+                      Done
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div class="popout-panel">
-                <div class="popout-slide-head">
-                  <span class="popout-slide-title">Anchor</span>
-                  <span class="popout-slide-close">×</span>
+              <div class="theme-helper-panel theme-helper-panel--main popout-dock-anchor-panel" role="presentation">
+                <div class="theme-helper-panel-header">
+                  <span>Theme</span>
+                  <span class="theme-helper-close" aria-hidden="true">×</span>
                 </div>
-                <p class="popout-panel-hint">Primary list or presets. Opens the sheet when the user goes deeper.</p>
+                <p class="theme-helper-hint">
+                  Presets live in <code>src/themes/palettes.ts</code>. <strong>Custom</strong> uses
+                  <code>deriveCustomPalette()</code> — primary updates live; harmony secondaries; tap a swatch to
+                  choose. <strong>Dark mode</strong> only affects Custom.
+                </p>
+                <ul class="theme-helper-list">
+                  <li>
+                    <div class="theme-helper-option" data-active="true" role="presentation">
+                      <span class="theme-helper-swatch" style="background: var(--color-accent)" aria-hidden="true"></span>
+                      <span class="theme-helper-option-text">
+                        <span class="theme-helper-option-label">Custom</span>
+                        <span class="theme-helper-option-desc"
+                          >Primary tints the page; sidebar uses your primary as-is.</span>
+                        <span class="theme-helper-option-source">Your colours</span>
+                      </span>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="theme-helper-option" data-active="false" role="presentation">
+                      <span class="theme-helper-swatch" style="background: #196061" aria-hidden="true"></span>
+                      <span class="theme-helper-option-text">
+                        <span class="theme-helper-option-label">Origin teal</span>
+                        <span class="theme-helper-option-desc">Navy text, teal accent — ramp from origin/main.</span>
+                        <span class="theme-helper-option-source">origin/main (git)</span>
+                      </span>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="theme-helper-option" data-active="false" role="presentation">
+                      <span class="theme-helper-swatch" style="background: #193c61" aria-hidden="true"></span>
+                      <span class="theme-helper-option-text">
+                        <span class="theme-helper-option-label">Hue +30° (blue shift)</span>
+                        <span class="theme-helper-option-desc"
+                          >Same roles as Origin teal, entire brand ramp rotated +30° in HSL.</span>
+                        <span class="theme-helper-option-source">Local development palette</span>
+                      </span>
+                    </div>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
-          <p class="popout-dock-meta">Live implementation: <code>ThemeHelperFab.tsx</code> · styles: <code>theme-helper.css</code> (<code>.theme-helper-dock</code>, <code>.theme-helper-slide</code>, <code>.theme-helper-slide-notice</code>).</p>
+          <p class="popout-dock-meta">Live implementation: <code>ThemeHelperFab.tsx</code> · styles: <code>theme-helper.css</code> (<code>.theme-helper-dock</code>, <code>.theme-helper-slide-inner</code>, <code>.theme-helper-panel</code>, <code>.theme-helper-option</code>).</p>
         </div>
       </div>
     </section>
@@ -667,7 +812,7 @@
 
       <div class="nav-preview">
         <div class="nav-bar">
-          <div class="nav-brand">TylerJames<span style="color:var(--color-accent)">OS</span></div>
+          <div class="nav-brand">TylerJames<span style="color:var(--color-accent-on-surface)">OS</span></div>
           <div class="nav-links">
             <div class="nav-link active">Finance</div>
             <div class="nav-link">Todos</div>

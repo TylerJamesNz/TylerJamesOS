@@ -27,7 +27,7 @@
   justify-self: start;
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
-  color: var(--color-accent);
+  color: var(--color-accent-on-surface);
   text-decoration: none;
 }
 
@@ -46,7 +46,7 @@
 }
 
 .placeholder-logo span {
-  color: var(--color-accent);
+  color: var(--color-accent-on-surface);
 }
 
 .placeholder-main {

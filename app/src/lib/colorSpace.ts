@@ -30,6 +30,12 @@ export function rgbToHex(r: number, g: number, b: number): string {
   return `#${((1 << 24) + (c(r) << 16) + (c(g) << 8) + c(b)).toString(16).slice(1)}`
 }
 
+/** Per-channel invert (255 − channel) — used for dark-mode palette flip. */
+export function invertHex(hex: string): string {
+  const { r, g, b } = hexToRgb(hex)
+  return rgbToHex(255 - r, 255 - g, 255 - b)
+}
+
 export function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
   r /= 255
   g /= 255
@@ -142,4 +148,50 @@ export function ensureContrast(
         : mixHex(cur, '#111111', 0.14)
   }
   return toward === 'lighter' ? '#ffffff' : '#111111'
+}
+
+/**
+ * Like `ensureContrast`, but adjusts **lightness on the same hue** (then slightly relaxes saturation)
+ * before falling back to greyscale mix — keeps sidebar / nav accents recognisably coloured on chromatic
+ * backgrounds.
+ */
+export function ensureContrastSameHue(
+  fg: string,
+  bg: string,
+  minRatio: number,
+  bias: 'auto' | 'lighter' | 'darker' = 'auto'
+): string {
+  const bgN = normalizeHex(bg)
+  let cur = normalizeHex(fg)
+  if (contrastRatio(cur, bgN) >= minRatio) return cur
+
+  const { r, g, b } = hexToRgb(cur)
+  let { h: hh, s, l } = rgbToHsl(r, g, b)
+
+  let toward: 'lighter' | 'darker'
+  if (bias === 'lighter') toward = 'lighter'
+  else if (bias === 'darker') toward = 'darker'
+  else {
+    const up = contrastRatio(hslToHex(hh, clamp(s, 0.18, 1), clamp(l + 0.22, 0, 1)), bgN)
+    const down = contrastRatio(hslToHex(hh, clamp(s, 0.18, 1), clamp(l - 0.22, 0, 1)), bgN)
+    toward = up >= down ? 'lighter' : 'darker'
+  }
+
+  const step = 0.026
+  for (let i = 0; i < 48; i++) {
+    cur = hslToHex(hh, clamp(s, 0.12, 1), clamp(l, 0.05, 0.96))
+    if (contrastRatio(cur, bgN) >= minRatio) return cur
+    l += toward === 'lighter' ? step : -step
+    l = clamp(l, 0.05, 0.96)
+  }
+
+  for (let i = 0; i < 18; i++) {
+    s = clamp(s * 0.94, 0.08, 1)
+    cur = hslToHex(hh, s, clamp(l, 0.05, 0.96))
+    if (contrastRatio(cur, bgN) >= minRatio) return cur
+    l += toward === 'lighter' ? step * 1.4 : -step * 1.4
+    l = clamp(l, 0.05, 0.96)
+  }
+
+  return ensureContrast(cur, bgN, minRatio, toward)
 }

@@ -73,7 +73,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    a { color: var(--color-accent); text-decoration: none; }
+    a { color: var(--color-accent-on-surface); text-decoration: none; }
     a:hover { text-decoration: underline; }
 
     code, pre {
@@ -96,7 +96,7 @@
       left: 0;
       height: 100vh;
       width: 220px;
-      background: var(--color-sidebar-bg);
+      background: var(--color-sidebar-bg-gradient, var(--color-sidebar-bg));
       border-right: 1px solid var(--color-sidebar-border);
       padding: var(--space-6);
       overflow-y: auto;
@@ -127,7 +127,7 @@
       font-weight: var(--weight-semi);
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--color-sidebar-accent);
+      color: var(--color-sidebar-label, var(--color-sidebar-accent));
       margin-bottom: var(--space-2);
     }
 
@@ -167,7 +167,7 @@
       font-weight: var(--weight-semi);
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--color-accent);
+      color: var(--color-accent-on-surface);
       margin-bottom: var(--space-2);
     }
 
@@ -401,7 +401,7 @@
     }
 
     .badge-default  { background: var(--color-surface-2); color: var(--color-text-muted); border: 1px solid var(--color-border); }
-    .badge-accent   { background: rgba(var(--accent-rgb), 0.12); color: var(--color-accent); }
+    .badge-accent   { background: rgba(var(--accent-rgb), 0.12); color: var(--color-accent-on-surface); }
     .badge-success  { background: rgba(22,163,74,0.10); color: var(--color-success); }
     .badge-warning  { background: rgba(217,119,6,0.10); color: var(--color-warning); }
     .badge-danger   { background: rgba(220,38,38,0.10); color: var(--color-destructive); }
@@ -664,7 +664,7 @@
     }
 
     .code-comment { color: var(--color-text-subtle); }
-    .code-key     { color: var(--color-accent); }
+    .code-key     { color: var(--color-accent-on-surface); }
     .code-value   { color: #16a34a; }
     .code-string  { color: #b45309; }
 
@@ -708,7 +708,7 @@
       font-weight: var(--weight-semi);
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--color-accent);
+      color: var(--color-accent-on-surface);
       margin-bottom: var(--space-4);
     }
 
@@ -722,7 +722,7 @@
       margin-bottom: var(--space-4);
     }
 
-    .hero-title span { color: var(--color-accent); }
+    .hero-title span { color: var(--color-accent-on-surface); }
 
     .hero-subtitle {
       font-size: var(--text-lg);
@@ -827,83 +827,53 @@
       font-size: var(--text-sm);
     }
 
-    /* Pop-out dock (theme helper — brand kit reference) */
+    /* Pop-out dock — static demo uses production theme-helper.css classes */
     .popout-dock-demo {
       padding: var(--space-2);
+      overflow-x: auto;
     }
 
-    .popout-dock {
+    .popout-dock-theme-helper {
       display: flex;
       flex-direction: row;
       align-items: stretch;
-      max-width: 400px;
+      width: max-content;
+      max-width: 100%;
     }
 
-    .popout-slide {
+    .popout-dock-slide {
       flex-shrink: 0;
-      width: 168px;
-      box-sizing: border-box;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
+    }
+
+    .popout-dock-sheet-inner {
+      max-height: none;
+    }
+
+    .popout-dock-theme-helper .theme-helper-slide-inner {
       border-right: none;
       border-radius: var(--radius-lg) 0 0 var(--radius-lg);
-      box-shadow: var(--shadow-lg);
     }
 
-    .popout-slide-inner {
-      padding: var(--space-3);
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-2);
-    }
-
-    .popout-panel {
-      flex: 1;
-      min-width: 0;
-      box-sizing: border-box;
-      padding: var(--space-3);
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
+    .popout-dock-theme-helper .theme-helper-panel--main.popout-dock-anchor-panel {
       border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
-      box-shadow: var(--shadow-lg);
+      border-left: none;
+      width: auto;
+      flex: 1;
+      min-width: min(280px, 52vw);
+      max-width: min(360px, 100%);
     }
 
-    .popout-slide-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--space-2);
+    .popout-dock-theme-helper .theme-helper-option {
+      cursor: default;
+      pointer-events: none;
     }
 
-    .popout-slide-title {
-      font-size: var(--text-sm);
-      font-weight: var(--weight-semi);
-      color: var(--color-text);
+    .popout-dock-theme-helper .theme-helper-secondary-swatch {
+      display: block;
     }
 
-    .popout-slide-close {
-      font-size: 18px;
-      line-height: 1;
-      color: var(--color-text-muted);
-    }
-
-    .popout-slide-copy,
-    .popout-panel-hint {
-      font-size: var(--text-xs);
-      color: var(--color-text-muted);
-      line-height: var(--leading-normal);
-      margin: 0;
-    }
-
-    .popout-slide-notice {
-      padding: var(--space-2) var(--space-3);
-      font-size: var(--text-xs);
-      line-height: var(--leading-snug);
-      color: var(--color-text);
-      background: var(--color-bg);
-      border: 1px solid var(--color-border-soft);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-sm);
+    .popout-dock-theme-helper .theme-helper-slide-notice {
+      animation: none;
     }
 
     .popout-dock-meta {
@@ -915,7 +885,7 @@
 
     .popout-dock-meta code {
       font-size: 10px;
-      color: var(--color-accent);
+      color: var(--color-accent-on-surface);
     }
 
     /* Miscellaneous */
