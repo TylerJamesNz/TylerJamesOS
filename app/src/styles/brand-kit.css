@@ -937,6 +937,43 @@
       color: var(--color-accent-on-surface);
     }
 
+    /* ── Icons ── */
+
+    /* .tx-icon — accent SVG chip in transaction rows */
+    .tx-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--color-accent);
+    }
+
+    /* Finance card icon pill */
+    .card-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-md);
+      background: rgba(51, 169, 172, 0.10);
+      margin-bottom: var(--space-3);
+      color: var(--color-accent);
+    }
+
+    /* Stat card header: label + icon side by side */
+    .stat-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-1);
+    }
+
     /* Miscellaneous */
     .flex { display: flex; }
     .items-center { align-items: center; }

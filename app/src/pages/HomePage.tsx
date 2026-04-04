@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { LayoutDashboard, Wallet, CheckSquare } from 'lucide-react'
 import './HomePage.css'
 
 export default function HomePage() {
@@ -30,7 +31,7 @@ export default function HomePage() {
           <div className="home-hub">
             <Link to="/brand-kit" className="home-card home-card--live tj-motion-hover-macro-tile">
               <div className="home-card-icon" aria-hidden>
-                ◎
+                <LayoutDashboard size={20} strokeWidth={1.75} />
               </div>
               <h3 className="home-card-title">Brand kit</h3>
               <p className="home-card-desc">Colours, type, spacing, components — and theme presets for the whole system.</p>
@@ -39,7 +40,7 @@ export default function HomePage() {
 
             <Link to="/finance" className="home-card home-card--live tj-motion-hover-macro-tile">
               <div className="home-card-icon" aria-hidden>
-                ◇
+                <Wallet size={20} strokeWidth={1.75} />
               </div>
               <h3 className="home-card-title">Finance</h3>
               <p className="home-card-desc">Budgeting, transactions, and net worth — placeholder screen until the real app ships.</p>
@@ -48,7 +49,7 @@ export default function HomePage() {
 
             <Link to="/todos" className="home-card home-card--live tj-motion-hover-macro-tile">
               <div className="home-card-icon" aria-hidden>
-                ☆
+                <CheckSquare size={20} strokeWidth={1.75} />
               </div>
               <h3 className="home-card-title">Todos</h3>
               <p className="home-card-desc">Tasks, priorities, and due dates — placeholder screen until the todos app is wired up.</p>

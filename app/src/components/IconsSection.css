@@ -1,0 +1,209 @@
+.icons-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ── Icon tile ── */
+.icons-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease;
+  font-family: inherit;
+  text-align: center;
+  width: 100%;
+  overflow: hidden;
+}
+
+.icons-tile:hover {
+  border-color: var(--color-accent);
+  background: var(--color-surface-2);
+}
+
+.icons-tile--copied {
+  border-color: var(--color-accent);
+  background: rgba(51, 169, 172, 0.06);
+}
+
+.icons-tile svg {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.icons-tile-name {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--color-text-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.icons-tile-copy {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--color-text-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.icons-tile:hover .icons-tile-copy,
+.icons-tile--copied .icons-tile-copy {
+  opacity: 1;
+  color: var(--color-accent);
+}
+
+/* ── Grids ── */
+.icons-grid {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.icons-grid--featured {
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+}
+
+.icons-grid--modal {
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  align-content: start;
+  grid-auto-rows: min-content;
+}
+
+/* ── View more button ── */
+.icons-view-more {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-4);
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.icons-view-more:hover {
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+}
+
+/* ── Modal ── */
+.icons-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(21, 44, 54, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-6);
+}
+
+.icons-modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 760px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(21, 44, 54, 0.18);
+}
+
+.icons-modal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.icons-modal-title {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semi);
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.icons-modal-search {
+  flex: 1;
+  height: 34px;
+  padding: 0 var(--space-3);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  outline: none;
+}
+
+.icons-modal-search:focus {
+  border-color: var(--color-accent);
+}
+
+.icons-modal-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.icons-modal-close:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.icons-modal-hint {
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-xs);
+  color: var(--color-text-subtle);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.icons-modal .icons-grid--modal {
+  padding: var(--space-5) var(--space-6);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.icons-modal-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--space-12);
+  font-size: var(--text-sm);
+  color: var(--color-text-subtle);
+}

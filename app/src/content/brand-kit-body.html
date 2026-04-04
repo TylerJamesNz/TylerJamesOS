@@ -23,6 +23,7 @@
         <a href="#buttons">Buttons</a>
         <a href="#badges">Badges & Tags</a>
         <a href="#cards">Cards</a>
+        <a href="#icons">Icons</a>
         <a href="#hub-tiles">App hub tiles</a>
         <a href="#inputs">Form Inputs</a>
         <a href="#alerts">Alerts</a>
@@ -534,16 +535,19 @@
         <div class="component-group-label">Finance overview cards</div>
         <div class="card-grid">
           <div class="card">
+            <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg></div>
             <div class="card-subtitle">Income this month</div>
             <div class="card-value">$8,400</div>
             <div class="card-delta">↑ $400 vs last month</div>
           </div>
           <div class="card">
+            <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></div>
             <div class="card-subtitle">Expenses this month</div>
             <div class="card-value">$4,218</div>
             <div class="card-delta negative">↑ $312 vs last month</div>
           </div>
           <div class="card">
+            <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg></div>
             <div class="card-subtitle">Net saved</div>
             <div class="card-value">$4,182</div>
             <div class="card-delta">↑ $88 vs last month</div>
@@ -569,7 +573,7 @@
                 margin-bottom: var(--space-4);
               "
             >
-              ◎
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-accent)"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
             </div>
             <h3
               style="
@@ -618,7 +622,7 @@
                 margin-bottom: var(--space-4);
               "
             >
-              ◇
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-accent)"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
             </div>
             <h3
               style="
@@ -667,7 +671,7 @@
                 margin-bottom: var(--space-4);
               "
             >
-              ☆
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-accent)"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/></svg>
             </div>
             <h3
               style="
@@ -703,6 +707,18 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- ============================================================
+         ICONS
+         ============================================================ -->
+    <section class="section" id="icons">
+      <div class="section-header">
+        <div class="section-tag">Components</div>
+        <h2 class="section-title">Icons</h2>
+        <p class="section-description">Lucide icon set — inline SVG in HTML templates, <code>lucide-react</code> imports in React components. Always rendered at <code>--color-accent</code>, 1.75 stroke weight.</p>
+      </div>
+      <div id="icons-root"></div>
     </section>
 
     <!-- ============================================================
@@ -1012,17 +1028,26 @@
 
       <div class="stat-grid">
         <div class="stat-card">
-          <div class="stat-label">Net Worth</div>
+          <div class="stat-card-header">
+            <div class="stat-label">Net Worth</div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-accent);opacity:0.7"><path d="M10 18v-7"/><path d="M11.12 2.198a2 2 0 0 1 1.76.006l7.866 3.847c.476.233.31.949-.22.949H3.474c-.53 0-.695-.716-.22-.949z"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M3 22h18"/><path d="M6 18v-7"/></svg>
+          </div>
           <div class="stat-value">$42,180</div>
           <div class="stat-change"><span class="up">↑ 3.2%</span> vs last month</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Monthly Burn</div>
+          <div class="stat-card-header">
+            <div class="stat-label">Monthly Burn</div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-accent);opacity:0.7"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"/></svg>
+          </div>
           <div class="stat-value">$4,218</div>
           <div class="stat-change"><span class="down">↑ $312</span> vs last month</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Savings Rate</div>
+          <div class="stat-card-header">
+            <div class="stat-label">Savings Rate</div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-accent);opacity:0.7"><line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+          </div>
           <div class="stat-value">49.8%</div>
           <div class="stat-change"><span class="up">↑ 1.1%</span> vs last month</div>
         </div>
@@ -1040,7 +1065,7 @@
 
       <div class="card">
         <div class="tx-row">
-          <div class="tx-icon">🛒</div>
+          <div class="tx-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg></div>
           <div class="tx-info">
             <div class="tx-name">Countdown Metro Auckland</div>
             <div class="tx-meta">Groceries · <span class="tag" style="display:inline-flex;padding:1px 6px;font-size:10px">groceries</span></div>
@@ -1048,7 +1073,7 @@
           <div class="tx-amount debit">−$124.50</div>
         </div>
         <div class="tx-row">
-          <div class="tx-icon">✈️</div>
+          <div class="tx-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div>
           <div class="tx-info">
             <div class="tx-name">Air New Zealand</div>
             <div class="tx-meta">Travel · <span class="tag" style="display:inline-flex;padding:1px 6px;font-size:10px">Bali 2025</span> <span class="tag" style="display:inline-flex;padding:1px 6px;font-size:10px">travel</span></div>
@@ -1056,7 +1081,7 @@
           <div class="tx-amount debit">−$890.00</div>
         </div>
         <div class="tx-row">
-          <div class="tx-icon">💼</div>
+          <div class="tx-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg></div>
           <div class="tx-info">
             <div class="tx-name">Direct Credit — Employer</div>
             <div class="tx-meta">Salary / Wages</div>
@@ -1064,7 +1089,7 @@
           <div class="tx-amount credit">+$4,200.00</div>
         </div>
         <div class="tx-row">
-          <div class="tx-icon">❓</div>
+          <div class="tx-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>
           <div class="tx-info">
             <div class="tx-name">POS PURCHASE 4821</div>
             <div class="tx-meta"><span class="badge badge-warning" style="font-size:10px">Needs review</span></div>

@@ -3,16 +3,19 @@ import { createPortal } from 'react-dom'
 import brandBody from '../content/brand-kit-body.html?raw'
 import { initTjMotionTypeHeadings } from '../lib/tjMotion'
 import TokensSnippet from './TokensSnippet'
+import IconsSection from './IconsSection'
 
 export default function BrandKitShell() {
   const hostRef = useRef<HTMLDivElement>(null)
-  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
+  const [tokensTarget, setTokensTarget] = useState<HTMLElement | null>(null)
+  const [iconsTarget, setIconsTarget] = useState<HTMLElement | null>(null)
 
   useLayoutEffect(() => {
     const el = hostRef.current
     if (!el) return
     el.innerHTML = brandBody
-    setPortalTarget(document.getElementById('tokens-snippet-root'))
+    setTokensTarget(document.getElementById('tokens-snippet-root'))
+    setIconsTarget(document.getElementById('icons-root'))
     void document.fonts.ready.then(() => {
       requestAnimationFrame(() => initTjMotionTypeHeadings(el))
     })
@@ -21,7 +24,8 @@ export default function BrandKitShell() {
   return (
     <>
       <div ref={hostRef} />
-      {portalTarget ? createPortal(<TokensSnippet />, portalTarget) : null}
+      {tokensTarget ? createPortal(<TokensSnippet />, tokensTarget) : null}
+      {iconsTarget ? createPortal(<IconsSection />, iconsTarget) : null}
     </>
   )
 }
