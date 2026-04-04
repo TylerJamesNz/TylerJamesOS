@@ -6,7 +6,7 @@
   <title>Tyler James OS — Brand Kit</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700&family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     /* ============================================================
        DESIGN TOKENS — edit these to restyle the entire system
@@ -37,7 +37,8 @@
       --color-sidebar-accent:  #7DA0A0;
 
       /* Typography */
-      --font-sans:  'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono:  'Geist Mono', 'Fira Code', monospace;
 
       --text-xs:    11px;
@@ -139,11 +140,11 @@
     }
 
     .sidebar-logo {
-      font-size: var(--text-sm);
-      font-weight: var(--weight-semi);
+      font-size: var(--text-md);
+      font-weight: var(--weight-bold);
+      font-family: var(--font-display);
       color: var(--color-sidebar-text-hi);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+      letter-spacing: -0.01em;
       padding-bottom: var(--space-6);
       border-bottom: 1px solid var(--color-sidebar-border);
       margin-bottom: var(--space-6);
@@ -209,6 +210,7 @@
     .section-title {
       font-size: var(--text-2xl);
       font-weight: var(--weight-semi);
+      font-family: var(--font-display);
       color: var(--color-text);
       line-height: var(--leading-tight);
     }
@@ -451,6 +453,7 @@
     .card-title {
       font-size: var(--text-md);
       font-weight: var(--weight-semi);
+      font-family: var(--font-display);
       color: var(--color-text);
       margin-bottom: var(--space-1);
     }
@@ -464,6 +467,7 @@
     .card-value {
       font-size: var(--text-3xl);
       font-weight: var(--weight-semi);
+      font-family: var(--font-display);
       color: var(--color-text);
       line-height: 1;
     }
@@ -743,6 +747,7 @@
     .hero-title {
       font-size: var(--text-4xl);
       font-weight: var(--weight-semi);
+      font-family: var(--font-display);
       color: var(--color-text);
       line-height: var(--leading-tight);
       letter-spacing: -0.02em;
@@ -799,7 +804,7 @@
       padding: var(--space-5);
     }
     .stat-label { font-size: var(--text-xs); color: var(--color-text-subtle); text-transform: uppercase; letter-spacing: 0.06em; font-weight: var(--weight-semi); }
-    .stat-value { font-size: var(--text-2xl); font-weight: var(--weight-semi); color: var(--color-text); margin: var(--space-1) 0; line-height: 1; }
+    .stat-value { font-size: var(--text-2xl); font-weight: var(--weight-semi); font-family: var(--font-display); color: var(--color-text); margin: var(--space-1) 0; line-height: 1; }
     .stat-change { font-size: var(--text-xs); color: var(--color-text-muted); }
     .stat-change .up   { color: var(--color-success); }
     .stat-change .down { color: var(--color-destructive); }
@@ -824,6 +829,7 @@
     .nav-brand {
       font-size: var(--text-sm);
       font-weight: var(--weight-semi);
+      font-family: var(--font-display);
       color: var(--color-text);
       letter-spacing: 0.06em;
     }
@@ -887,7 +893,7 @@
        SIDEBAR NAV
        ============================================================ -->
   <aside class="sidebar">
-    <div class="sidebar-logo">Tyler James <span>OS</span></div>
+    <div class="sidebar-logo">TylerJames<span>OS</span></div>
 
     <div class="sidebar-section">
       <div class="sidebar-label">Foundation</div>
@@ -936,12 +942,12 @@
 
     <!-- Hero -->
     <div class="hero">
-      <div class="hero-eyebrow">Tyler James OS</div>
+      <div class="hero-eyebrow">TylerJames<span style="color:var(--color-accent)">OS</span></div>
       <h1 class="hero-title">Brand <span>Kit</span></h1>
       <p class="hero-subtitle">The single source of truth for visual decisions. Every component, colour, and spacing value used across the system lives here.</p>
       <div class="flex gap-3 mt-6">
         <span class="badge badge-accent">Dark mode first</span>
-        <span class="badge badge-default">Geist typeface</span>
+        <span class="badge badge-default">Bricolage Grotesque + Inter</span>
         <span class="badge badge-default">4px grid</span>
         <span class="badge badge-default">v0.1 — draft</span>
       </div>
@@ -1109,7 +1115,7 @@
       <div class="section-header">
         <div class="section-tag">Foundation</div>
         <h2 class="section-title">Typography</h2>
-        <p class="section-description">Geist for UI text. Geist Mono for numbers, code, and data values.</p>
+        <p class="section-description">Bricolage Grotesque for headings and display. Inter for body and UI text. Geist Mono for numbers, code, and data values.</p>
       </div>
 
       <div class="component-group">
@@ -1120,7 +1126,7 @@
             <div class="type-meta-name">4xl / Display</div>
             <div class="type-meta-value">56px · 700 · -0.02em</div>
           </div>
-          <div style="font-size:var(--text-4xl);font-weight:var(--weight-bold);line-height:var(--leading-tight);letter-spacing:-0.02em;color:var(--color-text)">Tyler James OS</div>
+          <div style="font-size:var(--text-4xl);font-weight:var(--weight-bold);line-height:var(--leading-tight);letter-spacing:-0.02em;color:var(--color-text)">TylerJames<span style="color:var(--color-accent)">OS</span></div>
         </div>
 
         <div class="type-specimen">
@@ -1509,7 +1515,7 @@
 
       <div class="nav-preview">
         <div class="nav-bar">
-          <div class="nav-brand">Tyler James OS</div>
+          <div class="nav-brand">TylerJames<span style="color:var(--color-accent)">OS</span></div>
           <div class="nav-links">
             <div class="nav-link active">Finance</div>
             <div class="nav-link">Todos</div>
@@ -1679,7 +1685,8 @@
 <br><br>
 &nbsp;&nbsp;<span class="code-comment">/* Fonts */</span>
 <br>
-&nbsp;&nbsp;<span class="code-key">--font-sans</span>: <span class="code-string">'Geist', -apple-system, sans-serif</span>;
+&nbsp;&nbsp;<span class="code-key">--font-display</span>: <span class="code-string">'Bricolage Grotesque', sans-serif</span>;
+&nbsp;&nbsp;<span class="code-key">--font-sans</span>: <span class="code-string">'Inter', -apple-system, sans-serif</span>;
 <br>
 &nbsp;&nbsp;<span class="code-key">--font-mono</span>: <span class="code-string">'Geist Mono', monospace</span>;
 <br>
