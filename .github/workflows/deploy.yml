@@ -1,4 +1,8 @@
-name: Deploy to Vercel
+name: Deploy
+
+# Unified deploy: schema migrations → edge functions → frontend.
+# Migrations + functions run before the frontend build, so a failure in either
+# halts the deploy and prevents the UI from going live against a stale backend.
 
 on:
   push:
@@ -8,10 +12,33 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link Supabase project
+        run: supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+
+      - name: Push database migrations
+        run: supabase db push
+
+      - name: Deploy edge functions
+        if: hashFiles('supabase/functions/**/index.ts') != ''
+        run: |
+          for fn_dir in supabase/functions/*/; do
+            fn_name=$(basename "$fn_dir")
+            echo "Deploying function: $fn_name"
+            supabase functions deploy "$fn_name" --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}"
+          done
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -20,12 +47,15 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         working-directory: app
         run: npm ci
 
-      - name: Build
+      - name: Build frontend
         working-directory: app
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: npm run build
 
       - name: Deploy to Vercel
