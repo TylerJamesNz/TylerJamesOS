@@ -1,0 +1,23 @@
+.todos-page {
+  display: flex;
+  height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.todos-page-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+  .todos-page-sidebar {
+    display: none;
+  }
+}
+
+.todos-page-main {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}

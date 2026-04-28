@@ -19,8 +19,8 @@ export default function HomePage() {
             One place for money, tasks, and how things look.
           </h1>
           <p className="home-lede">
-            This hub is a stand-in while apps are built. Open the brand kit to explore the design system; Finance and Todos
-            will land here next.
+            Todos is live. Open the brand kit to explore the design system, or sign in and head to Todos to add and
+            manage tasks. Finance is next.
           </p>
         </section>
 
@@ -52,8 +52,8 @@ export default function HomePage() {
                 <CheckSquare size={20} strokeWidth={1.75} />
               </div>
               <h3 className="home-card-title">Todos</h3>
-              <p className="home-card-desc">Tasks, priorities, and due dates — placeholder screen until the todos app is wired up.</p>
-              <span className="home-card-cta">Open placeholder →</span>
+              <p className="home-card-desc">Voice-first task management with tags, drawers, and offline queue.</p>
+              <span className="home-card-cta">Open Todos →</span>
             </Link>
           </div>
         </section>

@@ -9,6 +9,7 @@ import BrandKitPage from './pages/BrandKitPage'
 import HomePage from './pages/HomePage'
 import PlaceholderAppPage from './pages/PlaceholderAppPage'
 import SignInPage from './pages/SignInPage'
+import TodosPage from './pages/TodosPage'
 
 function useTjMotionTypeInit() {
   useEffect(() => {
@@ -49,10 +50,7 @@ export default function App() {
               path="/todos"
               element={
                 <RequireAuth>
-                  <PlaceholderAppPage
-                    title="Todos"
-                    description="Task lists, priorities, and due dates will live here — same navigation and visual system as the rest of Tyler James OS."
-                  />
+                  <TodosPage />
                 </RequireAuth>
               }
             />

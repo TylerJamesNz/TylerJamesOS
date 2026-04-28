@@ -1,0 +1,23 @@
+.floating-mic {
+  position: fixed;
+  bottom: 96px;
+  right: var(--space-6);
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
+  z-index: 40;
+}
+
+@media (min-width: 768px) {
+  .floating-mic {
+    display: none;
+  }
+}

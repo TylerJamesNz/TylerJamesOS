@@ -1,0 +1,128 @@
+.task-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-bg);
+}
+
+.task-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+@media (min-width: 768px) {
+  .task-list-header {
+    padding: var(--space-6);
+  }
+}
+
+.task-list-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semi);
+  color: var(--color-text);
+  text-transform: capitalize;
+  line-height: var(--leading-tight);
+}
+
+.task-list-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: background var(--ease-default);
+}
+
+.task-list-action:hover {
+  background: var(--color-accent-hover, var(--color-accent));
+}
+
+.task-list-action-label {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .task-list-action-label {
+    display: inline;
+  }
+}
+
+.task-list-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-4) 80px;
+}
+
+@media (min-width: 768px) {
+  .task-list-content {
+    padding: var(--space-6);
+  }
+}
+
+.task-list-today {
+  max-width: 500px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.task-list-group-title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semi);
+  color: var(--color-text);
+}
+
+.task-list-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.task-list-empty {
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  color: var(--color-text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.task-list-empty-title {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-base);
+  color: var(--color-text);
+}
+
+.task-list-empty-body {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.task-list-mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+}
+
+@media (min-width: 768px) {
+  .task-list-mobile-nav {
+    display: none;
+  }
+}

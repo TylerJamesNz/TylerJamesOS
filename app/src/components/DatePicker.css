@@ -1,0 +1,59 @@
+.date-picker {
+  position: relative;
+}
+
+.date-picker-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-base);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--ease-default), border-color var(--ease-default), color var(--ease-default);
+}
+
+.date-picker-trigger:hover {
+  background: var(--color-surface);
+  border-color: var(--color-accent);
+}
+
+.date-picker-trigger.has-value {
+  color: var(--color-text);
+}
+
+.date-picker-trigger.is-highlighted {
+  color: var(--color-success);
+}
+
+.date-picker-trigger-label {
+  flex: 1;
+}
+
+.date-picker-clear {
+  position: absolute;
+  right: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--ease-default), color var(--ease-default);
+}
+
+.date-picker-clear:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}

@@ -1,0 +1,14 @@
+.emoji-picker-drawer {
+  margin: calc(-1 * var(--space-6));
+}
+
+.emoji-picker-drawer .EmojiPickerReact {
+  --epr-bg-color: var(--color-surface);
+  --epr-text-color: var(--color-text);
+  --epr-search-input-bg-color: var(--color-surface-2);
+  --epr-category-label-bg-color: var(--color-surface);
+  --epr-hover-bg-color: var(--color-surface-2);
+  --epr-focus-bg-color: rgba(var(--accent-rgb), 0.18);
+  --epr-highlight-color: var(--color-accent);
+  border: none;
+}
