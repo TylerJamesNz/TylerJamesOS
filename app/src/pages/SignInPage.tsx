@@ -1,6 +1,8 @@
+import { LogIn } from 'lucide-react'
 import { Navigate } from 'react-router-dom'
 import { useSession } from '@/context/SessionContext'
 import { supabase } from '@/lib/supabase'
+import './SignInPage.css'
 
 export default function SignInPage() {
   const { user, loading } = useSession()
@@ -18,48 +20,29 @@ export default function SignInPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 24,
-      }}
-    >
-      <main
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 24,
-          maxWidth: 360,
-          width: '100%',
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: 32, fontWeight: 600, letterSpacing: '-0.01em' }}>
-          Tyler James OS
-        </h1>
-        <p style={{ margin: 0, opacity: 0.7, textAlign: 'center' }}>
-          Personal infrastructure, signed in once.
-        </p>
-        <button
-          type="button"
-          onClick={signInWithGoogle}
-          style={{
-            border: '1px solid currentColor',
-            background: 'transparent',
-            color: 'inherit',
-            borderRadius: 8,
-            padding: '12px 24px',
-            fontSize: 16,
-            fontWeight: 500,
-            cursor: 'pointer',
-            width: '100%',
-          }}
-        >
-          Continue with Google
-        </button>
+    <div className="signin">
+      <header className="signin-header">
+        <span className="signin-logo">
+          TylerJames<span>OS</span>
+        </span>
+        <span className="signin-tag">Personal operating system</span>
+      </header>
+
+      <main className="signin-main">
+        <section className="signin-hero" aria-labelledby="signin-heading">
+          <p className="signin-eyebrow">Welcome</p>
+          <h1 id="signin-heading" className="signin-title">
+            Sign in to continue.
+          </h1>
+          <p className="signin-lede">
+            Tyler James OS is a private, personal platform. Sign in with Google to access your tasks,
+            finance, and design system.
+          </p>
+          <button type="button" className="signin-button" onClick={signInWithGoogle}>
+            <LogIn size={18} aria-hidden="true" />
+            <span>Continue with Google</span>
+          </button>
+        </section>
       </main>
     </div>
   )

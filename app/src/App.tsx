@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import RequireAuth from './components/RequireAuth'
 import ThemeHelperFab from './components/ThemeHelperFab'
 import { PaletteProvider } from './context/PaletteContext'
@@ -34,27 +34,28 @@ export default function App() {
       <SessionProvider>
         <PaletteProvider>
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/brand-kit" element={<BrandKitPage />} />
             <Route path="/signin" element={<SignInPage />} />
             <Route
-              path="/finance"
-              element={
-                <PlaceholderAppPage
-                  title="Finance"
-                  description="Budgeting, transactions, imports, and net worth will live here — aligned with the shared data model and design tokens."
-                />
-              }
-            />
-            <Route
-              path="/todos"
               element={
                 <RequireAuth>
-                  <TodosPage />
+                  <Outlet />
                 </RequireAuth>
               }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            >
+              <Route path="/" element={<HomePage />} />
+              <Route path="/brand-kit" element={<BrandKitPage />} />
+              <Route
+                path="/finance"
+                element={
+                  <PlaceholderAppPage
+                    title="Finance"
+                    description="Budgeting, transactions, imports, and net worth will live here — aligned with the shared data model and design tokens."
+                  />
+                }
+              />
+              <Route path="/todos" element={<TodosPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
           </Routes>
           <ThemeHelperFab />
         </PaletteProvider>
