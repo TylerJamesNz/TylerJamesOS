@@ -1,11 +1,14 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import RequireAuth from './components/RequireAuth'
 import ThemeHelperFab from './components/ThemeHelperFab'
 import { PaletteProvider } from './context/PaletteContext'
+import { SessionProvider } from './context/SessionContext'
 import { initTjMotionTypeHeadings } from './lib/tjMotion'
 import BrandKitPage from './pages/BrandKitPage'
 import HomePage from './pages/HomePage'
 import PlaceholderAppPage from './pages/PlaceholderAppPage'
+import SignInPage from './pages/SignInPage'
 
 function useTjMotionTypeInit() {
   useEffect(() => {
@@ -27,32 +30,37 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <PaletteProvider>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/brand-kit" element={<BrandKitPage />} />
-          <Route
-            path="/finance"
-            element={
-              <PlaceholderAppPage
-                title="Finance"
-                description="Budgeting, transactions, imports, and net worth will live here — aligned with the shared data model and design tokens."
-              />
-            }
-          />
-          <Route
-            path="/todos"
-            element={
-              <PlaceholderAppPage
-                title="Todos"
-                description="Task lists, priorities, and due dates will live here — same navigation and visual system as the rest of Tyler James OS."
-              />
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        <ThemeHelperFab />
-      </PaletteProvider>
+      <SessionProvider>
+        <PaletteProvider>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/brand-kit" element={<BrandKitPage />} />
+            <Route path="/signin" element={<SignInPage />} />
+            <Route
+              path="/finance"
+              element={
+                <PlaceholderAppPage
+                  title="Finance"
+                  description="Budgeting, transactions, imports, and net worth will live here — aligned with the shared data model and design tokens."
+                />
+              }
+            />
+            <Route
+              path="/todos"
+              element={
+                <RequireAuth>
+                  <PlaceholderAppPage
+                    title="Todos"
+                    description="Task lists, priorities, and due dates will live here — same navigation and visual system as the rest of Tyler James OS."
+                  />
+                </RequireAuth>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          <ThemeHelperFab />
+        </PaletteProvider>
+      </SessionProvider>
     </BrowserRouter>
   )
 }
