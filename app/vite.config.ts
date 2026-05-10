@@ -9,6 +9,10 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    host: true,
+    allowedHosts: ['tylerbatchelor.local', 'localhost'],
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,

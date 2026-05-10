@@ -6,3 +6,8 @@ app/dist/
 .env
 .env.local
 .vercel
+.caddy.pid
+
+# OAuth client secrets downloaded from Google Cloud Console.
+# Store outside the repo (e.g. ~/Desktop) and copy values into supabase/.env.
+client_secret*.json

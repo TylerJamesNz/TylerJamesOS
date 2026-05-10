@@ -84,38 +84,46 @@ Standard daily-dev setup. Vite hot-reloads on your machine; Supabase runs in Doc
 
 **One-time setup:**
 
-1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) and the [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started).
-2. From the repo root, start the local stack:
+1. Install the prerequisites (all via Homebrew):
 
    ```bash
-   supabase start
+   brew install --cask docker
+   brew install supabase/tap/supabase
+   brew install caddy
    ```
 
-   First run pulls about ten Docker images and applies every file in `supabase/migrations/` automatically.
+   Open Docker Desktop once so the daemon is running.
 
-3. Confirm `app/.env.local` points at the local stack (the LOCAL block uncommented). It is preconfigured this way out of the box.
+2. From the repo root, start everything via the bootstrap script:
+
+   ```bash
+   ./bin/start-local.sh
+   ```
+
+   First run is interactive: it prompts for sudo to add `127.0.0.1 tylerbatchelor.local` to `/etc/hosts`, prompts for sudo again to trust Caddy's local CA in the System keychain, then pulls ~10 Docker images for Supabase. Subsequent runs are fast and silent on those steps.
+
+3. After Supabase prints its status, copy `app/.env.example` to `app/.env.local` and replace `<publishable key from `supabase status`>` with the publishable key from that output. The LOCAL block at the top is active by default; the CLOUD block stays commented out.
 
 **Daily loop:**
 
 ```bash
-supabase start          # if not already running
-cd app && npm run dev   # http://localhost:5173
+./bin/start-local.sh    # brings up Supabase + Caddy + Vite, foreground
 ```
 
 | Service | URL |
 |---|---|
-| API | `http://127.0.0.1:54321` |
-| **Studio (DB browser)** | `http://127.0.0.1:54323` |
+| App + API (Caddy fronts both) | `https://tylerbatchelor.local:4443` (API at `/api/*`) |
+| Supabase Studio (DB browser) | `http://127.0.0.1:54323` |
 | Postgres | `postgresql://postgres:postgres@127.0.0.1:54322/postgres` |
-| Inbucket (catches outbound mail) | `http://127.0.0.1:54324` |
+| Mailpit (catches outbound mail) | `http://127.0.0.1:54324` |
 
-Stop the local stack with `supabase stop`. Add `--no-backup` to drop local data.
+Stop everything with `./bin/stop-local.sh` (Vite is already gone after Ctrl+C in its own terminal).
 
 ### Google sign-in locally (optional)
 
-Local Supabase Auth needs the Google OAuth client to know about its callback. One-time setup:
+Local Supabase Auth needs the Google OAuth client to know about its callback:
 
-1. Add `http://127.0.0.1:54321/auth/v1/callback` to the **Authorised Redirect URIs** of the existing `Tyler James OS` OAuth client in Google Cloud Console.
+1. In the existing `Tyler James OS` OAuth client in Google Cloud Console, add `http://localhost:54321/auth/v1/callback` to **Authorised Redirect URIs**. (The `.local` hostname can't go here, Google rejects non-public TLDs, but local Supabase advertises `localhost` as its callback host regardless of the URL the app is served on, so the localhost entry covers every dev machine.)
 2. Copy `supabase/.env.example` to `supabase/.env` and fill in the Client ID and Client Secret from that same OAuth client.
 3. Restart so GoTrue picks up the new env vars:
 
@@ -125,7 +133,7 @@ Local Supabase Auth needs the Google OAuth client to know about its callback. On
 
 ### Toggling between local and cloud Supabase
 
-`app/.env.local` ships with two blocks; comment one, uncomment the other, restart `npm run dev`. CI and Vercel deploys are unaffected because they read GitHub Actions secrets, not this file.
+`app/.env.local` carries two blocks (LOCAL active by default, CLOUD commented out). Comment one, uncomment the other, restart `npm run dev`. CI and Vercel deploys are unaffected because they read GitHub Actions secrets, not this file.
 
 ### Deploy pipeline
 
@@ -138,24 +146,12 @@ Push to `main` triggers `.github/workflows/deploy.yml`, which runs in this order
 
 If a backend step fails, the frontend never ships against a stale schema.
 
-## Git Workflow
+## Branch strategy
 
-Rules for working with this repo (enforced via `.cursor/rules/`):
+Day-to-day work lives on `dev`. `main` is the deploy line and only moves when something is shipped.
 
-**Commits**
-- Commit after each coherent set of changes (feature, fix, or restore) with a clear message.
-- Split unrelated changes into separate commits — don't bundle everything into one.
+- Commit and push freely on `dev`. `git push` does not trigger a deploy.
+- To ship, open a draft PR from `dev` to `main` (Claude opens one autonomously the first time `dev` is ahead). The PR body is the deployment runbook. When ready, `gh pr ready <pr> && gh pr merge --squash <pr>` and the deploy fires.
+- Force-push to `main` is never allowed. Force-with-lease on `dev` is fine if you've rebased.
 
-**Pushing**
-- Never push unless explicitly asked to push, publish, or deploy.
-- Local commits are enough until a push is requested.
-- No force-pushing unless explicitly asked.
-
-**Branching**
-- Work on the branch specified. Don't open PRs or push new branches unless asked.
-
-**After pushing to `main`**
-- Use `gh` (GitHub CLI) to watch the deploy workflow and report progress.
-- Report success or failure with a summary and next steps.
-
-Full rules live in [`CLAUDE.md`](CLAUDE.md) (project-level) and `~/.claude/CLAUDE.md` (global — applies to all projects).
+Full rules live in [`CLAUDE.md`](CLAUDE.md) (project-level) and `~/.claude/CLAUDE.md` (global, applies to all projects).
