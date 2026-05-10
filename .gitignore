@@ -11,3 +11,7 @@ app/dist/
 # OAuth client secrets downloaded from Google Cloud Console.
 # Store outside the repo (e.g. ~/Desktop) and copy values into supabase/.env.
 client_secret*.json
+
+# Real bank statement samples dropped at the project root for ad-hoc work.
+# Anonymised fixtures used by parsers live under app/src/lib/finance/import/parsers/__fixtures__/.
+/*.pdf

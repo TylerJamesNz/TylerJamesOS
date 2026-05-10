@@ -1,301 +1,230 @@
-# Finance App
+# Finance App V1 PRD
 
-## Goal
+## Problem
 
-Replace manual financial tracking with an automatic, intelligent system. Import transactions from ANZ (Australia and New Zealand accounts), automatically categorise them, and surface meaningful insights — without Tyler having to manually enter anything.
+Tyler's money lives in five accounts across two countries (ANZ NZ, ANZ AU primary, ANZ AU savings, KiwiSaver, Australian Super). Each provider has its own login, its own statement format, its own UI. There is no single place to see what Tyler is worth this week, what changed this month, or how income lined up against outgoings, especially once flatmate reimbursements muddy the picture. The bank apps optimise for transactions; nothing he uses optimises for understanding.
 
----
+## Users
 
-## ANZ Data Import
+One. Tyler. Single-tenant by construction. RLS on every row. No collaboration, no sharing, no roles.
 
-### The challenge
-ANZ does not have a public developer API. Options for getting data into the system:
+## Success criteria
 
-**Option A: CSV / OFX export (V1 — recommended starting point)**
-- ANZ lets you export transactions as CSV or OFX from internet banking
-- Build an import page where Tyler uploads the file
-- Parse it server-side, deduplicate against existing transactions, and store
-- Simple, reliable, no ongoing auth headaches
-- Downside: manual step required periodically
+- One URL (`/finance`) shows Net Worth, Liquid balance over time, Investments over time, this month's income vs expense, and category breakdown for the displayed range, in AUD, within 2 seconds of load.
+- Importing a statement is a drag onto the page, then a confirm click. Zero typing for known accounts; no manual transaction entry for any text-extractable PDF.
+- Flatmate reimbursements cancel the corresponding Rent outgoing automatically; the dashboard shows Net Cost by default, raw available on hover.
+- Zero ongoing per-import API cost. The whole pipeline runs free.
+- `/finance` installs as its own iOS PWA icon, distinct from `/todos`.
 
-**Option B: Screen scraping / unofficial API**
-- Tools like Basiq (AU) or Akahu (NZ) act as open banking middleware
-- Akahu is specifically built for NZ and has ANZ support — worth investigating
-- Would enable automatic/scheduled imports
-- Has a cost (Akahu is free for personal use, worth confirming)
-- ✅ **Akahu is the recommended long-term path for NZ accounts**
+## Non-goals (V1)
 
-**Option C: Email parsing**
-- ANZ sends transaction notification emails
-- Could parse these to capture transactions in near-real-time
-- Fragile and incomplete (not all transactions trigger emails)
-- Last resort only
-
-### Recommended approach
-1. **V1:** CSV import with a clean upload UI
-2. **V2:** Integrate Akahu for automatic NZ account sync
-3. **V3 (if needed):** Investigate Australian ANZ options (Basiq or similar)
-
-### Deduplication
-Each transaction gets an `external_id` derived from the bank's reference. On import, skip any transaction where `external_id` already exists for that account.
+- No live bank API (Akahu, Plaid, Basiq). File import only.
+- No paid AI in the import or categorisation path. Claude is not in the loop.
+- No collaboration, sharing, or multi-user features.
+- No mobile-native app. iOS PWA only.
+- No bills/budgets/goals. Just "see what's there."
+- No CSV import. PDF only (statements are what providers actually send).
+- No tax export, accounting export, or third-party sync.
 
 ---
 
-## Tags
+## Architecture
 
-Tags are freeform labels applied to one or many transactions. Unlike categories (which are structured, one per transaction, used for insights and charts), tags are for personal context — grouping transactions that belong together even if they span multiple categories.
+`/finance` is a Vite + React 19 SPA inside Tyler James OS. Data layer is Supabase (Postgres + Storage + Auth + Edge Functions). All architectural terms canonical in `/CONTEXT.md`.
 
-Examples:
-- `"Bali 2025"` — tag all flights, hotels, restaurants, and activities from one trip
-- `"groceries"` — tag supermarket runs separately from the Groceries category if needed
-- `"bills"` — cross-cutting tag for anything that's a fixed obligation
-- `"work expense"` — anything you might claim back
+Routes:
+- `/finance` (single dashboard page)
+- `/finance/transactions` (searchable, filterable table)
+- `/finance/accounts` (per-account detail and statement upload)
 
-Tags can be applied manually on any transaction, or automatically via a CategoryRule (so every Air NZ transaction automatically gets tagged `"travel"`).
+`/finance/insights` does not exist (collapsed into `/finance`).
 
 ---
 
-## Interpretation Engine
+## Domain model
 
-### The goal
-Upload a CSV once and never manually categorise a known merchant again. The system should only ask Tyler about things it genuinely hasn't seen before. Claude is a fallback, not the primary engine — the rule library does the heavy lifting.
+The canonical glossary lives in `/CONTEXT.md`. In summary:
 
-### Seeded rule library (ships with the app)
+- **Deposit Account.** Bank account with transaction-level data (ANZ NZ, ANZ AU primary, ANZ AU savings).
+- **Investment Account.** Fund-managed account with balance-level data (KiwiSaver, Australian Super).
+- **Balance Snapshot.** Recorded balance for an Account on a date, sourced from a statement. Source of truth for any "balance over time" chart.
+- **Liquid.** UI metric label. Total of latest Balance Snapshots across all Deposit Accounts, optionally adjusted for transactions since.
+- **Net Worth.** Sum of latest Balance Snapshots across all Accounts.
+- **Home Currency.** AUD. Native amounts stored on every row; conversion happens at read time using the row-date FX rate.
+- **Transaction Link.** Relationship that nets a reimbursement against its parent outgoing.
+- **Net Cost.** Outgoing amount minus linked reimbursements. Default chart display.
+- **Categorical Slot.** Palette-derived colour position 0..9 used by every categorical chart series.
 
-The app seeds a comprehensive set of `is_system = true` rules on first run, covering the merchants that appear in virtually every NZ and AU bank account. Claude is only called for transactions that make it past this entire list.
+---
 
-**New Zealand — Groceries**
-- COUNTDOWN, PAK N SAVE, PAKNSAVE, NEW WORLD, FOUR SQUARE, FRESH CHOICE, SUPER VALUE, MOORE WILSONS, FARRO
+## Statement import
 
-**New Zealand — Dining & Takeaway**
-- MCDONALD, MCDONALDS, KFC, BURGER KING, SUBWAY, DOMINOS, PIZZA HUT, HELL PIZZA, GUZMAN, FATIMA, CARL'S JR
+Statements are PDF, sourced from each provider's online portal. The pipeline is **fully free** by design (ADR 0002).
 
-**New Zealand — Fuel & Transport**
-- Z ENERGY, BP, MOBIL, CALTEX, GULL, ALLIED, NZ BUS, AT HOP, METLINK, SNAPPER, UBER, OLA, ZOOMY
+### Strategy chain
 
-**New Zealand — Utilities**
-- MERCURY, GENESIS, CONTACT ENERGY, MERIDIAN, TRUSTPOWER, VECTOR, WATERCARE, CHORUS, SPARK, VODAFONE, ONE NZ, 2DEGREES, SKINNY
+Each uploaded file walks the chain top to bottom. First strategy that succeeds wins; failure or zero-rows falls through.
 
-**New Zealand — Government & Tax**
-- INLAND REVENUE, IRD, ACC, KIWISAVER, WINZ, MSD
+1. **Text extract + format-specific parser.** `pdfjs-dist` extracts text; a per-format parser (initially ANZ NZ, then ANZ AU) reads it deterministically. Free, instant, offline.
+2. **Text extract + generic table parser.** Same extraction, but a heuristic parser infers rows from date-token + currency-token co-location. Catches text PDFs from unknown providers.
+3. **Tesseract.js OCR + generic table parser.** Browser-side OCR (free, no API key) for scanned PDFs. Slower (5 to 30s per page) but $0.
+4. **Manual review queue.** Always available. The human escape hatch.
 
-**New Zealand — Health**
-- UNICHEM, LIFE PHARMACY, CHEMIST WAREHOUSE NZ, GREEN CROSS, ACCIDENT COMPENSATION
+Format detection sniffs the first page for known headers ("ANZ Bank New Zealand", "AustralianSuper", etc.) and picks the strategy. On miss, falls to the generic strategies.
 
-**New Zealand — Finance & Banking**
-- ANZ FEES, ANZ VISA, ANZ HOME LOAN, ANZ BANK FEE, KIWIBANK, BNZ, WESTPAC, ASB
+### What an import produces
 
-**Australia — Groceries**
-- WOOLWORTHS, COLES, ALDI, IGA, HARRIS FARM, COSTCO
+For each accepted statement:
+- One **Statement** row with `parser_strategy`, `parser_version`, `period_start`, `period_end`, `storage_path`, `opening_balance`, `closing_balance`.
+- **Two Balance Snapshots** seeded automatically, opening at `period_start`, closing at `period_end`.
+- N **Transaction** rows for each line item.
 
-**Australia — Fuel & Transport**
-- 7-ELEVEN, AMPOL, VIVA ENERGY, PUMA ENERGY, CALTEX AU, OPAL, MYKI, TRANSLINK, UBER AU
+Re-uploading the same statement (same `account_id`, same period) replaces the previous Statement row and its Transactions. Idempotent.
 
-**Australia — Utilities**
-- ORIGIN ENERGY, AGL, ENERGY AUSTRALIA, SYDNEY WATER, MELBOURNE WATER, TELSTRA, OPTUS, TPG, AUSSIE BROADBAND
+### Source file storage
 
-**Australia — Government & Tax**
-- AUSTRALIAN TAXATION, ATO, MEDICARE, CENTRELINK, SERVICES AUSTRALIA
-
-**Australia — Health**
-- PRICELINE, TERRY WHITE, CHEMIST WAREHOUSE AU, AMCAL, NATIONAL PHARMACIES
-
-**Global — Subscriptions & Software**
-- NETFLIX, SPOTIFY, APPLE.COM, APPLE ITUNES, GOOGLE, YOUTUBE, AMAZON PRIME, DISNEY PLUS, NEON, SKY TV, MICROSOFT, ADOBE, DROPBOX, NOTION, XERO, MYOB, FIGMA, GITHUB, OPENAI, ANTHROPIC, CHATGPT, CANVA, SLACK, ZOOM
-
-**Global — Travel**
-- AIR NZ, AIR NEW ZEALAND, JETSTAR, QANTAS, VIRGIN AUSTRALIA, EMIRATES, SINGAPORE AIR, AIRBNB, BOOKING.COM, EXPEDIA, HOTELS.COM, WOTIF
-
-**Global — Dining chains**
-- STARBUCKS, MCCAFE, GLORIA JEANS, THE COFFEE CLUB, ROBERT HARRIS
-
-**Income patterns**
-- SALARY, WAGES, PAYROLL, DIRECT CREDIT (employer name), FREELANCE, INVOICE
-
-**Transfers (exclude from insights)**
-- TRANSFER TO, TRANSFER FROM, OWN ACCOUNT, SAVINGS TRANSFER
-
-### How it works — three-pass pipeline
-
-Every transaction runs through three passes in order. The first pass that succeeds wins.
-
-**Pass 1: Rule engine**
-
-Before touching AI, check every transaction against the `CategoryRule` table. Rules are ordered by `priority` (higher first), then by `created_at` (newer first as a tiebreaker).
+Every uploaded PDF lives in Supabase Storage at:
 
 ```
-For each transaction:
-  → Run description against each rule in priority order
-  → If a rule matches: assign category + any auto-tags, mark source = RULE
-  → Move to next transaction
+bank-statements/{userId}/{accountId}/{YYYY-MM}.pdf
 ```
 
-Rules are cheap (a simple string match), fast, and deterministic. A transaction matched by a rule never touches the AI.
+`YYYY-MM` is the **period_end** month. Bucket is private. RLS keys off `auth.uid()`. Files kept forever; manual delete only.
 
-**Pass 2: Claude categorisation**
+### First-time-seen accounts
 
-Any transaction that didn't match a rule goes to Claude in a single batched prompt (not one API call per transaction — send the whole unmatched batch at once to keep costs low).
-
-Claude receives:
-- The list of unmatched transactions (description, amount, type)
-- The full list of available categories
-- The full list of available tags
-- A few examples of previously confirmed categorisations (for context)
-- Today's date
-
-Claude returns a structured array:
-```json
-[
-  {
-    "external_id": "txn_abc123",
-    "category": "Groceries",
-    "tags": ["groceries"],
-    "confidence": "high",
-    "reasoning": "Description 'COUNTDOWN METRO AUCKLAND' matches a major NZ supermarket chain",
-    "suggest_rule": "COUNTDOWN"
-  },
-  {
-    "external_id": "txn_def456",
-    "category": "Travel",
-    "tags": ["travel"],
-    "confidence": "medium",
-    "reasoning": "Description 'AIR NZ' suggests a flight but could be a refund",
-    "suggest_rule": "AIR NZ"
-  }
-]
-```
-
-Note `suggest_rule` — Claude proactively recommends rules to create for merchants it recognises with high confidence. This is how the rule engine grows over time.
-
-**Pass 3: Review queue**
-
-Any transaction Claude returns with `confidence: low`, or any that errored, lands in the review queue for manual action.
+If the parser sniffs an account number not present in the `accounts` table, the import flow pauses with a modal pre-filled with sniffed details (institution, currency, account_type guess) and resumes after Tyler confirms or edits.
 
 ---
 
-### After import — the confirmation step
+## Categorisation
 
-Once the pipeline runs, Tyler sees a summary screen before anything is committed to the database:
+Two passes, both free:
 
-```
-Import summary — 47 transactions
+1. **Rule engine.** `category_rules` ordered by priority, then created_at. First match wins. Rules ship seeded (`is_system = true`, see seed list below). Tyler can disable system rules without deleting them. Manual confirmations of unmatched transactions can grow the rule library on save.
+2. **Manual review queue.** Anything the rule engine misses lands here for one-click categorisation.
 
-✅ 31 matched by rules (auto-confirmed, no action needed)
-🤖 12 categorised by AI — review suggested
-⚠️  4 need manual categorisation
+`category_rules.created_from` is `SYSTEM | USER`. The previous `AI_SUGGESTION` value is removed (V1 has no AI).
 
-[Confirm all AI suggestions]  [Review individually]  [Cancel import]
-```
+### Seed rule library
 
-The "review individually" flow shows each AI-categorised transaction with Claude's reasoning and a one-click confirm or reassign. Fast to get through — most will be right.
+Lifted from previous work on this app. Seeded on first run. Tyler can disable any.
 
----
+**NZ groceries:** COUNTDOWN, PAK N SAVE, PAKNSAVE, NEW WORLD, FOUR SQUARE, FRESH CHOICE, SUPER VALUE, MOORE WILSONS, FARRO.
+**NZ dining:** MCDONALD, MCDONALDS, KFC, BURGER KING, SUBWAY, DOMINOS, PIZZA HUT, HELL PIZZA, GUZMAN, CARL'S JR.
+**NZ fuel/transport:** Z ENERGY, BP, MOBIL, CALTEX, GULL, ALLIED, NZ BUS, AT HOP, METLINK, SNAPPER, UBER, OLA, ZOOMY.
+**NZ utilities:** MERCURY, GENESIS, CONTACT ENERGY, MERIDIAN, TRUSTPOWER, VECTOR, WATERCARE, CHORUS, SPARK, VODAFONE, ONE NZ, 2DEGREES, SKINNY.
+**NZ government:** INLAND REVENUE, IRD, ACC, KIWISAVER, WINZ, MSD.
+**NZ health:** UNICHEM, LIFE PHARMACY, CHEMIST WAREHOUSE NZ, GREEN CROSS.
+**NZ banking:** ANZ FEES, ANZ VISA, ANZ HOME LOAN, ANZ BANK FEE, KIWIBANK, BNZ, WESTPAC, ASB.
+**AU groceries:** WOOLWORTHS, COLES, ALDI, IGA, HARRIS FARM, COSTCO.
+**AU fuel/transport:** 7-ELEVEN, AMPOL, VIVA ENERGY, PUMA ENERGY, CALTEX AU, OPAL, MYKI, TRANSLINK, UBER AU.
+**AU utilities:** ORIGIN ENERGY, AGL, ENERGY AUSTRALIA, SYDNEY WATER, MELBOURNE WATER, TELSTRA, OPTUS, TPG, AUSSIE BROADBAND.
+**AU government:** AUSTRALIAN TAXATION, ATO, MEDICARE, CENTRELINK, SERVICES AUSTRALIA.
+**AU health:** PRICELINE, TERRY WHITE, CHEMIST WAREHOUSE AU, AMCAL, NATIONAL PHARMACIES.
+**Global subs:** NETFLIX, SPOTIFY, APPLE.COM, GOOGLE, YOUTUBE, AMAZON PRIME, DISNEY PLUS, NEON, SKY TV, MICROSOFT, ADOBE, DROPBOX, NOTION, XERO, MYOB, FIGMA, GITHUB, OPENAI, ANTHROPIC, CHATGPT, CANVA, SLACK, ZOOM.
+**Global travel:** AIR NZ, AIR NEW ZEALAND, JETSTAR, QANTAS, VIRGIN AUSTRALIA, EMIRATES, SINGAPORE AIR, AIRBNB, BOOKING.COM, EXPEDIA, HOTELS.COM, WOTIF.
+**Income:** SALARY, WAGES, PAYROLL, FREELANCE, INVOICE.
+**Transfers (excluded from insights):** TRANSFER TO, TRANSFER FROM, OWN ACCOUNT, SAVINGS TRANSFER.
 
-### Rule creation flow
+### System categories
 
-After confirming an AI categorisation, Tyler is offered the option to save a rule:
+Seeded on first run alongside rules.
 
-> "COUNTDOWN METRO AUCKLAND → Groceries. Save as rule for future imports?"
-> Rule pattern: `COUNTDOWN` (pre-filled, editable) → [Save rule] [Skip]
-
-Saved rules go into `CategoryRule` with `created_from = AI_SUGGESTION`. Next import, those transactions are handled instantly in Pass 1 with no AI cost.
-
-Over time, the rule engine handles more and more of each import. The AI is only needed for genuinely new merchants.
-
----
-
-### Cost management
-
-Sending 100 transactions to Claude in a single batched prompt costs a few cents at most. The bigger risk is API latency — batching keeps this to one round trip regardless of import size. For large imports (500+ transactions), split into batches of ~100.
-
-Rule coverage metric: worth tracking what percentage of each import is handled by rules vs AI. As this number grows, imports get faster and cheaper.
-
----
-
-## Categories (system defaults)
-
-These are created on first run. Tyler can add, rename, or merge them.
-
-**Expenses:**
-- Housing (rent, rates, insurance)
-- Groceries
-- Dining & Takeaway
-- Transport (fuel, parking, public transport)
-- Subscriptions & Software
-- Health & Medical
-- Entertainment & Hobbies
-- Clothing & Personal Care
-- Travel
-- Utilities (power, water, internet, phone)
-- Savings & Investments
-- Transfers (between own accounts — exclude from insights)
-- Other / Uncategorised
-
-**Income:**
-- Salary / Wages
-- Freelance / Contract
-- Transfers In
-- Other Income
+**Expenses:** Housing, Groceries, Dining & Takeaway, Transport, Subscriptions & Software, Health & Medical, Entertainment & Hobbies, Clothing & Personal Care, Travel, Utilities, Savings & Investments, Transfers, Other.
+**Income:** Salary / Wages, Freelance / Contract, Transfers In, Other Income.
 
 ---
 
-## Insights
+## Reimbursements (Transaction Links)
 
-Things the finance tab should surface:
+Tyler pays full rent each month; flatmates send back roughly two thirds across one or two payments in the days that follow. The default dashboard view should read as a single net expense, not as a spike up and a spike down.
 
-**Monthly summary**
-- Total income vs total expenses
-- Net savings for the month
-- Comparison to previous month
+The mechanism is `transaction_links`. Each reimbursement points to its parent outgoing. Charts and totals display **Net Cost** by default; raw figures available on hover or via a "show raw" toggle.
 
-**Spending by category**
-- Breakdown chart of where money went
-- Biggest categories vs last month
+### Auto-link rule
 
-**Recurring transactions**
-- Automatically detected subscriptions and regular payments
-- Total monthly committed spend
+On import completion, an incoming transaction automatically links to a parent outgoing if all hold:
 
-**Trends over time**
-- 6 and 12-month views of income, spending, savings rate
+- Description matches one of `user_settings.flatmate_names` (case-insensitive substring).
+- Lands within seven days after an outgoing categorised as Housing.
+- The outgoing is not already fully linked (sum of children does not exceed parent absolute amount).
 
-**Alerts (future)**
-- Unusual spending in a category
-- Large single transactions
+Unmatched candidates land in the review queue for one-click manual linking.
 
 ---
 
-## UI overview
+## Multi-currency
 
-```
-/finance
-├── Overview card — this month's income, expenses, net
-├── Recent transactions (last 10, with category badges)
-└── Quick link to review queue if items need attention
+Home Currency is AUD. Every Transaction and Balance Snapshot stores amount in the account's native currency, never converted at write time. The `fx_rates` table holds one row per (date, base, quote) pair; an Edge Function (`fx-daily`) seeds NZD↔AUD daily from frankfurter.app (free, keyless). Conversion happens at read time using the rate for the row's date, so historical charts do not drift retroactively when rates move. Missing-day fallback uses the nearest previous rate.
 
-/finance/transactions
-├── Search + filter (date range, category, account)
-├── Sortable table of all transactions
-└── Click any row to edit category / add note
+Tyler can flip Home Currency in settings without re-importing anything.
 
-/finance/insights
-├── Monthly summary
-├── Category breakdown (pie/bar chart)
-├── Trend over time (line chart)
-└── Recurring transactions list
+---
 
-/finance/accounts
-└── Connected accounts, import history, manual import button
-```
+## Dashboard
+
+`/finance` is a single page with a global time range scrubber at the top. All "over time" charts subscribe to the scrubber; pie charts treat the scrubber's end-date as their as-of point.
+
+### Composition (top to bottom)
+
+1. **Time navigator.** ECharts `dataZoom` slider. Default range: last 12 months. Scrubbing only re-renders; data is pre-loaded into the client store on mount.
+2. **Net Worth pie** (top-left) + **Liquid line** (top-right). Pie breaks the latest snapshot at the scrubber's end-date down by Account. Line is the running total of Deposit Account balances over the scrubber range.
+3. **Investments line.** Per-fund line (KiwiSaver, AustralianSuper) plus a thicker "total" line that is the sum of fund balances over time.
+4. **Monthly snapshot.** Income vs expense for the trailing month within the scrubber range. Burn-down style, incoming and outgoing on a shared time axis so the gap reads as "saved this month." Net Cost applies, so flatmate reimbursements do not appear as income spikes.
+5. **Category pie.** Breakdown of expenses for the displayed range, by Category, slot-coloured.
+6. **Transactions table preview.** Last N transactions in the range, with a "view all" link to `/finance/transactions`.
+
+### Charting
+
+Apache ECharts is the project's default charting library (ADR-not-needed; locked in this V1). React 19 compat: charts use `echarts` core directly via a `useRef` + `useEffect` wrapper component (`app/src/components/Chart.tsx`). `echarts-for-react` is **not used** (lags React 19).
+
+Categorical colours come from a 10-slot ramp `--chart-cat-0` through `--chart-cat-9` defined per palette in `app/src/themes/palettes.ts` (ADR 0003). Categories and Accounts hold a `colour_slot: int`, not a hex. Switching the active palette via the theme helper retints every chart in lockstep with the rest of the UI.
+
+The live brand kit at `/brand-kit` includes a Chart slots swatch row and a demo of pie + line + bar primitives so the colour system can be refined visually.
+
+---
+
+## Upload UX
+
+Three coordinated entry points, all leading to the same import drawer:
+
+1. **Drag anywhere on `/finance`.** Dragging a PDF over the page surfaces a full-screen drop overlay; releasing kicks off the strategy chain.
+2. **"Import" button in the page header.** Click-discoverable canonical entry.
+3. **"Upload statement" button per account on `/finance/accounts`.** Pre-selects the account in the import flow.
+
+The import drawer:
+- Shows the parser strategy picked (and lets Tyler force a different one).
+- For first-time-seen accounts, surfaces the prompt-then-continue modal pre-filled from sniffed header data.
+- Renders the parsed transactions for confirmation before committing.
+- Surfaces rule-engine matches inline so Tyler can see what was auto-categorised.
+
+---
+
+## PWA
+
+Per-app manifests (ADR 0001). `/finance` and `/todos` install as separate iOS home-screen icons with their own name, theme colour, and start URL. Single service worker at the origin root. The TJOS hub at `/` is not installable.
+
+---
+
+## Data tables (summary)
+
+Detailed schema in `_project/data-model.md`. Shape:
+
+- `accounts`, Deposit and Investment Accounts. `account_type` enum. `colour_slot: int`. `institution`, `external_account_number` for sniffing on import. `opening_balance` for one-time seed.
+- `transactions`, line items. `statement_id` (nullable). Stores native currency.
+- `statements`, parsed source file metadata. Idempotent on `(account_id, period_start, period_end)`.
+- `balance_snapshots`, per-Account-per-date balance. Auto-seeded from each statement's opening/closing.
+- `transaction_links`, reimbursement relationships. `link_type = NETS_AGAINST`.
+- `categories`, `category_rules`, `tags`, `transaction_tags`, categorisation surface.
+- `fx_rates`, daily FX. NZD↔AUD seeded by `fx-daily` Edge Function.
+- `user_settings`, `home_currency`, `flatmate_names: text[]`.
 
 ---
 
 ## Open questions
 
-- [ ] Confirm Akahu supports ANZ NZ — check akahu.nz
-- [ ] What Australian bank accounts need to be covered?
-- [ ] How frequently should auto-import run if using Akahu?
-- [ ] Should transfers between own accounts be hidden from insights by default?
-- [ ] Currency — transactions in NZD and AUD? Need multi-currency support?
-- [ ] Should tag filtering be available in the transactions view? (e.g. show all transactions tagged "Bali 2025")
-- [ ] Should there be a "trip summary" view — filter by tag and show total spend for that tag across all categories?
+- Term deposit accounts (none today; would they be Deposit or Investment?). Defer until one shows up.
+- Currency-denominated tags ("Bali 2025 spend in IDR"). Out of V1.
+- Recurring transaction detection. Out of V1.
+- Counterparty entity (instead of `flatmate_names: text[]`). Promote when a second use case appears.

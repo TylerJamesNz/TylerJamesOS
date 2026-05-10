@@ -2,22 +2,22 @@
 
 ## Status: To be defined
 
-This file will evolve into the single source of truth for all visual decisions. The brand kit also exists as a **live web page** within the app itself — a rendered reference that shows colours, typography, spacing, and components in context.
+This file will evolve into the single source of truth for all visual decisions. The brand kit also exists as a **live web page** within the app itself, a rendered reference that shows colours, typography, spacing, and components in context.
 
 ---
 
 ## Theme palettes (colour source of truth)
 
-- **File:** `app/src/themes/palettes.ts` — named presets: **Custom**, `origin_teal`, `hue_shift_30`, four `wildcard_*` themes, then eight `product_*` vibe ramps (unofficial, not affiliated with named products). Each preset is a flat map of CSS custom property names → values (including `--accent-rgb`, shadows, and demo tag accent).
+- **File:** `app/src/themes/palettes.ts`, named presets: **Custom**, `origin_teal`, `hue_shift_30`, four `wildcard_*` themes, then eight `product_*` vibe ramps (unofficial, not affiliated with named products). Each preset is a flat map of CSS custom property names → values (including `--accent-rgb`, shadows, and demo tag accent).
 - **Runtime:** `applyPalette()` in `app/src/lib/applyPalette.ts` writes those keys to `document.documentElement`. New apps should import the same module (or a shared package later) so styling stays aligned.
 - **UI:** The React brand kit includes a floating **theme helper** to switch presets without a backend; the choice is cached in `localStorage` under `tjos-theme-palette-id`.
-- **Custom:** The **Custom** row opens a slide-out from that panel. Two seeds (primary + secondary) are stored in `localStorage` under `tjos-custom-palette-seeds`; `deriveCustomPalette()` in `app/src/lib/deriveCustomPalette.ts` builds the rest of the token map and **nudges colours for contrast** (body text on page bg, sidebar labels on sidebar bg, white on accent buttons) so loud primaries stay legible without changing the fixed presets. Re-saving overwrites the same slot (no duplicate presets). At runtime, `mergeSidebarPresentation()` in `applyPalette.ts` adds `--color-sidebar-bg-gradient` by ramping the solid sidebar base (primary family) toward slate — not the accent; custom themes also emit `--color-sidebar-label` for sidebar section subheads (harmony hue). **Dark mode** (Custom slide-out switch only) applies when the active theme is **Custom**: inverted seeds drive the sidebar shell and accent family; `deriveCustomPalette(..., { appearance: 'dark', pageTintHueFrom: light primary })` tints **page/surface/borders** with the user’s original primary hue so the content area does not jump to the RGB-complement hue. **`--color-accent`** stays the dark CTA fill (white label contrast); **`--color-accent-on-surface`** is a lighter same-hue accent for links and display type on `--color-bg` (`applyPalette` defaults it to `--color-accent` for presets). **`tjos-dark-mode`** in `localStorage`. **Preset themes always use their light ramp** — the stored dark flag has no effect until the user picks Custom again.
+- **Custom:** The **Custom** row opens a slide-out from that panel. Two seeds (primary + secondary) are stored in `localStorage` under `tjos-custom-palette-seeds`; `deriveCustomPalette()` in `app/src/lib/deriveCustomPalette.ts` builds the rest of the token map and **nudges colours for contrast** (body text on page bg, sidebar labels on sidebar bg, white on accent buttons) so loud primaries stay legible without changing the fixed presets. Re-saving overwrites the same slot (no duplicate presets). At runtime, `mergeSidebarPresentation()` in `applyPalette.ts` adds `--color-sidebar-bg-gradient` by ramping the solid sidebar base (primary family) toward slate, not the accent; custom themes also emit `--color-sidebar-label` for sidebar section subheads (harmony hue). **Dark mode** (Custom slide-out switch only) applies when the active theme is **Custom**: inverted seeds drive the sidebar shell and accent family; `deriveCustomPalette(..., { appearance: 'dark', pageTintHueFrom: light primary })` tints **page/surface/borders** with the user’s original primary hue so the content area does not jump to the RGB-complement hue. **`--color-accent`** stays the dark CTA fill (white label contrast); **`--color-accent-on-surface`** is a lighter same-hue accent for links and display type on `--color-bg` (`applyPalette` defaults it to `--color-accent` for presets). **`tjos-dark-mode`** in `localStorage`. **Preset themes always use their light ramp**, the stored dark flag has no effect until the user picks Custom again.
 
 ## Purpose of the brand kit page
 
 The brand kit lives at `/brand` (or similar) within Tyler James OS. It serves as:
 - A visual reference when building new components
-- A test bed — if a new component looks right on this page, it belongs in the system
+- A test bed, if a new component looks right on this page, it belongs in the system
 - Documentation for "why does this look like this"
 
 ---
@@ -27,7 +27,7 @@ The brand kit lives at `/brand` (or similar) within Tyler James OS. It serves as
 > To be defined. Some questions to answer:
 > - Light mode, dark mode, or both?
 > - What's the primary accent colour?
-> - What's the vibe — minimal/clean, rich/dark, warm/neutral?
+> - What's the vibe, minimal/clean, rich/dark, warm/neutral?
 
 | Token | Value | Usage |
 |---|---|---|
@@ -54,9 +54,9 @@ The brand kit lives at `/brand` (or similar) within Tyler James OS. It serves as
 | Caption / Label | TBD | TBD | TBD |
 | Monospace (code) | TBD | TBD | TBD |
 
-**Lists — accent carets:** Reference specimen on the live brand kit (**Typography → Lists**, `#typography-lists`) under that group label — “Before you ship”. Section title, one short muted line, then supporting lines with accent **›** markers and muted body copy. For prose checklists and “what’s included” blocks, not dense data tables.
+**Lists, accent carets:** Reference specimen on the live brand kit (**Typography → Lists**, `#typography-lists`) under that group label, “Before you ship”. Section title, one short muted line, then supporting lines with accent **›** markers and muted body copy. For prose checklists and “what’s included” blocks, not dense data tables.
 
-**Font loading strategy:** Google Fonts or self-hosted via `next/font` (preferred — no external requests, no layout shift).
+**Font loading strategy:** Google Fonts or self-hosted via `next/font` (preferred, no external requests, no layout shift).
 
 ---
 
@@ -95,15 +95,37 @@ Based on a 4px base unit. All spacing should be multiples of 4.
 - **Buttons:** Primary, secondary, ghost, destructive variants
 - **Cards:** Consistent padding, border, shadow treatment
 - **Forms:** Label position, input height, focus ring style
-- **Navigation:** Sidebar vs. top nav — TBD
-- **Pop-out dock:** Floating control opens a horizontal dock — slide sheet (left) + anchor panel (right), shared seam, `max-width` / opacity transition on the sheet. Inline notices for confirmation live inside the sheet (`role="status"`, `aria-live="polite"`), not `window.alert`. Documented on the live brand kit under **Pop-out dock**; implementation reference `ThemeHelperFab` + `theme-helper.css`.
-- **Icons:** Library TBD (Lucide is a strong candidate — lightweight, consistent)
+- **Navigation:** Sidebar vs. top nav, TBD
+- **Pop-out dock:** Floating control opens a horizontal dock, slide sheet (left) + anchor panel (right), shared seam, `max-width` / opacity transition on the sheet. Inline notices for confirmation live inside the sheet (`role="status"`, `aria-live="polite"`), not `window.alert`. Documented on the live brand kit under **Pop-out dock**; implementation reference `ThemeHelperFab` + `theme-helper.css`.
+- **Icons:** Library TBD (Lucide is a strong candidate, lightweight, consistent)
+
+---
+
+## Charts
+
+**Library:** Apache ECharts (`echarts`) is the project's default charting library. Used directly via a `useRef` + `useEffect` wrapper component (`app/src/components/Chart.tsx`); we do **not** depend on `echarts-for-react` (lags React 19). See `docs/adr/0003-slot-based-chart-colours.md` for why categorical colour comes from palette slots, not from per-series hex.
+
+**Categorical slot ramp.** Every palette in `app/src/themes/palettes.ts` exposes `--chart-cat-0` through `--chart-cat-9`, a 10-colour categorical ramp. Categories, Accounts, Tags reference slots by integer index (`colour_slot: 0..9`), not hex. Switching the active palette retints every chart in lockstep with the rest of the UI.
+
+**Chart-specific tokens** (added per palette alongside the slot ramp):
+
+| Token | Role |
+| --- | --- |
+| `--chart-cat-0` … `--chart-cat-9` | Categorical series colours |
+| `--chart-axis` | Axis line and label colour (defaults to `--color-text-muted`) |
+| `--chart-grid` | Gridline colour (defaults to `--color-border`) |
+| `--chart-tooltip-bg` | Tooltip background (defaults to `--color-surface`) |
+| `--chart-tooltip-text` | Tooltip text (defaults to `--color-text`) |
+
+**Live reference:** brand kit page Components → **Charts** (`#charts-demo-root`). Shows the slot swatch row and live primitives (pie, line, bar) so the colour system can be refined visually. Toggling palettes via the theme helper retints the demo charts in real time.
+
+**Building a new chart.** Use `<Chart>` from `app/src/components/Chart.tsx`. Feed an ECharts options object; the wrapper merges palette slots and theme tokens via `buildEchartsTheme()` (`app/src/lib/echartsTheme.ts`) at render time. Subscribe to `usePalette()` to retint live without unmount.
 
 ---
 
 ## Motion & animation
 
-- Prefer subtle, **functional** animation — feedback and hierarchy, not distraction.
+- Prefer subtle, **functional** animation, feedback and hierarchy, not distraction.
 - **Global utilities** live in `app/src/styles/brand-kit.css` (imported from `main.tsx`). Add classes to any markup; tune defaults on `:root` with `--tj-motion-*` variables.
 - **Live reference:** brand kit page **Reference → Motion** (`#motion`) shows examples.
 - **`prefers-reduced-motion: reduce`:** enter / stagger / hover motion utilities and glyph typing are disabled or reduced; content stays visible.
@@ -121,7 +143,7 @@ Based on a 4px base unit. All spacing should be multiples of 4.
 | `.tj-motion-hover-pop` | Hover: light `scale` (e.g. icon tiles). |
 | `.tj-motion-hover-macro-tile` | Large link tiles (hub homepage): border + `--shadow-sm` + subtle `scale` using `--tj-motion-hover-pop` easing; keeps `text-decoration: none` on hover (overrides global link underline). |
 
-**App hub tiles:** Reference specimen under brand kit **Cards → App hub tiles** — same pattern as other card groups (label + demo row), matching the hub route `/`.
+**App hub tiles:** Reference specimen under brand kit **Cards → App hub tiles**, same pattern as other card groups (label + demo row), matching the hub route `/`.
 
 ### `:root` tokens (optional overrides)
 
