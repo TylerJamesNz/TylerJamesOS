@@ -1,7 +1,16 @@
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Upload } from 'lucide-react'
+import { DragOverlay } from '../../components/finance/DragOverlay'
+import { ImportDrawer } from '../../components/finance/ImportDrawer'
 import './finance.css'
 
 export default function FinanceLayout() {
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [importTick, setImportTick] = useState(0)
+  const location = useLocation()
+  const prefillAccountIdFromQs = new URLSearchParams(location.search).get('account') ?? undefined
+
   return (
     <div className="finance">
       <header className="finance-header">
@@ -12,7 +21,21 @@ export default function FinanceLayout() {
           <Link to="/" className="finance-logo">
             TylerJames<span>OS</span>
           </Link>
-          <span className="finance-header-spacer" aria-hidden />
+          <span className="finance-header-spacer">
+            <label className="finance-import-button">
+              <Upload size={16} aria-hidden /> Import
+              <input
+                type="file"
+                accept="application/pdf"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const f = e.target.files?.[0]
+                  if (f) setPendingFile(f)
+                  e.target.value = ''
+                }}
+              />
+            </label>
+          </span>
         </div>
       </header>
       <nav className="finance-subnav">
@@ -26,9 +49,17 @@ export default function FinanceLayout() {
           Accounts
         </NavLink>
       </nav>
-      <main className="finance-main">
+      <main className="finance-main" key={importTick}>
         <Outlet />
       </main>
+      <DragOverlay onFileDropped={setPendingFile} />
+      <ImportDrawer
+        open={pendingFile != null}
+        file={pendingFile}
+        prefillAccountId={prefillAccountIdFromQs}
+        onClose={() => setPendingFile(null)}
+        onImported={() => setImportTick((t) => t + 1)}
+      />
     </div>
   )
 }

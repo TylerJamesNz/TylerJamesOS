@@ -103,4 +103,74 @@ describe('finance schema', () => {
     expect(await pgPoliciesOf('transactions')).not.toHaveLength(0)
     expect(await pgPoliciesOf('user_settings')).not.toHaveLength(0)
   })
+
+  it('has a statements table with the expected columns', async () => {
+    const cols = await columnsOf('statements')
+    expect(cols).toHaveProperty('id')
+    expect(cols).toHaveProperty('user_id')
+    expect(cols).toHaveProperty('account_id')
+    expect(cols).toHaveProperty('period_start')
+    expect(cols).toHaveProperty('period_end')
+    expect(cols).toHaveProperty('storage_path')
+    expect(cols).toHaveProperty('parser_strategy')
+    expect(cols).toHaveProperty('parser_version')
+    expect(cols).toHaveProperty('opening_balance')
+    expect(cols).toHaveProperty('closing_balance')
+    expect(cols).toHaveProperty('status')
+    expect(cols).toHaveProperty('imported_at')
+  })
+
+  it('has a balance_snapshots table linking back to statements', async () => {
+    const cols = await columnsOf('balance_snapshots')
+    expect(cols).toHaveProperty('id')
+    expect(cols).toHaveProperty('user_id')
+    expect(cols).toHaveProperty('account_id')
+    expect(cols).toHaveProperty('date')
+    expect(cols).toHaveProperty('balance')
+    expect(cols).toHaveProperty('source')
+    expect(cols).toHaveProperty('statement_id')
+  })
+
+  it('has a statement_id column on transactions', async () => {
+    const cols = await columnsOf('transactions')
+    expect(cols).toHaveProperty('statement_id')
+  })
+
+  it('has RLS policies on statements and balance_snapshots', async () => {
+    expect(await pgPoliciesOf('statements')).not.toHaveLength(0)
+    expect(await pgPoliciesOf('balance_snapshots')).not.toHaveLength(0)
+  })
+
+  it('exposes parser_strategy, statement_status, snapshot_source enums', async () => {
+    expect(await enumValues('parser_strategy')).toEqual([
+      'TEXT_FORMAT_SPECIFIC',
+      'TEXT_GENERIC',
+      'OCR_GENERIC',
+      'MANUAL',
+    ])
+    expect(await enumValues('statement_status')).toEqual(['IMPORTED', 'NEEDS_REVIEW', 'FAILED'])
+    expect(await enumValues('snapshot_source')).toEqual(['STATEMENT', 'MANUAL'])
+  })
+
+  it('has a private bank-statements storage bucket with user-scoped policies', async () => {
+    const client = new Client({ connectionString: TEST_DB_URL })
+    await client.connect()
+    try {
+      const bucket = await client.query(
+        `SELECT id, name, public FROM storage.buckets WHERE id = 'bank-statements'`
+      )
+      expect(bucket.rows).toHaveLength(1)
+      expect(bucket.rows[0].public).toBe(false)
+
+      const policies = await client.query(
+        `SELECT policyname, cmd FROM pg_policies
+         WHERE schemaname = 'storage' AND tablename = 'objects'
+         AND policyname LIKE '%bank-statements%'`
+      )
+      const cmds = policies.rows.map((r) => r.cmd).sort()
+      expect(cmds).toEqual(['DELETE', 'INSERT', 'SELECT', 'UPDATE'])
+    } finally {
+      await client.end()
+    }
+  })
 })

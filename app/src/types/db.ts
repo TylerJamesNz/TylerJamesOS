@@ -84,6 +84,127 @@ export type Database = {
           },
         ]
       }
+      balance_snapshots: {
+        Row: {
+          account_id: string
+          balance: number
+          created_at: string | null
+          date: string
+          id: string
+          source: Database["public"]["Enums"]["snapshot_source"]
+          statement_id: string | null
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          balance: number
+          created_at?: string | null
+          date: string
+          id?: string
+          source: Database["public"]["Enums"]["snapshot_source"]
+          statement_id?: string | null
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          balance?: number
+          created_at?: string | null
+          date?: string
+          id?: string
+          source?: Database["public"]["Enums"]["snapshot_source"]
+          statement_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "balance_snapshots_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "balance_snapshots_statement_id_fkey"
+            columns: ["statement_id"]
+            isOneToOne: false
+            referencedRelation: "statements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "balance_snapshots_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      statements: {
+        Row: {
+          account_id: string
+          closing_balance: number | null
+          created_at: string | null
+          id: string
+          imported_at: string | null
+          opening_balance: number | null
+          parser_strategy: Database["public"]["Enums"]["parser_strategy"]
+          parser_version: string | null
+          period_end: string
+          period_start: string
+          status: Database["public"]["Enums"]["statement_status"]
+          storage_path: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          closing_balance?: number | null
+          created_at?: string | null
+          id?: string
+          imported_at?: string | null
+          opening_balance?: number | null
+          parser_strategy: Database["public"]["Enums"]["parser_strategy"]
+          parser_version?: string | null
+          period_end: string
+          period_start: string
+          status?: Database["public"]["Enums"]["statement_status"]
+          storage_path: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          closing_balance?: number | null
+          created_at?: string | null
+          id?: string
+          imported_at?: string | null
+          opening_balance?: number | null
+          parser_strategy?: Database["public"]["Enums"]["parser_strategy"]
+          parser_version?: string | null
+          period_end?: string
+          period_start?: string
+          status?: Database["public"]["Enums"]["statement_status"]
+          storage_path?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "statements_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "statements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tags: {
         Row: {
           color: string
@@ -218,6 +339,7 @@ export type Database = {
           external_id: string | null
           id: string
           notes: string | null
+          statement_id: string | null
           type: Database["public"]["Enums"]["transaction_type"]
           updated_at: string | null
           user_id: string
@@ -231,6 +353,7 @@ export type Database = {
           external_id?: string | null
           id?: string
           notes?: string | null
+          statement_id?: string | null
           type: Database["public"]["Enums"]["transaction_type"]
           updated_at?: string | null
           user_id: string
@@ -244,6 +367,7 @@ export type Database = {
           external_id?: string | null
           id?: string
           notes?: string | null
+          statement_id?: string | null
           type?: Database["public"]["Enums"]["transaction_type"]
           updated_at?: string | null
           user_id?: string
@@ -254,6 +378,13 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_statement_id_fkey"
+            columns: ["statement_id"]
+            isOneToOne: false
+            referencedRelation: "statements"
             referencedColumns: ["id"]
           },
           {
@@ -337,6 +468,13 @@ export type Database = {
     }
     Enums: {
       account_type: "DEPOSIT" | "INVESTMENT"
+      parser_strategy:
+        | "TEXT_FORMAT_SPECIFIC"
+        | "TEXT_GENERIC"
+        | "OCR_GENERIC"
+        | "MANUAL"
+      snapshot_source: "STATEMENT" | "MANUAL"
+      statement_status: "IMPORTED" | "NEEDS_REVIEW" | "FAILED"
       sync_status: "local" | "synced" | "pending"
       task_status: "active" | "completed" | "archived"
       transaction_type: "DEBIT" | "CREDIT"
@@ -471,6 +609,14 @@ export const Constants = {
   public: {
     Enums: {
       account_type: ["DEPOSIT", "INVESTMENT"],
+      parser_strategy: [
+        "TEXT_FORMAT_SPECIFIC",
+        "TEXT_GENERIC",
+        "OCR_GENERIC",
+        "MANUAL",
+      ],
+      snapshot_source: ["STATEMENT", "MANUAL"],
+      statement_status: ["IMPORTED", "NEEDS_REVIEW", "FAILED"],
       sync_status: ["local", "synced", "pending"],
       task_status: ["active", "completed", "archived"],
       transaction_type: ["DEBIT", "CREDIT"],

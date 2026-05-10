@@ -5,6 +5,17 @@ export type AccountRow = Database['public']['Tables']['accounts']['Row']
 export type AccountInsert = Database['public']['Tables']['accounts']['Insert']
 export type TransactionRow = Database['public']['Tables']['transactions']['Row']
 export type TransactionInsert = Database['public']['Tables']['transactions']['Insert']
+export type StatementRow = Database['public']['Tables']['statements']['Row']
+
+export async function listStatementsForAccount(accountId: string): Promise<StatementRow[]> {
+  const { data, error } = await supabase
+    .from('statements')
+    .select('*')
+    .eq('account_id', accountId)
+    .order('period_end', { ascending: false })
+  if (error) throw error
+  return data ?? []
+}
 
 export async function listAccounts(): Promise<AccountRow[]> {
   const { data, error } = await supabase
