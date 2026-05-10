@@ -8,6 +8,7 @@ import {
   paletteCustom,
   type ThemePalette,
 } from '../themes/palettes'
+import { withChartSlots } from '../themes/chartSlots'
 import type { PaletteStorageState } from './paletteStorage'
 
 /**
@@ -16,7 +17,9 @@ import type { PaletteStorageState } from './paletteStorage'
  */
 export function computeActiveThemePalette(state: PaletteStorageState): ThemePalette {
   const { paletteId, customSeeds, darkMode } = state
-  const customDerived = deriveCustomPalette(customSeeds.primary, customSeeds.secondary)
+  const customDerived = withChartSlots(
+    deriveCustomPalette(customSeeds.primary, customSeeds.secondary)
+  )
 
   const basePalette: ThemePalette =
     paletteId !== CUSTOM_PALETTE_ID
@@ -30,10 +33,12 @@ export function computeActiveThemePalette(state: PaletteStorageState): ThemePale
   if (darkMode && basePalette.id === CUSTOM_PALETTE_ID) {
     const ip = invertHex(customSeeds.primary)
     const is = pickNearestSecondary(ip, invertHex(customSeeds.secondary))
-    appliedCssVars = deriveCustomPalette(ip, is, {
-      appearance: 'dark',
-      pageTintHueFrom: customSeeds.primary,
-    })
+    appliedCssVars = withChartSlots(
+      deriveCustomPalette(ip, is, {
+        appearance: 'dark',
+        pageTintHueFrom: customSeeds.primary,
+      })
+    )
   }
 
   return {

@@ -9,6 +9,7 @@ import {
   CUSTOM_DEFAULT_SECONDARY,
   deriveCustomPalette,
 } from '../lib/deriveCustomPalette'
+import { withChartSlots } from './chartSlots'
 
 export type ThemePalette = {
   id: string
@@ -46,7 +47,7 @@ export const paletteOriginTeal: ThemePalette = {
   label: 'Origin teal',
   description: 'Navy text, teal accent — the ramp from origin/main before the +30° hue shift.',
   source: 'origin/main (git)',
-  cssVars: {
+  cssVars: withChartSlots({
     '--color-bg': '#F7F9F9',
     '--color-surface': '#ffffff',
     '--color-surface-2': '#EEF2F2',
@@ -71,7 +72,7 @@ export const paletteOriginTeal: ThemePalette = {
     '--accent-rgb': '25, 96, 97',
     '--btn-secondary-hover': '#dde8e8',
     '--tag-demo-accent': '#5b6ef8',
-  },
+  }),
 }
 
 /** Local “+30° on the wheel” shift — cooler blue emphasis, same structure. */
@@ -80,7 +81,7 @@ export const paletteHueShift30: ThemePalette = {
   label: 'Hue +30° (blue shift)',
   description: 'Same roles as Origin teal, entire brand ramp rotated +30° in HSL.',
   source: 'Local development palette',
-  cssVars: {
+  cssVars: withChartSlots({
     '--color-bg': '#F7F8F9',
     '--color-surface': '#ffffff',
     '--color-surface-2': '#EEF0F2',
@@ -105,7 +106,7 @@ export const paletteHueShift30: ThemePalette = {
     '--accent-rgb': '25, 60, 97',
     '--btn-secondary-hover': '#DDE3E8',
     '--tag-demo-accent': '#975bf8',
-  },
+  }),
 }
 
 /** Dark “editor” chrome — high contrast, neon teal accent. */
@@ -114,7 +115,7 @@ export const paletteWildcardNoir: ThemePalette = {
   label: 'Wildcard · Noir terminal',
   description: 'Near-OLED surfaces, electric teal accent, adjusted semantic hues for dark UI.',
   source: 'Wildcard',
-  cssVars: {
+  cssVars: withChartSlots({
     '--color-bg': '#0e0e12',
     '--color-surface': '#16161c',
     '--color-surface-2': '#1c1c24',
@@ -139,7 +140,7 @@ export const paletteWildcardNoir: ThemePalette = {
     '--accent-rgb': '94, 234, 212',
     '--btn-secondary-hover': '#252530',
     '--tag-demo-accent': '#c084fc',
-  },
+  }),
 }
 
 /** Warm paper, sepia ink, amber CTA. */
@@ -148,7 +149,7 @@ export const paletteWildcardPaper: ThemePalette = {
   label: 'Wildcard · Paper & ink',
   description: 'Cream stock, brown type, amber accent — editorial / notebook feel.',
   source: 'Wildcard',
-  cssVars: {
+  cssVars: withChartSlots({
     '--color-bg': '#faf6f0',
     '--color-surface': '#fffdf8',
     '--color-surface-2': '#f3ece4',
@@ -173,7 +174,7 @@ export const paletteWildcardPaper: ThemePalette = {
     '--accent-rgb': '180, 83, 9',
     '--btn-secondary-hover': '#e8ddd4',
     '--tag-demo-accent': '#7c3aed',
-  },
+  }),
 }
 
 /** Neon purple fantasy UI — not for accessibility-critical flows. */
@@ -182,7 +183,7 @@ export const paletteWildcardSynthwave: ThemePalette = {
   label: 'Wildcard · Synthwave',
   description: 'Violet void, hot pink accent, cyan highlights — loud on purpose.',
   source: 'Wildcard',
-  cssVars: {
+  cssVars: withChartSlots({
     '--color-bg': '#1a0b2e',
     '--color-surface': '#2d1b4e',
     '--color-surface-2': '#3d2a5c',
@@ -207,7 +208,7 @@ export const paletteWildcardSynthwave: ThemePalette = {
     '--accent-rgb': '255, 45, 146',
     '--btn-secondary-hover': '#3d2a5c',
     '--tag-demo-accent': '#00fff0',
-  },
+  }),
 }
 
 /** Quiet sage field — calm product UI. */
@@ -216,7 +217,7 @@ export const paletteWildcardOatMoss: ThemePalette = {
   label: 'Wildcard · Oat & moss',
   description: 'Oat background, forest green type, muted sage accent.',
   source: 'Wildcard',
-  cssVars: {
+  cssVars: withChartSlots({
     '--color-bg': '#f4f2eb',
     '--color-surface': '#fffcf7',
     '--color-surface-2': '#ebe8df',
@@ -241,7 +242,7 @@ export const paletteWildcardOatMoss: ThemePalette = {
     '--accent-rgb': '79, 111, 82',
     '--btn-secondary-hover': '#dde2d9',
     '--tag-demo-accent': '#ca8a04',
-  },
+  }),
 }
 
 /** Unofficial vibe snapshots — not affiliated with the products named in labels. */
@@ -250,7 +251,7 @@ export const paletteProductJiraBlue: ThemePalette = {
   label: 'Product · Jira blue',
   description: 'Navy backlog shell, electric board blue—ticket closed, dopamine unlocked.',
   source: 'Inspired by Atlassian Jira',
-  cssVars: {
+  cssVars: withChartSlots({
     '--color-bg': '#F7F8F9',
     '--color-surface': '#ffffff',
     '--color-surface-2': '#EBECF0',
@@ -276,7 +277,7 @@ export const paletteProductJiraBlue: ThemePalette = {
     '--accent-rgb': '0, 82, 204',
     '--btn-secondary-hover': '#DEEBFF',
     '--tag-demo-accent': '#6554C0',
-  },
+  }),
 }
 
 export const paletteProductConfluenceTeal: ThemePalette = {
@@ -284,7 +285,7 @@ export const paletteProductConfluenceTeal: ThemePalette = {
   label: 'Product · Confluence teal',
   description: 'Doc-green accent on warm paper—wiki energy without the stale links.',
   source: 'Inspired by Atlassian Confluence',
-  cssVars: {
+  cssVars: withChartSlots({
     '--color-bg': '#FAFBFC',
     '--color-surface': '#ffffff',
     '--color-surface-2': '#E6FCFF',
@@ -310,7 +311,7 @@ export const paletteProductConfluenceTeal: ThemePalette = {
     '--accent-rgb': '0, 141, 166',
     '--btn-secondary-hover': '#E6FCFF',
     '--tag-demo-accent': '#36B37E',
-  },
+  }),
 }
 
 export const paletteProductSlackAubergine: ThemePalette = {
@@ -318,7 +319,7 @@ export const paletteProductSlackAubergine: ThemePalette = {
   label: 'Product · Slack dark (aubergine)',
   description: 'Dark main chrome like Slack—purple rail, cyan highlights, pink jabs. Not the white marketing page.',
   source: 'Inspired by Slack',
-  cssVars: {
+  cssVars: withChartSlots({
     '--color-bg': '#1a1d21',
     '--color-surface': '#222529',
     '--color-surface-2': '#2b2d31',
@@ -344,7 +345,7 @@ export const paletteProductSlackAubergine: ThemePalette = {
     '--accent-rgb': '54, 197, 240',
     '--btn-secondary-hover': '#3c3f44',
     '--tag-demo-accent': '#ecb22e',
-  },
+  }),
 }
 
 export const paletteProductSlackCanvas: ThemePalette = {
@@ -352,7 +353,7 @@ export const paletteProductSlackCanvas: ThemePalette = {
   label: 'Product · Slack dark (violet rail)',
   description: 'Same dark-app energy, deeper violet shell—still not the bright marketing site.',
   source: 'Inspired by Slack',
-  cssVars: {
+  cssVars: withChartSlots({
     '--color-bg': '#16131f',
     '--color-surface': '#1e1a2e',
     '--color-surface-2': '#262136',
@@ -378,7 +379,7 @@ export const paletteProductSlackCanvas: ThemePalette = {
     '--accent-rgb': '167, 139, 250',
     '--btn-secondary-hover': '#322a4a',
     '--tag-demo-accent': '#36c5f0',
-  },
+  }),
 }
 
 /** Blue CTA, green sidebar highlights, yellow surfaces, red tag pop: one pass at the four-colour rhythm. */
@@ -388,7 +389,7 @@ export const paletteProductGoogleWorkspace: ThemePalette = {
   description:
     'Material light base with blue buttons, green rail accents, butter yellow cards, and red pings in the mix.',
   source: 'Inspired by Google',
-  cssVars: {
+  cssVars: withChartSlots({
     '--color-bg': '#F8F9FA',
     '--color-surface': '#ffffff',
     '--color-surface-2': '#FEF7E0',
@@ -414,7 +415,7 @@ export const paletteProductGoogleWorkspace: ThemePalette = {
     '--accent-rgb': '26, 115, 232',
     '--btn-secondary-hover': '#FEEFC3',
     '--tag-demo-accent': '#EA4335',
-  },
+  }),
 }
 
 export const paletteProductNotion: ThemePalette = {
@@ -422,7 +423,7 @@ export const paletteProductNotion: ThemePalette = {
   label: 'Product · Notion',
   description: 'Warm paper grey, ink type, and that familiar red nudge on a calm workspace canvas.',
   source: 'Inspired by Notion',
-  cssVars: {
+  cssVars: withChartSlots({
     '--color-bg': '#FBFBFA',
     '--color-surface': '#ffffff',
     '--color-surface-2': '#F7F6F3',
@@ -448,7 +449,7 @@ export const paletteProductNotion: ThemePalette = {
     '--accent-rgb': '235, 87, 87',
     '--btn-secondary-hover': '#E8E7E4',
     '--tag-demo-accent': '#2383E2',
-  },
+  }),
 }
 
 export const paletteProductDiscord: ThemePalette = {
@@ -456,7 +457,7 @@ export const paletteProductDiscord: ThemePalette = {
   label: 'Product · Discord',
   description: 'Blurple buttons on charcoal and slate, the late-night server aesthetic.',
   source: 'Inspired by Discord',
-  cssVars: {
+  cssVars: withChartSlots({
     '--color-bg': '#313338',
     '--color-surface': '#2B2D31',
     '--color-surface-2': '#1E2124',
@@ -482,7 +483,7 @@ export const paletteProductDiscord: ThemePalette = {
     '--accent-rgb': '88, 101, 242',
     '--btn-secondary-hover': '#3F4147',
     '--tag-demo-accent': '#EB459E',
-  },
+  }),
 }
 
 export const paletteProductSpotify: ThemePalette = {
@@ -490,7 +491,7 @@ export const paletteProductSpotify: ThemePalette = {
   label: 'Product · Spotify',
   description: 'Ink black chrome, elevator grey text, and that unmistakable green play energy.',
   source: 'Inspired by Spotify',
-  cssVars: {
+  cssVars: withChartSlots({
     '--color-bg': '#121212',
     '--color-surface': '#181818',
     '--color-surface-2': '#282828',
@@ -516,7 +517,7 @@ export const paletteProductSpotify: ThemePalette = {
     '--accent-rgb': '29, 185, 84',
     '--btn-secondary-hover': '#282828',
     '--tag-demo-accent': '#E91429',
-  },
+  }),
 }
 
 export const CUSTOM_PALETTE_ID = 'custom' as const
@@ -527,7 +528,7 @@ export const paletteCustom: ThemePalette = {
   label: 'Custom',
   description: 'Mix your own colour for the whole app.',
   source: 'Your colours',
-  cssVars: deriveCustomPalette(CUSTOM_DEFAULT_PRIMARY, CUSTOM_DEFAULT_SECONDARY),
+  cssVars: withChartSlots(deriveCustomPalette(CUSTOM_DEFAULT_PRIMARY, CUSTOM_DEFAULT_SECONDARY)),
 }
 
 export const THEME_PALETTES: ThemePalette[] = [
