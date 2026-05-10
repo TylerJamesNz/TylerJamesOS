@@ -26,12 +26,14 @@
   },
   "devDependencies": {
     "@types/chroma-js": "^3.1.2",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@types/react-router-dom": "^5.3.3",
     "@types/react-speech-recognition": "^3.9.6",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/ui": "^4.1.5",
+    "pg": "^8.20.0",
     "typescript": "~5.7.2",
     "vite": "^6.0.3",
     "vitest": "^4.1.5"
