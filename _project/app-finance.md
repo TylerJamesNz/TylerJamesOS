@@ -100,17 +100,17 @@ If the parser sniffs an account number not present in the `accounts` table, the 
 
 ## Live data
 
-Statements arrive 5+ days after month-end and (for Tyler's ANZ AU Online Saver) are half-yearly. To see "how is this month trending" requires a live preview surface that updates before the next statement lands. See `docs/adr/0004-live-transaction-sources.md` for the architectural decision.
+Statements arrive 5+ days after month-end and (for Tyler's ANZ AU Online Saver) are half-yearly. To see "how is this month trending" requires a live preview surface that updates before the next statement lands. See `docs/adr/0004-live-transaction-sources.md` for the architectural decision and `docs/adr/0005-anz-au-live-data-deferred.md` for the AU-side amendment.
 
-Two free live-data sources, one per region:
+V1 ships one live-data source. AU live-data is deferred.
 
-### NZ live: Akahu (open-banking aggregator)
+### NZ live: Akahu Personal App
 
-Akahu is the NZ open-banking aggregator, free for personal use. Tyler registers an Akahu Developer app, then connects ANZ NZ in TJOS settings via Akahu's hosted OAuth consent screen. Access + refresh tokens land in Supabase Vault. A Supabase Edge Function (`akahu-sync`) polls Akahu daily plus on a "Refresh now" button on `/finance`. Each Akahu transaction has a stable ID used as the `external_id` for idempotency.
+Akahu is the NZ open-banking aggregator, free for personal use. Tyler registers a Personal App at `my.akahu.nz`, which issues a pre-minted user access token, no end-user OAuth round-trip required. He pastes the App Token and User Token into TJOS settings; the user token is wrapped by Supabase Vault before storage. A Supabase Edge Function (`akahu-sync`) uses `@akahu/sdk-js` to poll Akahu daily plus on a "Refresh now" button on `/finance`. Each Akahu transaction has a stable ID used as the `external_id` for idempotency. Akahu received CDR accreditation in late 2025 and migrates big-4-bank traffic to the regulated open-banking endpoints by 2026-05-31; the SDK surface is stable either side of that cut.
 
-### AU live: Gmail-parsed ANZ Activity Alert emails
+### AU live: deferred from V1
 
-ANZ AU's "Account Activity Alerts" can be configured (in internet banking) to email on every transaction. Tyler creates a Gmail filter routing those alerts to a label (e.g., `Finance/ANZ AU/Saver`). TJOS settings has a "Connect Gmail" OAuth button (scope `gmail.readonly`). A Supabase Edge Function (`anz-au-sync`) polls Gmail hourly for new messages under the configured label, regex-parses the email body, and inserts each as a Live Transaction. Unparseable emails surface in a review queue rather than failing silently.
+The original V1 plan called for Gmail-parsing ANZ AU "Account Activity Alert" emails. A 2026-05-11 verification pass found that ANZ AU personal accounts do not have per-transaction email alerts in 2026 (only Osko, payee-list, and overdraft notifications). No free single-user CDR path exists. T1e is dropped from V1 per ADR 0005; AU "this month trending" is invisible until the next half-yearly statement lands. Re-enablement triggers (Up Bank move, ANZ ships transaction emails, Basiq consumer tier) are documented in ADR 0005.
 
 ### Source of Truth Hierarchy
 

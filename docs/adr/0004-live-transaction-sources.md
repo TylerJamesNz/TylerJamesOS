@@ -1,6 +1,6 @@
 # 0004. Live transaction sources alongside statement import
 
-**Status:** Accepted, 2026-05-11.
+**Status:** Accepted, 2026-05-11. Step 4 superseded by ADR 0005 (also 2026-05-11) after a verification pass disproved the load-bearing assumption that ANZ AU personal accounts can be configured for per-transaction email alerts. Steps 1, 2, 3, 5, 6 remain. T1d's shape also refined: Akahu Personal App pattern (App Token + User Token, no end-user OAuth round-trip) via the `@akahu/sdk-js` SDK, against the post-CDR-transition endpoint surface (Akahu handles the switch 2026-05-31).
 
 ## Context
 
@@ -24,7 +24,7 @@ Concretely:
 1. **One `transactions` table** with a `source` enum (`STATEMENT | LIVE | MANUAL`). All charts and totals query the union; live rows are filtered out of audit reports by date-range + source predicate.
 2. **Match-and-merge on statement import.** When a statement covering a period of live transactions is imported, for each statement row the import flow finds a matching live row by `(account_id, date, amount, type)` and UPDATEs its `source` to `STATEMENT`, filling statement-side metadata (`external_id`, `statement_id`, official description). Unmatched live rows in the period get a `superseded_at` timestamp and an audit note. Manual TransactionLinks tied to a promoted row survive because the primary key does not change.
 3. **NZ live: Akahu via OAuth.** Tyler registers an Akahu developer app once. TJOS settings has a "Connect Akahu" button that runs the consent flow. Access + refresh tokens land in Supabase Vault. A Supabase Edge Function (`akahu-sync`) polls daily plus on demand.
-4. **AU live: Gmail-parse ANZ Activity Alert emails.** Tyler enables Activity Alerts in ANZ AU internet banking (per-transaction, $1 threshold), creates a Gmail filter routing those alerts to a label. TJOS settings has a "Connect Gmail" OAuth button. An Edge Function (`anz-au-sync`) polls Gmail hourly, regex-parses each alert, inserts as Live Transactions.
+4. ~~**AU live: Gmail-parse ANZ Activity Alert emails.** Tyler enables Activity Alerts in ANZ AU internet banking (per-transaction, $1 threshold), creates a Gmail filter routing those alerts to a label. TJOS settings has a "Connect Gmail" OAuth button. An Edge Function (`anz-au-sync`) polls Gmail hourly, regex-parses each alert, inserts as Live Transactions.~~ **Superseded by ADR 0005.** Verification on 2026-05-11 found that ANZ AU personal accounts do not have per-transaction email alerts in 2026. T1e is dropped from V1; AU coverage stays statement-only.
 5. **Both sources are free.** ADR 0002's "no paid services in the import pipeline" principle is preserved: Akahu is free for personal use; Gmail API is free; only Basiq and Plaid-like aggregators are explicitly rejected.
 6. **Two new tables: `external_integrations` (OAuth tokens, Vault-encrypted) and `live_sync_runs` (append-only log, powers the review queue).** Schema additions on `transactions` and `accounts` documented in `_project/data-model.md`.
 
