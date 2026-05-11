@@ -1,0 +1,53 @@
+--- PAGE 1 ---
+ANZ ONLINE SAVER STATEMENT
+ STATEMENT NUMBER 2
+ 01 MAY 2025 TO 03 NOVEMBER 2025
+ MR T EXAMPLE
+ 1 SAMPLE STREET
+ MELBOURNE VIC 3000
+ WELCOME TO YOUR ANZ ACCOUNT AT A GLANCE
+ Account Details
+ EXAMPLE TEST-USER
+ Branch Number (BSB)
+ 012-345
+ Account Number
+ 1234-56789
+ Opening Balance:
+ $
+2,000.00
+ Total Deposits:
+ $
+500.00
+ Total Withdrawals:
+ $
+300.00
+ Closing Balance:
+ $
+2,200.00
+ NEED TO GET IN TOUCH?
+ ANZ Internet Banking
+ anz.com
+--- PAGE 2 ---
+ANZ ONLINE SAVER STATEMENT
+ Account Number 1234-56789
+ Page   2   of   2
+ Transaction Details
+ Please retain this statement for taxation purposes
+ Date   Transaction Details   Withdrawals ($)   Deposits ($)   Balance ($)
+ 2025
+ 01 MAY   OPENING BALANCE
+ blank   blank
+ 2,000.00
+ 03 MAY   PAYMENT
+ TO ACME UTILITIES 12345
+ 100.00   blank   1,900.00
+ 15 MAY   PAYMENT FROM EMPLOYER PTY LTD
+ SALARY PMNT
+ blank   500.00   2,400.00
+ 22 MAY   ANZ M-BANKING FUNDS TFER
+ TRANSFER 111111 TO 012345123456789
+ EFFECTIVE DATE 21 MAY 2025
+ 200.00   blank   2,200.00
+ 03 NOV   CLOSING BALANCE
+ blank   blank
+ 2,200.00
