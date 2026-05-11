@@ -31,7 +31,7 @@ Removed. Supabase Auth manages sessions via `auth.sessions`; no application-leve
 ---
 
 ### Transaction (Finance)
-Core financial record, imported from a Statement (or entered manually).
+Core financial record, imported from a Statement, ingested live, or entered manually.
 
 ```
 Transaction {
@@ -40,6 +40,8 @@ Transaction {
   external_id      String?       , bank reference, for dedup; unique with account_id
   account_id       UUID (FK → Account)
   statement_id     UUID? (FK → Statement) , null for manual entries
+  source           Enum: STATEMENT | LIVE | MANUAL  , data origin (see Live data section in PRD)
+  superseded_at    DateTime?     , set when a Live row could not be matched by a covering Statement
   date             Date
   description      String        , raw description from bank
   amount           Decimal       , positive = income, negative = expense, in account currency
@@ -53,6 +55,8 @@ Transaction {
   updated_at       DateTime
 }
 ```
+
+`source` distinguishes the data origin per `/CONTEXT.md` Source of Truth Hierarchy: Statement > Live > Manual. When a Statement imports rows whose period covers existing Live rows, match-and-merge promotes matched Live rows in place (UPDATE source = 'STATEMENT' + statement_id + statement-side metadata). Unmatched Live rows in the period get a `superseded_at` timestamp; they stop appearing in trending without being silently dropped.
 
 Transactions relate to Tags via TransactionTag, to other Transactions via TransactionLink.
 
@@ -72,9 +76,13 @@ Account {
   currency                 String        , default "AUD"
   opening_balance          Decimal?      , one-time seed for Deposit running balance
   colour_slot              Int           , 0..9, position in palette categorical ramp
+  akahu_account_id         String?       , unique; maps this Account to an Akahu account for NZ live ingest
+  gmail_label              String?       , Gmail label that catches this account's Activity Alerts for AU live ingest
   created_at               DateTime
 }
 ```
+
+`akahu_account_id` is set once during the Akahu OAuth flow on the integrations settings page; `gmail_label` is set per AU account during Gmail OAuth setup.
 
 ---
 
@@ -253,6 +261,48 @@ Counterparty entity (a richer registry beyond flatmate names) is deferred until 
 
 ---
 
+### ExternalIntegration (Finance / global)
+Stores OAuth credentials for the live-data sources: Akahu (NZ live) and Gmail (AU live). Tokens are encrypted at rest via Supabase Vault. One row per (user, provider).
+
+```
+ExternalIntegration {
+  id                        UUID (PK)
+  user_id                   UUID (FK → User)
+  provider                  Enum: akahu | gmail
+  encrypted_access_token    bytea         , Supabase Vault wraps the plaintext at rest
+  encrypted_refresh_token   bytea?        , null if the provider does not issue refresh tokens
+  expires_at                DateTime?     , null if non-expiring
+  scopes                    String[]      , granted OAuth scopes
+  created_at, updated_at    DateTime
+
+  UNIQUE (user_id, provider)
+}
+```
+
+The Edge Functions (`akahu-sync`, `anz-au-sync`, plus their OAuth-exchange callbacks) are the only readers. RLS keys on `auth.uid() = user_id`. On a 401 from the provider, the function uses `encrypted_refresh_token` to refresh and updates the row.
+
+---
+
+### LiveSyncRun (Finance, observability)
+Append-only log of every live-ingest run, for the review queue and debugging.
+
+```
+LiveSyncRun {
+  id              UUID (PK)
+  user_id         UUID (FK → User)
+  provider        Enum: akahu | gmail
+  started_at      DateTime
+  finished_at     DateTime?
+  inserted_count  Int           , number of new Live Transactions inserted
+  unparseable     JSONB[]       , Gmail-side only: array of { message_id, reason } for emails that did not parse
+  error_message   String?
+}
+```
+
+Surfaced in `/finance` review queue: "3 alerts in the last week couldn't be parsed".
+
+---
+
 ### Task (Todos)
 A to-do item, replacing Todoist.
 
@@ -302,6 +352,8 @@ User
  ├── has many Statement (via Account)
  ├── has many BalanceSnapshot (via Account)
  ├── has many TransactionLink
+ ├── has many ExternalIntegration (one per provider: akahu, gmail)
+ ├── has many LiveSyncRun
  ├── has many Category
  ├── has many CategoryRule
  ├── has many Tag

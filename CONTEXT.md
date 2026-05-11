@@ -26,6 +26,10 @@ The canonical names for things in this system. When a user-facing label, a route
 
 **Net Cost.** The amount of an outgoing Transaction after subtracting the sum of its linked incoming reimbursements. Shown by default on charts and totals. The pre-link figure is "Gross Cost" and is exposed on hover or via a "show raw" toggle.
 
+**Live Transaction.** A Transaction inserted from a real-time data source (Akahu for NZ accounts, ANZ Activity Alert email parse for AU accounts) before the canonical Statement covering its period is imported. Live Transactions power current-month trending on `/finance` home; they are never used for audit reporting. When a Statement covering a Live Transaction's date is later imported, the Live row is promoted in place to a Statement-source row by match-and-merge on (account_id, date, amount, type). Manual Transaction Links pinned to the row survive the promotion because the primary key does not change.
+
+**Source of Truth Hierarchy.** From most to least authoritative: Statement (canonical audit truth) > Live (mid-period preview, replaced by Statement when one arrives) > Manual (user-entered, sits between in trust depending on context).
+
 ## Charts and theming
 
 **Categorical Slot.** A position 0..9 in the active palette's 10-colour categorical ramp. Categories and Accounts are assigned a slot at creation, not a fixed hex. Charts read the slot's current colour from CSS custom properties (`--chart-cat-0` through `--chart-cat-9`), so flipping the palette retints every chart in lockstep with the rest of the UI. The Category and Account `colour` fields hold a slot index (integer), not a hex string.

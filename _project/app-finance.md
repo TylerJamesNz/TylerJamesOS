@@ -18,13 +18,14 @@ One. Tyler. Single-tenant by construction. RLS on every row. No collaboration, n
 
 ## Non-goals (V1)
 
-- No live bank API (Akahu, Plaid, Basiq). File import only.
+- No paid bank-API aggregators (Basiq, Plaid). Free open-banking only.
 - No paid AI in the import or categorisation path. Claude is not in the loop.
 - No collaboration, sharing, or multi-user features.
 - No mobile-native app. iOS PWA only.
 - No bills/budgets/goals. Just "see what's there."
-- No CSV import. PDF only (statements are what providers actually send).
+- No CSV import. PDF only for statements.
 - No tax export, accounting export, or third-party sync.
+- No browser-automation (Playwright) into bank web UIs. ToS violation and account-lockout risk.
 
 ---
 
@@ -94,6 +95,31 @@ bank-statements/{userId}/{accountId}/{YYYY-MM}.pdf
 ### First-time-seen accounts
 
 If the parser sniffs an account number not present in the `accounts` table, the import flow pauses with a modal pre-filled with sniffed details (institution, currency, account_type guess) and resumes after Tyler confirms or edits.
+
+---
+
+## Live data
+
+Statements arrive 5+ days after month-end and (for Tyler's ANZ AU Online Saver) are half-yearly. To see "how is this month trending" requires a live preview surface that updates before the next statement lands. See `docs/adr/0004-live-transaction-sources.md` for the architectural decision.
+
+Two free live-data sources, one per region:
+
+### NZ live: Akahu (open-banking aggregator)
+
+Akahu is the NZ open-banking aggregator, free for personal use. Tyler registers an Akahu Developer app, then connects ANZ NZ in TJOS settings via Akahu's hosted OAuth consent screen. Access + refresh tokens land in Supabase Vault. A Supabase Edge Function (`akahu-sync`) polls Akahu daily plus on a "Refresh now" button on `/finance`. Each Akahu transaction has a stable ID used as the `external_id` for idempotency.
+
+### AU live: Gmail-parsed ANZ Activity Alert emails
+
+ANZ AU's "Account Activity Alerts" can be configured (in internet banking) to email on every transaction. Tyler creates a Gmail filter routing those alerts to a label (e.g., `Finance/ANZ AU/Saver`). TJOS settings has a "Connect Gmail" OAuth button (scope `gmail.readonly`). A Supabase Edge Function (`anz-au-sync`) polls Gmail hourly for new messages under the configured label, regex-parses the email body, and inserts each as a Live Transaction. Unparseable emails surface in a review queue rather than failing silently.
+
+### Source of Truth Hierarchy
+
+See `/CONTEXT.md`. From most to least authoritative: Statement > Live > Manual. Statements supersede Live by **match-and-merge** when imported: for each statement row, find a matching Live row by `(account_id, date, amount, type)` and UPDATE its `source` to `STATEMENT`, filling statement-side metadata (`external_id`, `statement_id`). Unmatched Live rows in the period get a `superseded_at` timestamp + audit note. Manual TransactionLinks tied to a promoted row survive because the primary key does not change.
+
+### Why not Basiq, why not Playwright
+
+- **Basiq / CDR aggregators**: $0.50/user/month minimum + 12-month contract, B2B-shaped onboarding. Not free for personal use. Documented in ADR 0004.
+- **Playwright into ANZ web**: ToS violation; bank bot-detection; MFA breaks unattended automation; account lockout risk. Rejected.
 
 ---
 
