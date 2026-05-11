@@ -37,10 +37,12 @@ export type Database = {
       accounts: {
         Row: {
           account_type: Database["public"]["Enums"]["account_type"]
+          akahu_account_id: string | null
           colour_slot: number
           created_at: string | null
           currency: string
           external_account_number: string | null
+          gmail_label: string | null
           id: string
           institution: string
           name: string
@@ -50,10 +52,12 @@ export type Database = {
         }
         Insert: {
           account_type: Database["public"]["Enums"]["account_type"]
+          akahu_account_id?: string | null
           colour_slot?: number
           created_at?: string | null
           currency?: string
           external_account_number?: string | null
+          gmail_label?: string | null
           id?: string
           institution: string
           name: string
@@ -63,10 +67,12 @@ export type Database = {
         }
         Update: {
           account_type?: Database["public"]["Enums"]["account_type"]
+          akahu_account_id?: string | null
           colour_slot?: number
           created_at?: string | null
           currency?: string
           external_account_number?: string | null
+          gmail_label?: string | null
           id?: string
           institution?: string
           name?: string
@@ -132,6 +138,50 @@ export type Database = {
           },
           {
             foreignKeyName: "balance_snapshots_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_integrations: {
+        Row: {
+          created_at: string | null
+          encrypted_access_token: string
+          encrypted_refresh_token: string | null
+          expires_at: string | null
+          id: string
+          provider: Database["public"]["Enums"]["integration_provider"]
+          scopes: string[]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          encrypted_access_token: string
+          encrypted_refresh_token?: string | null
+          expires_at?: string | null
+          id?: string
+          provider: Database["public"]["Enums"]["integration_provider"]
+          scopes?: string[]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          encrypted_access_token?: string
+          encrypted_refresh_token?: string | null
+          expires_at?: string | null
+          id?: string
+          provider?: Database["public"]["Enums"]["integration_provider"]
+          scopes?: string[]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_integrations_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -339,7 +389,9 @@ export type Database = {
           external_id: string | null
           id: string
           notes: string | null
+          source: Database["public"]["Enums"]["transaction_source"]
           statement_id: string | null
+          superseded_at: string | null
           type: Database["public"]["Enums"]["transaction_type"]
           updated_at: string | null
           user_id: string
@@ -353,7 +405,9 @@ export type Database = {
           external_id?: string | null
           id?: string
           notes?: string | null
+          source?: Database["public"]["Enums"]["transaction_source"]
           statement_id?: string | null
+          superseded_at?: string | null
           type: Database["public"]["Enums"]["transaction_type"]
           updated_at?: string | null
           user_id: string
@@ -367,7 +421,9 @@ export type Database = {
           external_id?: string | null
           id?: string
           notes?: string | null
+          source?: Database["public"]["Enums"]["transaction_source"]
           statement_id?: string | null
+          superseded_at?: string | null
           type?: Database["public"]["Enums"]["transaction_type"]
           updated_at?: string | null
           user_id?: string
@@ -468,6 +524,7 @@ export type Database = {
     }
     Enums: {
       account_type: "DEPOSIT" | "INVESTMENT"
+      integration_provider: "akahu" | "gmail"
       parser_strategy:
         | "TEXT_FORMAT_SPECIFIC"
         | "TEXT_GENERIC"
@@ -477,6 +534,7 @@ export type Database = {
       statement_status: "IMPORTED" | "NEEDS_REVIEW" | "FAILED"
       sync_status: "local" | "synced" | "pending"
       task_status: "active" | "completed" | "archived"
+      transaction_source: "STATEMENT" | "LIVE" | "MANUAL"
       transaction_type: "DEBIT" | "CREDIT"
     }
     CompositeTypes: {
@@ -609,6 +667,7 @@ export const Constants = {
   public: {
     Enums: {
       account_type: ["DEPOSIT", "INVESTMENT"],
+      integration_provider: ["akahu", "gmail"],
       parser_strategy: [
         "TEXT_FORMAT_SPECIFIC",
         "TEXT_GENERIC",
@@ -619,6 +678,7 @@ export const Constants = {
       statement_status: ["IMPORTED", "NEEDS_REVIEW", "FAILED"],
       sync_status: ["local", "synced", "pending"],
       task_status: ["active", "completed", "archived"],
+      transaction_source: ["STATEMENT", "LIVE", "MANUAL"],
       transaction_type: ["DEBIT", "CREDIT"],
     },
   },

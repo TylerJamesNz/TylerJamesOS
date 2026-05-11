@@ -152,6 +152,60 @@ describe('finance schema', () => {
     expect(await enumValues('snapshot_source')).toEqual(['STATEMENT', 'MANUAL'])
   })
 
+  it('has source and superseded_at columns on transactions', async () => {
+    const cols = await columnsOf('transactions')
+    expect(cols).toHaveProperty('source')
+    expect(cols.source.is_nullable).toBe('NO')
+    expect(cols).toHaveProperty('superseded_at')
+    expect(cols.superseded_at.is_nullable).toBe('YES')
+  })
+
+  it('has akahu_account_id and gmail_label columns on accounts', async () => {
+    const cols = await columnsOf('accounts')
+    expect(cols).toHaveProperty('akahu_account_id')
+    expect(cols).toHaveProperty('gmail_label')
+  })
+
+  it('exposes transaction_source enum with STATEMENT, LIVE, MANUAL values', async () => {
+    expect(await enumValues('transaction_source')).toEqual(['STATEMENT', 'LIVE', 'MANUAL'])
+  })
+
+  it('has an external_integrations table with the expected columns', async () => {
+    const cols = await columnsOf('external_integrations')
+    expect(cols).toHaveProperty('user_id')
+    expect(cols).toHaveProperty('provider')
+    expect(cols).toHaveProperty('encrypted_access_token')
+    expect(cols).toHaveProperty('encrypted_refresh_token')
+    expect(cols).toHaveProperty('expires_at')
+    expect(cols).toHaveProperty('scopes')
+    expect(cols).toHaveProperty('created_at')
+    expect(cols).toHaveProperty('updated_at')
+  })
+
+  it('has RLS policy on external_integrations', async () => {
+    expect(await pgPoliciesOf('external_integrations')).not.toHaveLength(0)
+  })
+
+  it('exposes integration_provider enum with akahu and gmail values', async () => {
+    expect(await enumValues('integration_provider')).toEqual(['akahu', 'gmail'])
+  })
+
+  it('akahu_account_id on accounts has a unique constraint', async () => {
+    const client = new Client({ connectionString: TEST_DB_URL })
+    await client.connect()
+    try {
+      const { rows } = await client.query(
+        `SELECT conname FROM pg_constraint
+         WHERE conrelid = 'public.accounts'::regclass
+           AND contype = 'u'
+           AND pg_get_constraintdef(oid) LIKE '%akahu_account_id%'`
+      )
+      expect(rows.length).toBeGreaterThan(0)
+    } finally {
+      await client.end()
+    }
+  })
+
   it('has a private bank-statements storage bucket with user-scoped policies', async () => {
     const client = new Client({ connectionString: TEST_DB_URL })
     await client.connect()
