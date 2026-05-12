@@ -206,6 +206,31 @@ describe('finance schema', () => {
     }
   })
 
+  it('has a live_sync_runs table with the expected columns', async () => {
+    const cols = await columnsOf('live_sync_runs')
+    expect(cols).toHaveProperty('id')
+    expect(cols).toHaveProperty('user_id')
+    expect(cols).toHaveProperty('provider')
+    expect(cols).toHaveProperty('started_at')
+    expect(cols).toHaveProperty('finished_at')
+    expect(cols).toHaveProperty('status')
+    expect(cols).toHaveProperty('inserted_count')
+    expect(cols).toHaveProperty('error_message')
+    expect(cols).toHaveProperty('trigger')
+    expect(cols.user_id.is_nullable).toBe('NO')
+    expect(cols.provider.is_nullable).toBe('NO')
+    expect(cols.started_at.is_nullable).toBe('NO')
+    expect(cols.status.is_nullable).toBe('NO')
+    expect(cols.inserted_count.is_nullable).toBe('NO')
+    expect(cols.trigger.is_nullable).toBe('NO')
+    expect(cols.finished_at.is_nullable).toBe('YES')
+    expect(cols.error_message.is_nullable).toBe('YES')
+  })
+
+  it('has an RLS policy on live_sync_runs', async () => {
+    expect(await pgPoliciesOf('live_sync_runs')).not.toHaveLength(0)
+  })
+
   it('has a private bank-statements storage bucket with user-scoped policies', async () => {
     const client = new Client({ connectionString: TEST_DB_URL })
     await client.connect()
