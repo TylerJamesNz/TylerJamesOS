@@ -30,6 +30,14 @@ The canonical names for things in this system. When a user-facing label, a route
 
 **Source of Truth Hierarchy.** From most to least authoritative: Statement (canonical audit truth) > Live (mid-period preview, replaced by Statement when one arrives) > Manual (user-entered, sits between in trust depending on context).
 
+## Assistant
+
+**Assistant.** The class of programmatic callers that invoke TJOS Edge Functions on the operator's behalf: Claude Code desktop sessions, claude.ai mobile sessions with the Supabase connector, and any future automations. Distinct from the operator (a person) and from the EFs themselves (the endpoints being called).
+
+**TJOS Assistant Token.** The shared bearer secret an Assistant presents in the `Authorization: Bearer ...` header to authorise an EF call. Env name `TJOS_ASSISTANT_TOKEN`. TJOS-wide: every EF reads the same var. Not an Anthropic API key despite the original draft name `CLAUDE_API_KEY`.
+
+**Task Queue.** The persistent task chart maintained inline in chat, backed by `assistant.tasks` and `assistant.plans` in the TJOS Supabase. Source of truth for "what's on my plate" across desktop and mobile Assistants. Schema lives under the `assistant.*` namespace; the legacy `public.tasks` table is deprecated.
+
 ## Charts and theming
 
 **Categorical Slot.** A position 0..9 in the active palette's 10-colour categorical ramp. Categories and Accounts are assigned a slot at creation, not a fixed hex. Charts read the slot's current colour from CSS custom properties (`--chart-cat-0` through `--chart-cat-9`), so flipping the palette retints every chart in lockstep with the rest of the UI. The Category and Account `colour` fields hold a slot index (integer), not a hex string.
