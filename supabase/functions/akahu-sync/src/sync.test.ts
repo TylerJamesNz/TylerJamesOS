@@ -151,6 +151,92 @@ describe('runAkahuSync', () => {
     expect(rows[0].finished_at).not.toBeNull()
   })
 
+  it('follows cursor.next pagination and inserts rows from every page', async () => {
+    const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
+    const userId = await insertFixtureUser(supabase)
+    await insertMappedAkahuAccount(userId, 'akahu-acc-1')
+
+    const page1: AkahuTransaction[] = [
+      { _id: 'akahu-txn-1', date: '2026-05-01T10:00:00Z', description: 'COFFEE', amount: -4.5, type: 'DEBIT' },
+    ]
+    const page2: AkahuTransaction[] = [
+      { _id: 'akahu-txn-2', date: '2026-05-02T09:00:00Z', description: 'SALARY', amount: 2500, type: 'CREDIT' },
+    ]
+    const calls: Array<{ cursor?: string | null }> = []
+    const akahu: AkahuClientLike = {
+      transactions: {
+        list: async (_userToken, _akahuAccountId, opts) => {
+          calls.push({ cursor: opts?.cursor })
+          if (!opts?.cursor) return { items: page1, cursor: { next: 'page-2' } }
+          if (opts.cursor === 'page-2') return { items: page2, cursor: { next: null } }
+          throw new Error(`unexpected cursor: ${opts.cursor}`)
+        },
+      },
+    }
+
+    await runAkahuSync({ supabase, akahu, userToken: 'fake-user-token', userId, trigger: 'manual' })
+
+    const { rows } = await pgQuery(
+      `SELECT external_id FROM public.transactions WHERE user_id = $1 ORDER BY date ASC`,
+      [userId],
+    )
+    expect(rows.map((r) => r.external_id)).toEqual(['akahu-txn-1', 'akahu-txn-2'])
+    expect(calls.length).toBe(2)
+    expect(calls[1].cursor).toBe('page-2')
+  })
+
+  it('uses a 90-day backfill window when no prior LIVE rows exist for the account', async () => {
+    const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
+    const userId = await insertFixtureUser(supabase)
+    await insertMappedAkahuAccount(userId, 'akahu-acc-1')
+
+    const calls: Array<{ start?: string; end?: string }> = []
+    const akahu: AkahuClientLike = {
+      transactions: {
+        list: async (_userToken, _akahuAccountId, opts) => {
+          calls.push({ start: opts?.start, end: opts?.end })
+          return { items: [], cursor: { next: null } }
+        },
+      },
+    }
+
+    const before = Date.now()
+    await runAkahuSync({ supabase, akahu, userToken: 'fake-user-token', userId, trigger: 'manual' })
+
+    expect(calls.length).toBe(1)
+    const start = new Date(calls[0].start!)
+    const ninetyDaysAgo = before - 90 * 24 * 60 * 60 * 1000
+    expect(start.getTime()).toBeGreaterThanOrEqual(ninetyDaysAgo - 60_000)
+    expect(start.getTime()).toBeLessThanOrEqual(ninetyDaysAgo + 60_000)
+  })
+
+  it('uses a max(date)-2-days rolling window when prior LIVE rows exist', async () => {
+    const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
+    const userId = await insertFixtureUser(supabase)
+    const accountId = await insertMappedAkahuAccount(userId, 'akahu-acc-1')
+
+    await pgQuery(
+      `INSERT INTO public.transactions (user_id, account_id, external_id, date, description, amount, type, source)
+       VALUES ($1, $2, 'seed-1', '2026-05-08', 'PRIOR', -10.00, 'DEBIT', 'LIVE')`,
+      [userId, accountId],
+    )
+
+    const calls: Array<{ start?: string }> = []
+    const akahu: AkahuClientLike = {
+      transactions: {
+        list: async (_userToken, _akahuAccountId, opts) => {
+          calls.push({ start: opts?.start })
+          return { items: [], cursor: { next: null } }
+        },
+      },
+    }
+
+    await runAkahuSync({ supabase, akahu, userToken: 'fake-user-token', userId, trigger: 'manual' })
+
+    expect(calls.length).toBe(1)
+    expect(calls[0].start).toMatch(/^2026-05-06T/)
+  })
+
   it('writes a live_sync_runs row with status=error when the Akahu SDK throws', async () => {
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
     const userId = await insertFixtureUser(supabase)
