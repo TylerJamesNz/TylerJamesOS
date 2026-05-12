@@ -1,6 +1,6 @@
-import { checkAuth } from './auth'
-import { resolveProject, type Project } from './resolver'
-import { renderChart, type Task, type Plan, type TaskStatus } from './renderer'
+import { checkAuth } from './auth.ts'
+import { resolveProject, type Project } from './resolver.ts'
+import { renderChart, type Task, type Plan, type TaskStatus } from './renderer.ts'
 
 export type Db = {
   listProjects: () => Promise<Project[]>
