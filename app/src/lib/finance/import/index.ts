@@ -2,6 +2,7 @@ import { supabase } from '../../supabase'
 import type { Database } from '../../../types/db'
 import { uploadStatementPdf } from './storage'
 import { tryParse, type ParseAttempt } from './parsers'
+import { matchAndMerge } from './matchMerge'
 
 export type ParserStrategy = Database['public']['Enums']['parser_strategy']
 export type StatementStatus = Database['public']['Enums']['statement_status']
@@ -58,21 +59,22 @@ export async function runImport(req: ImportRequest): Promise<ImportResult> {
   await supabase.from('transactions').delete().eq('statement_id', statement.id)
   await supabase.from('balance_snapshots').delete().eq('statement_id', statement.id)
 
-  const txnRows = req.parsed.statement.transactions.map((t, idx) => ({
-    user_id: req.userId,
-    account_id: req.accountId,
-    statement_id: statement.id,
-    external_id: `${req.parsed!.parser}:${statement.id}:${idx}`,
-    date: t.date,
-    description: t.description,
-    amount: Number(t.amount),
-    type: t.type as Database['public']['Enums']['transaction_type'],
-  }))
-
-  if (txnRows.length > 0) {
-    const { error: txnErr } = await supabase.from('transactions').insert(txnRows)
-    if (txnErr) throw txnErr
-  }
+  const { promoted, inserted } = await matchAndMerge({
+    supabase,
+    userId: req.userId,
+    accountId: req.accountId,
+    statementId: statement.id,
+    parser: req.parsed.parser,
+    periodStart: req.parsed.statement.periodStart,
+    periodEnd: req.parsed.statement.periodEnd,
+    statementRows: req.parsed.statement.transactions.map((t) => ({
+      date: t.date,
+      description: t.description,
+      amount: Number(t.amount),
+      type: t.type as Database['public']['Enums']['transaction_type'],
+    })),
+  })
+  const transactionsInserted = promoted + inserted
 
   const { error: snapErr } = await supabase.from('balance_snapshots').insert([
     {
@@ -94,5 +96,5 @@ export async function runImport(req: ImportRequest): Promise<ImportResult> {
   ])
   if (snapErr) throw snapErr
 
-  return { statement, strategy, transactionsInserted: txnRows.length }
+  return { statement, strategy, transactionsInserted }
 }

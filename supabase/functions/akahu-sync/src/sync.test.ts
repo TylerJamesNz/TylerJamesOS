@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { execSync } from 'node:child_process'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { Client as PgClient } from 'pg'
@@ -32,17 +32,9 @@ async function pgQuery(sql: string, params: unknown[] = []) {
   }
 }
 
-async function resetFinanceFixtures() {
-  await pgQuery('DELETE FROM public.transactions')
-  await pgQuery('DELETE FROM public.live_sync_runs')
-  await pgQuery('DELETE FROM public.accounts')
-  await pgQuery('DELETE FROM public.users')
-  await pgQuery('DELETE FROM auth.users')
-}
-
 async function insertFixtureUser(supabase: SupabaseClient): Promise<string> {
   const { data, error } = await supabase.auth.admin.createUser({
-    email: `t1d-${Date.now()}@example.com`,
+    email: `t1d-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.com`,
     password: 'fixture-password',
     email_confirm: true,
   })
@@ -64,6 +56,10 @@ async function insertMappedAkahuAccount(userId: string, akahuAccountId: string):
   return rows[0].id
 }
 
+function randAcc(): string {
+  return `akahu-acc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
 function mockAkahu(txnsByAccount: Record<string, AkahuTransaction[]>): AkahuClientLike {
   return {
     transactions: {
@@ -76,15 +72,14 @@ function mockAkahu(txnsByAccount: Record<string, AkahuTransaction[]>): AkahuClie
 }
 
 describe('runAkahuSync', () => {
-  beforeEach(resetFinanceFixtures)
-
   it('inserts LIVE rows for each Akahu transaction returned for a mapped account', async () => {
+    const akahuAccId = randAcc()
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
     const userId = await insertFixtureUser(supabase)
-    const accountId = await insertMappedAkahuAccount(userId, 'akahu-acc-1')
+    const accountId = await insertMappedAkahuAccount(userId, akahuAccId)
 
     const akahu = mockAkahu({
-      'akahu-acc-1': [
+      [akahuAccId]: [
         { _id: 'akahu-txn-1', date: '2026-05-01T10:00:00Z', description: 'COFFEE', amount: -4.5, type: 'DEBIT' },
         { _id: 'akahu-txn-2', date: '2026-05-02T09:00:00Z', description: 'SALARY', amount: 2500, type: 'CREDIT' },
       ],
@@ -103,12 +98,13 @@ describe('runAkahuSync', () => {
   })
 
   it('is idempotent on re-invocation: same Akahu txns produce no duplicate rows', async () => {
+    const akahuAccId = randAcc()
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
     const userId = await insertFixtureUser(supabase)
-    await insertMappedAkahuAccount(userId, 'akahu-acc-1')
+    await insertMappedAkahuAccount(userId, akahuAccId)
 
     const akahu = mockAkahu({
-      'akahu-acc-1': [
+      [akahuAccId]: [
         { _id: 'akahu-txn-1', date: '2026-05-01T10:00:00Z', description: 'COFFEE', amount: -4.5, type: 'DEBIT' },
         { _id: 'akahu-txn-2', date: '2026-05-02T09:00:00Z', description: 'SALARY', amount: 2500, type: 'CREDIT' },
       ],
@@ -122,12 +118,13 @@ describe('runAkahuSync', () => {
   })
 
   it('writes a live_sync_runs row with status=ok, inserted_count, and trigger on success', async () => {
+    const akahuAccId = randAcc()
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
     const userId = await insertFixtureUser(supabase)
-    await insertMappedAkahuAccount(userId, 'akahu-acc-1')
+    await insertMappedAkahuAccount(userId, akahuAccId)
 
     const akahu = mockAkahu({
-      'akahu-acc-1': [
+      [akahuAccId]: [
         { _id: 'akahu-txn-1', date: '2026-05-01T10:00:00Z', description: 'COFFEE', amount: -4.5, type: 'DEBIT' },
         { _id: 'akahu-txn-2', date: '2026-05-02T09:00:00Z', description: 'SALARY', amount: 2500, type: 'CREDIT' },
       ],
@@ -152,9 +149,10 @@ describe('runAkahuSync', () => {
   })
 
   it('follows cursor.next pagination and inserts rows from every page', async () => {
+    const akahuAccId = randAcc()
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
     const userId = await insertFixtureUser(supabase)
-    await insertMappedAkahuAccount(userId, 'akahu-acc-1')
+    await insertMappedAkahuAccount(userId, akahuAccId)
 
     const page1: AkahuTransaction[] = [
       { _id: 'akahu-txn-1', date: '2026-05-01T10:00:00Z', description: 'COFFEE', amount: -4.5, type: 'DEBIT' },
@@ -186,9 +184,10 @@ describe('runAkahuSync', () => {
   })
 
   it('uses a 90-day backfill window when no prior LIVE rows exist for the account', async () => {
+    const akahuAccId = randAcc()
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
     const userId = await insertFixtureUser(supabase)
-    await insertMappedAkahuAccount(userId, 'akahu-acc-1')
+    await insertMappedAkahuAccount(userId, akahuAccId)
 
     const calls: Array<{ start?: string; end?: string }> = []
     const akahu: AkahuClientLike = {
@@ -211,9 +210,10 @@ describe('runAkahuSync', () => {
   })
 
   it('uses a max(date)-2-days rolling window when prior LIVE rows exist', async () => {
+    const akahuAccId = randAcc()
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
     const userId = await insertFixtureUser(supabase)
-    const accountId = await insertMappedAkahuAccount(userId, 'akahu-acc-1')
+    const accountId = await insertMappedAkahuAccount(userId, akahuAccId)
 
     await pgQuery(
       `INSERT INTO public.transactions (user_id, account_id, external_id, date, description, amount, type, source)
@@ -238,9 +238,10 @@ describe('runAkahuSync', () => {
   })
 
   it('writes a live_sync_runs row with status=error when the Akahu SDK throws', async () => {
+    const akahuAccId = randAcc()
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY)
     const userId = await insertFixtureUser(supabase)
-    await insertMappedAkahuAccount(userId, 'akahu-acc-1')
+    await insertMappedAkahuAccount(userId, akahuAccId)
 
     const akahu: AkahuClientLike = {
       transactions: {
