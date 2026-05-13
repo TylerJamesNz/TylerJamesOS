@@ -1,0 +1,21 @@
+{
+  "title": "Finance dashboard: prototype",
+  "pathFromRepoRoot": "app/prototype",
+  "variants": [
+    {
+      "key": "A",
+      "name": "Balanced",
+      "path": "../finance-mockup.html"
+    },
+    {
+      "key": "B",
+      "name": "Ledger",
+      "path": "../finance-mockup-ledger.html"
+    },
+    {
+      "key": "C",
+      "name": "Flow",
+      "path": "../finance-mockup-flow.html"
+    }
+  ]
+}

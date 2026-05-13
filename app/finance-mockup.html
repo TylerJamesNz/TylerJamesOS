@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#151B36" />
+  <title>Finance — Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <style>
+    /* ============================================================
+       DESIGN TOKENS — mirrored from app/brand-kit.html
+       (palette: paletteHueShift30 in app/src/themes/palettes.ts)
+       ============================================================ */
+    :root {
+      --color-bg:           #F7F8F9;
+      --color-surface:      #ffffff;
+      --color-surface-2:    #EEF0F2;
+      --color-border:       #DDE1E5;
+      --color-border-soft:  #EBEEF0;
+      --color-primary:      #151B36;
+      --color-accent:       #193C61;
+      --color-accent-hover: #0F2C4B;
+      --color-text:         #151B36;
+      --color-text-muted:   #4A5370;
+      --color-text-subtle:  #8F9AAF;
+      --color-success:      #16a34a;
+      --color-warning:      #d97706;
+      --color-destructive:  #dc2626;
+      --color-info:         #193C61;
+
+      --color-sidebar-bg:      #151B36;
+      --color-sidebar-border:  #1E274A;
+      --color-sidebar-text:    #A8B3CB;
+      --color-sidebar-text-hi: #E8EBF2;
+      --color-sidebar-accent:  #7D8EA0;
+
+      --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono:    'Geist Mono', 'Fira Code', monospace;
+
+      --text-xs:    11px;
+      --text-sm:    13px;
+      --text-base:  15px;
+      --text-md:    17px;
+      --text-lg:    20px;
+      --text-xl:    24px;
+      --text-2xl:   32px;
+      --text-3xl:   40px;
+      --text-4xl:   56px;
+
+      --weight-regular: 400;
+      --weight-medium:  500;
+      --weight-semi:    600;
+      --weight-bold:    700;
+
+      --leading-tight:  1.2;
+      --leading-snug:   1.4;
+      --leading-normal: 1.6;
+
+      --space-1:  4px;
+      --space-2:  8px;
+      --space-3:  12px;
+      --space-4:  16px;
+      --space-5:  20px;
+      --space-6:  24px;
+      --space-8:  32px;
+      --space-10: 40px;
+      --space-12: 48px;
+      --space-16: 64px;
+
+      --radius-sm:   4px;
+      --radius-md:   8px;
+      --radius-lg:   12px;
+      --radius-xl:   16px;
+      --radius-full: 9999px;
+
+      --shadow-sm:  0 1px 3px rgba(21,27,54,0.08);
+      --shadow-md:  0 4px 12px rgba(21,27,54,0.10);
+      --shadow-lg:  0 8px 32px rgba(21,27,54,0.12);
+
+      --ease-default: 150ms ease;
+
+      /* Chart categorical ramp — 10 slots, hue-rotated 36° per slot from accent
+         #193C61. Derived from chartCatRamp() in app/src/themes/chartSlots.ts
+         (target L=0.5 on white surface, min S=0.45, accent S clamped). */
+      --chart-cat-0: #3480CB; /* blue (accent hue) */
+      --chart-cat-1: #4334CB; /* indigo */
+      --chart-cat-2: #9E34CB; /* purple */
+      --chart-cat-3: #CB349E; /* magenta */
+      --chart-cat-4: #CB3443; /* red */
+      --chart-cat-5: #CB8034; /* orange */
+      --chart-cat-6: #BCCB34; /* yellow-green */
+      --chart-cat-7: #61CB34; /* green */
+      --chart-cat-8: #34CB61; /* emerald */
+      --chart-cat-9: #34CBBC; /* teal */
+    }
+
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      font-size: var(--text-base);
+      color: var(--color-text);
+      background: var(--color-bg);
+      -webkit-font-smoothing: antialiased;
+      line-height: var(--leading-normal);
+    }
+
+    /* ============================================================
+       LAYOUT
+       ============================================================ */
+    .page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: var(--space-12) var(--space-8);
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-8);
+      flex-wrap: wrap;
+    }
+
+    .page-title {
+      font-family: var(--font-display);
+      font-size: var(--text-3xl);
+      font-weight: var(--weight-semi);
+      letter-spacing: -0.02em;
+      line-height: var(--leading-tight);
+    }
+
+    .page-subtitle {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin-top: var(--space-1);
+      font-family: var(--font-mono);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 0 var(--space-4);
+      height: 36px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      cursor: pointer;
+      border: none;
+      transition: background var(--ease-default);
+      white-space: nowrap;
+    }
+    .btn-primary  { background: var(--color-accent); color: #fff; }
+    .btn-primary:hover { background: var(--color-accent-hover); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+    }
+    .btn-ghost:hover { background: var(--color-surface-2); color: var(--color-text); }
+
+    /* Cards */
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: var(--text-md);
+      font-weight: var(--weight-semi);
+      margin-bottom: var(--space-1);
+    }
+
+    .card-subtitle {
+      font-size: var(--text-xs);
+      font-family: var(--font-mono);
+      color: var(--color-text-subtle);
+      margin-bottom: var(--space-4);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Grids */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+    .grid-full { display: grid; grid-template-columns: 1fr; gap: var(--space-4); }
+
+    .row { margin-bottom: var(--space-4); }
+
+    /* Stat cards */
+    .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--space-4); }
+    .stat-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+    }
+    .stat-label {
+      font-size: var(--text-xs);
+      color: var(--color-text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: var(--weight-semi);
+    }
+    .stat-value {
+      font-size: var(--text-2xl);
+      font-weight: var(--weight-semi);
+      font-family: var(--font-display);
+      margin: var(--space-1) 0;
+      line-height: 1;
+    }
+    .stat-change { font-size: var(--text-xs); color: var(--color-text-muted); }
+    .stat-change .up   { color: var(--color-success); }
+    .stat-change .down { color: var(--color-destructive); }
+
+    /* Chart containers */
+    .chart {
+      width: 100%;
+      height: 280px;
+    }
+    .chart-sm { height: 240px; }
+    .chart-lg { height: 320px; }
+    .chart-nav { height: 64px; }
+
+    /* Transactions */
+    .tx-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-border-soft);
+    }
+    .tx-row:last-child { border-bottom: none; }
+
+    .tx-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: var(--text-sm);
+      color: var(--color-accent);
+      font-family: var(--font-mono);
+    }
+
+    .tx-info { flex: 1; min-width: 0; }
+
+    .tx-name {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tx-meta {
+      font-size: var(--text-xs);
+      color: var(--color-text-subtle);
+      margin-top: 2px;
+    }
+    .tx-amount {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      font-family: var(--font-mono);
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .tx-amount.debit  { color: var(--color-text); }
+    .tx-amount.credit { color: var(--color-success); }
+
+    .tx-link-note {
+      font-size: 10px;
+      color: var(--color-text-subtle);
+      margin-top: 2px;
+      font-style: italic;
+    }
+
+    /* Tiny info pill for "Net Cost applied" etc */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px var(--space-2);
+      border-radius: var(--radius-full);
+      font-size: 10px;
+      font-weight: var(--weight-medium);
+      background: rgba(25,60,97,0.08);
+      color: var(--color-accent);
+      margin-left: var(--space-2);
+      vertical-align: middle;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 540px) {
+      .stat-grid { grid-template-columns: 1fr; }
+      .page { padding: var(--space-6) var(--space-4); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     DUMMY DATA — entity shape mirrors _project/data-model.md.
+     Edit any value here and reload to fiddle with the dashboard.
+     ============================================================ -->
+<script id="finance-data" type="application/json">
+{
+  "user_settings": {
+    "home_currency": "AUD",
+    "flatmate_names": ["Alex", "Sam"]
+  },
+  "fx_rates": [
+    { "date": "2025-05-31", "base": "NZD", "quote": "AUD", "rate": 0.918 },
+    { "date": "2025-06-30", "base": "NZD", "quote": "AUD", "rate": 0.921 },
+    { "date": "2025-07-31", "base": "NZD", "quote": "AUD", "rate": 0.915 },
+    { "date": "2025-08-31", "base": "NZD", "quote": "AUD", "rate": 0.917 },
+    { "date": "2025-09-30", "base": "NZD", "quote": "AUD", "rate": 0.922 },
+    { "date": "2025-10-31", "base": "NZD", "quote": "AUD", "rate": 0.919 },
+    { "date": "2025-11-30", "base": "NZD", "quote": "AUD", "rate": 0.916 },
+    { "date": "2025-12-31", "base": "NZD", "quote": "AUD", "rate": 0.914 },
+    { "date": "2026-01-31", "base": "NZD", "quote": "AUD", "rate": 0.918 },
+    { "date": "2026-02-28", "base": "NZD", "quote": "AUD", "rate": 0.921 },
+    { "date": "2026-03-31", "base": "NZD", "quote": "AUD", "rate": 0.924 },
+    { "date": "2026-04-30", "base": "NZD", "quote": "AUD", "rate": 0.920 },
+    { "date": "2026-05-31", "base": "NZD", "quote": "AUD", "rate": 0.922 }
+  ],
+  "accounts": [
+    { "id": "anz-nz",         "name": "ANZ NZ",          "account_type": "DEPOSIT",    "currency": "NZD", "colour_slot": 0 },
+    { "id": "anz-au",         "name": "ANZ AU Primary",  "account_type": "DEPOSIT",    "currency": "AUD", "colour_slot": 1 },
+    { "id": "anz-au-savings", "name": "ANZ AU Savings",  "account_type": "DEPOSIT",    "currency": "AUD", "colour_slot": 2 },
+    { "id": "kiwisaver",      "name": "KiwiSaver",       "account_type": "INVESTMENT", "currency": "NZD", "colour_slot": 3 },
+    { "id": "ausuper",        "name": "AustralianSuper", "account_type": "INVESTMENT", "currency": "AUD", "colour_slot": 4 }
+  ],
+  "balance_snapshots": [
+    { "account_id": "anz-nz", "date": "2025-05-31", "balance": 4200 },
+    { "account_id": "anz-nz", "date": "2025-06-30", "balance": 4800 },
+    { "account_id": "anz-nz", "date": "2025-07-31", "balance": 3900 },
+    { "account_id": "anz-nz", "date": "2025-08-31", "balance": 5200 },
+    { "account_id": "anz-nz", "date": "2025-09-30", "balance": 4400 },
+    { "account_id": "anz-nz", "date": "2025-10-31", "balance": 5100 },
+    { "account_id": "anz-nz", "date": "2025-11-30", "balance": 4600 },
+    { "account_id": "anz-nz", "date": "2025-12-31", "balance": 3800 },
+    { "account_id": "anz-nz", "date": "2026-01-31", "balance": 5500 },
+    { "account_id": "anz-nz", "date": "2026-02-28", "balance": 4900 },
+    { "account_id": "anz-nz", "date": "2026-03-31", "balance": 5200 },
+    { "account_id": "anz-nz", "date": "2026-04-30", "balance": 4700 },
+    { "account_id": "anz-nz", "date": "2026-05-31", "balance": 5500 },
+
+    { "account_id": "anz-au", "date": "2025-05-31", "balance": 3400 },
+    { "account_id": "anz-au", "date": "2025-06-30", "balance": 3900 },
+    { "account_id": "anz-au", "date": "2025-07-31", "balance": 3200 },
+    { "account_id": "anz-au", "date": "2025-08-31", "balance": 4100 },
+    { "account_id": "anz-au", "date": "2025-09-30", "balance": 3700 },
+    { "account_id": "anz-au", "date": "2025-10-31", "balance": 4400 },
+    { "account_id": "anz-au", "date": "2025-11-30", "balance": 3900 },
+    { "account_id": "anz-au", "date": "2025-12-31", "balance": 3500 },
+    { "account_id": "anz-au", "date": "2026-01-31", "balance": 4600 },
+    { "account_id": "anz-au", "date": "2026-02-28", "balance": 4100 },
+    { "account_id": "anz-au", "date": "2026-03-31", "balance": 4400 },
+    { "account_id": "anz-au", "date": "2026-04-30", "balance": 3900 },
+    { "account_id": "anz-au", "date": "2026-05-31", "balance": 4200 },
+
+    { "account_id": "anz-au-savings", "date": "2025-05-31", "balance": 14000 },
+    { "account_id": "anz-au-savings", "date": "2025-06-30", "balance": 15200 },
+    { "account_id": "anz-au-savings", "date": "2025-07-31", "balance": 15600 },
+    { "account_id": "anz-au-savings", "date": "2025-08-31", "balance": 16800 },
+    { "account_id": "anz-au-savings", "date": "2025-09-30", "balance": 17400 },
+    { "account_id": "anz-au-savings", "date": "2025-10-31", "balance": 18200 },
+    { "account_id": "anz-au-savings", "date": "2025-11-30", "balance": 18800 },
+    { "account_id": "anz-au-savings", "date": "2025-12-31", "balance": 19400 },
+    { "account_id": "anz-au-savings", "date": "2026-01-31", "balance": 20100 },
+    { "account_id": "anz-au-savings", "date": "2026-02-28", "balance": 20600 },
+    { "account_id": "anz-au-savings", "date": "2026-03-31", "balance": 21200 },
+    { "account_id": "anz-au-savings", "date": "2026-04-30", "balance": 21600 },
+    { "account_id": "anz-au-savings", "date": "2026-05-31", "balance": 22000 },
+
+    { "account_id": "kiwisaver", "date": "2025-05-31", "balance": 44500 },
+    { "account_id": "kiwisaver", "date": "2025-06-30", "balance": 45200 },
+    { "account_id": "kiwisaver", "date": "2025-07-31", "balance": 46100 },
+    { "account_id": "kiwisaver", "date": "2025-08-31", "balance": 45800 },
+    { "account_id": "kiwisaver", "date": "2025-09-30", "balance": 47200 },
+    { "account_id": "kiwisaver", "date": "2025-10-31", "balance": 48100 },
+    { "account_id": "kiwisaver", "date": "2025-11-30", "balance": 47600 },
+    { "account_id": "kiwisaver", "date": "2025-12-31", "balance": 48900 },
+    { "account_id": "kiwisaver", "date": "2026-01-31", "balance": 49500 },
+    { "account_id": "kiwisaver", "date": "2026-02-28", "balance": 50100 },
+    { "account_id": "kiwisaver", "date": "2026-03-31", "balance": 50800 },
+    { "account_id": "kiwisaver", "date": "2026-04-30", "balance": 51400 },
+    { "account_id": "kiwisaver", "date": "2026-05-31", "balance": 52000 },
+
+    { "account_id": "ausuper", "date": "2025-05-31", "balance": 83500 },
+    { "account_id": "ausuper", "date": "2025-06-30", "balance": 85100 },
+    { "account_id": "ausuper", "date": "2025-07-31", "balance": 86200 },
+    { "account_id": "ausuper", "date": "2025-08-31", "balance": 85800 },
+    { "account_id": "ausuper", "date": "2025-09-30", "balance": 87400 },
+    { "account_id": "ausuper", "date": "2025-10-31", "balance": 88600 },
+    { "account_id": "ausuper", "date": "2025-11-30", "balance": 88100 },
+    { "account_id": "ausuper", "date": "2025-12-31", "balance": 89800 },
+    { "account_id": "ausuper", "date": "2026-01-31", "balance": 91200 },
+    { "account_id": "ausuper", "date": "2026-02-28", "balance": 92500 },
+    { "account_id": "ausuper", "date": "2026-03-31", "balance": 93400 },
+    { "account_id": "ausuper", "date": "2026-04-30", "balance": 94100 },
+    { "account_id": "ausuper", "date": "2026-05-31", "balance": 95000 }
+  ],
+  "categories": [
+    { "id": "housing",        "name": "Housing",        "kind": "EXPENSE", "colour_slot": 5 },
+    { "id": "groceries",      "name": "Groceries",      "kind": "EXPENSE", "colour_slot": 6 },
+    { "id": "dining",         "name": "Dining",         "kind": "EXPENSE", "colour_slot": 7 },
+    { "id": "transport",      "name": "Transport",      "kind": "EXPENSE", "colour_slot": 8 },
+    { "id": "subscriptions",  "name": "Subscriptions",  "kind": "EXPENSE", "colour_slot": 9 },
+    { "id": "utilities",      "name": "Utilities",      "kind": "EXPENSE", "colour_slot": 0 },
+    { "id": "health",         "name": "Health",         "kind": "EXPENSE", "colour_slot": 1 },
+    { "id": "entertainment",  "name": "Entertainment",  "kind": "EXPENSE", "colour_slot": 2 },
+    { "id": "travel",         "name": "Travel",         "kind": "EXPENSE", "colour_slot": 3 },
+    { "id": "transfers",      "name": "Transfers",      "kind": "TRANSFER","colour_slot": 4 },
+    { "id": "salary",         "name": "Salary",         "kind": "INCOME",  "colour_slot": 7 }
+  ],
+  "transactions": [
+    { "id": "tx-salary-05", "account_id": "anz-au", "date": "2026-05-12", "amount":  6800, "description": "ACME PTY LTD SALARY",     "category_id": "salary" },
+    { "id": "tx-rent-05",   "account_id": "anz-au", "date": "2026-05-01", "amount": -2400, "description": "ANZ INT BANKING RENT",    "category_id": "housing" },
+    { "id": "tx-flat-a-05", "account_id": "anz-au", "date": "2026-05-03", "amount":   800, "description": "FROM ALEX FLATMATE",     "category_id": "transfers" },
+    { "id": "tx-flat-s-05", "account_id": "anz-au", "date": "2026-05-04", "amount":   800, "description": "FROM SAM FLATMATE",      "category_id": "transfers" },
+    { "id": "tx-woolies-1", "account_id": "anz-au", "date": "2026-05-06", "amount":  -142, "description": "WOOLWORTHS METRO",       "category_id": "groceries" },
+    { "id": "tx-woolies-2", "account_id": "anz-au", "date": "2026-05-11", "amount":  -118, "description": "WOOLWORTHS METRO",       "category_id": "groceries" },
+    { "id": "tx-coles-1",   "account_id": "anz-au", "date": "2026-04-29", "amount":   -96, "description": "COLES SUPERMARKETS",     "category_id": "groceries" },
+    { "id": "tx-uber-1",    "account_id": "anz-au", "date": "2026-05-08", "amount":   -24, "description": "UBER TRIP",              "category_id": "transport" },
+    { "id": "tx-uber-2",    "account_id": "anz-au", "date": "2026-05-09", "amount":   -38, "description": "UBER EATS",              "category_id": "dining" },
+    { "id": "tx-myki",      "account_id": "anz-au", "date": "2026-05-02", "amount":   -50, "description": "MYKI TOP UP",            "category_id": "transport" },
+    { "id": "tx-netflix",   "account_id": "anz-au", "date": "2026-05-05", "amount":   -20, "description": "NETFLIX.COM",            "category_id": "subscriptions" },
+    { "id": "tx-spotify",   "account_id": "anz-au", "date": "2026-05-05", "amount":   -13, "description": "SPOTIFY P05",            "category_id": "subscriptions" },
+    { "id": "tx-agl",       "account_id": "anz-au", "date": "2026-05-10", "amount":  -184, "description": "AGL ELECTRICITY",        "category_id": "utilities" },
+    { "id": "tx-telstra",   "account_id": "anz-au", "date": "2026-05-07", "amount":   -75, "description": "TELSTRA MOBILE",         "category_id": "utilities" },
+    { "id": "tx-dining-1",  "account_id": "anz-au", "date": "2026-05-09", "amount":   -68, "description": "BAR SOMA ST KILDA",      "category_id": "dining" },
+    { "id": "tx-dining-2",  "account_id": "anz-au", "date": "2026-04-26", "amount":   -42, "description": "GUZMAN Y GOMEZ",         "category_id": "dining" },
+    { "id": "tx-chemist",   "account_id": "anz-au", "date": "2026-05-08", "amount":   -28, "description": "CHEMIST WAREHOUSE",      "category_id": "health" },
+    { "id": "tx-cinema",    "account_id": "anz-au", "date": "2026-04-19", "amount":   -32, "description": "PALACE CINEMAS",         "category_id": "entertainment" },
+    { "id": "tx-flights",   "account_id": "anz-au", "date": "2026-04-12", "amount":  -420, "description": "AIR NZ FLIGHTS",         "category_id": "travel" },
+    { "id": "tx-anznz-1",   "account_id": "anz-nz", "date": "2026-04-22", "amount":  -180, "description": "COUNTDOWN WGTN",         "category_id": "groceries" },
+    { "id": "tx-anznz-2",   "account_id": "anz-nz", "date": "2026-04-15", "amount":   -55, "description": "Z ENERGY",               "category_id": "transport" },
+    { "id": "tx-anznz-3",   "account_id": "anz-nz", "date": "2026-03-28", "amount":  -120, "description": "MERCURY ENERGY",         "category_id": "utilities" },
+    { "id": "tx-anznz-4",   "account_id": "anz-nz", "date": "2026-03-10", "amount":   -88, "description": "NEW WORLD",              "category_id": "groceries" },
+    { "id": "tx-salary-04", "account_id": "anz-au", "date": "2026-04-12", "amount":  6800, "description": "ACME PTY LTD SALARY",     "category_id": "salary" },
+    { "id": "tx-rent-04",   "account_id": "anz-au", "date": "2026-04-01", "amount": -2400, "description": "ANZ INT BANKING RENT",    "category_id": "housing" },
+    { "id": "tx-flat-a-04", "account_id": "anz-au", "date": "2026-04-03", "amount":   800, "description": "FROM ALEX FLATMATE",     "category_id": "transfers" },
+    { "id": "tx-flat-s-04", "account_id": "anz-au", "date": "2026-04-05", "amount":   800, "description": "FROM SAM FLATMATE",      "category_id": "transfers" }
+  ],
+  "transaction_links": [
+    { "parent_id": "tx-rent-05", "child_id": "tx-flat-a-05", "link_type": "NETS_AGAINST" },
+    { "parent_id": "tx-rent-05", "child_id": "tx-flat-s-05", "link_type": "NETS_AGAINST" },
+    { "parent_id": "tx-rent-04", "child_id": "tx-flat-a-04", "link_type": "NETS_AGAINST" },
+    { "parent_id": "tx-rent-04", "child_id": "tx-flat-s-04", "link_type": "NETS_AGAINST" }
+  ]
+}
+</script>
+
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Finance</h1>
+      <div class="page-subtitle" id="header-subtitle">Last 12 months · AUD</div>
+    </div>
+    <div style="display:flex; gap: var(--space-2);">
+      <button class="btn btn-ghost">Refresh</button>
+      <button class="btn btn-primary">Import statement</button>
+    </div>
+  </header>
+
+  <!-- Time range scrubber -->
+  <div class="card row" style="padding: var(--space-3) var(--space-4);">
+    <div id="chart-nav" class="chart chart-nav"></div>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid row">
+    <div class="stat-card">
+      <div class="stat-label">Net Worth</div>
+      <div class="stat-value" id="stat-net-worth">—</div>
+      <div class="stat-change"><span class="up" id="stat-net-worth-delta">—</span> vs 12mo ago</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Liquid</div>
+      <div class="stat-value" id="stat-liquid">—</div>
+      <div class="stat-change">Deposit accounts total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Saved this month</div>
+      <div class="stat-value" id="stat-saved">—</div>
+      <div class="stat-change">Income − Expense (Net) <span class="pill">Net Cost</span></div>
+    </div>
+  </div>
+
+  <!-- Row 1: Net Worth donut + Liquid line -->
+  <div class="grid-2 row">
+    <div class="card">
+      <div class="card-title">Net Worth</div>
+      <div class="card-subtitle">As of period end · by account</div>
+      <div id="chart-net-worth" class="chart"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Liquid</div>
+      <div class="card-subtitle">Deposit accounts · running total · AUD</div>
+      <div id="chart-liquid" class="chart"></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Investments line (full width) -->
+  <div class="grid-full row">
+    <div class="card">
+      <div class="card-title">Investments</div>
+      <div class="card-subtitle">Per fund · plus total · AUD</div>
+      <div id="chart-investments" class="chart chart-lg"></div>
+    </div>
+  </div>
+
+  <!-- Row 3: Monthly snapshot (full width) -->
+  <div class="grid-full row">
+    <div class="card">
+      <div class="card-title">Monthly snapshot <span class="pill">Net Cost</span></div>
+      <div class="card-subtitle">Income vs expense · trailing month of displayed range</div>
+      <div id="chart-monthly" class="chart"></div>
+    </div>
+  </div>
+
+  <!-- Row 4: Category pie + Transactions -->
+  <div class="grid-2 row">
+    <div class="card">
+      <div class="card-title">Expenses by category</div>
+      <div class="card-subtitle">Displayed range · AUD · transfers excluded</div>
+      <div id="chart-category" class="chart"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Recent transactions</div>
+      <div class="card-subtitle">Latest 8 in range</div>
+      <div id="tx-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // PARSE DATA + COLOUR PALETTE
+  // ============================================================
+  const DATA = JSON.parse(document.getElementById('finance-data').textContent);
+
+  const root = getComputedStyle(document.documentElement);
+  const cssVar = (name) => root.getPropertyValue(name).trim();
+  const SLOT = Array.from({ length: 10 }, (_, i) => cssVar(`--chart-cat-${i}`));
+  const COLOR_TEXT = cssVar('--color-text');
+  const COLOR_TEXT_SUBTLE = cssVar('--color-text-subtle');
+  const COLOR_TEXT_MUTED = cssVar('--color-text-muted');
+  const COLOR_BORDER_SOFT = cssVar('--color-border-soft');
+  const COLOR_ACCENT = cssVar('--color-accent');
+  const COLOR_SUCCESS = cssVar('--color-success');
+  const COLOR_DESTRUCTIVE = cssVar('--color-destructive');
+
+  const ACCOUNT_BY_ID = Object.fromEntries(DATA.accounts.map(a => [a.id, a]));
+  const CATEGORY_BY_ID = Object.fromEntries(DATA.categories.map(c => [c.id, c]));
+  const FX_BY_DATE = Object.fromEntries(DATA.fx_rates.map(r => [r.date, r.rate]));
+  const FX_DATES_SORTED = DATA.fx_rates.map(r => r.date).sort();
+
+  // Convert any amount in native account currency to AUD, using nearest-prior FX rate.
+  function toAud(amount, currency, date) {
+    if (currency === 'AUD') return amount;
+    const earlier = FX_DATES_SORTED.filter(d => d <= date);
+    const fxDate = earlier.length ? earlier[earlier.length - 1] : FX_DATES_SORTED[0];
+    return amount * FX_BY_DATE[fxDate];
+  }
+
+  // Apply NETS_AGAINST links: returns map of tx.id → adjusted absolute amount.
+  // Parent outgoing is reduced by sum of linked children; children are zeroed for category attribution.
+  const ZERO_FOR_CATEGORY = new Set();
+  const PARENT_ADJUSTMENT = {};
+  for (const link of DATA.transaction_links) {
+    if (link.link_type !== 'NETS_AGAINST') continue;
+    const child = DATA.transactions.find(t => t.id === link.child_id);
+    const parent = DATA.transactions.find(t => t.id === link.parent_id);
+    if (!child || !parent) continue;
+    ZERO_FOR_CATEGORY.add(child.id);
+    PARENT_ADJUSTMENT[parent.id] = (PARENT_ADJUSTMENT[parent.id] || 0) + Math.abs(child.amount);
+  }
+
+  // ============================================================
+  // FORMATTERS
+  // ============================================================
+  const fmtAud = (n) => new Intl.NumberFormat('en-AU', {
+    style: 'currency', currency: 'AUD', maximumFractionDigits: 0,
+  }).format(n);
+  const fmtAud2 = (n) => new Intl.NumberFormat('en-AU', {
+    style: 'currency', currency: 'AUD', maximumFractionDigits: 2,
+  }).format(n);
+
+  function shortDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-AU', { day: '2-digit', month: 'short' });
+  }
+
+  // ============================================================
+  // DERIVED SERIES
+  // ============================================================
+  // Snapshots converted to AUD, keyed by date+account.
+  // Returns { dates: ['2025-05-31', ...], byAccount: { acc_id: [..aud..] } }
+  function buildSnapshotSeries() {
+    const dates = Array.from(new Set(DATA.balance_snapshots.map(s => s.date))).sort();
+    const byAccount = {};
+    for (const acc of DATA.accounts) {
+      byAccount[acc.id] = dates.map(date => {
+        const snap = DATA.balance_snapshots.find(s => s.account_id === acc.id && s.date === date);
+        if (!snap) return null;
+        return toAud(snap.balance, acc.currency, date);
+      });
+    }
+    return { dates, byAccount };
+  }
+  const SNAP = buildSnapshotSeries();
+
+  function depositTotalSeries() {
+    return SNAP.dates.map((date, i) => {
+      let sum = 0;
+      for (const acc of DATA.accounts) {
+        if (acc.account_type !== 'DEPOSIT') continue;
+        const v = SNAP.byAccount[acc.id][i];
+        if (v != null) sum += v;
+      }
+      return [date, Math.round(sum)];
+    });
+  }
+  const LIQUID_SERIES = depositTotalSeries();
+
+  function investmentSeries() {
+    const inv = DATA.accounts.filter(a => a.account_type === 'INVESTMENT');
+    const perFund = inv.map(acc => ({
+      name: acc.name,
+      slot: acc.colour_slot,
+      data: SNAP.dates.map((date, i) => [date, Math.round(SNAP.byAccount[acc.id][i] ?? 0)]),
+    }));
+    const totals = SNAP.dates.map((date, i) => {
+      let sum = 0;
+      for (const acc of inv) sum += SNAP.byAccount[acc.id][i] ?? 0;
+      return [date, Math.round(sum)];
+    });
+    return { perFund, totals };
+  }
+  const INVESTMENTS = investmentSeries();
+
+  function netWorthSlices() {
+    const lastIdx = SNAP.dates.length - 1;
+    return DATA.accounts.map(acc => ({
+      name: acc.name,
+      value: Math.round(SNAP.byAccount[acc.id][lastIdx] ?? 0),
+      itemStyle: { color: SLOT[acc.colour_slot] },
+    }));
+  }
+
+  function lastMonthRange() {
+    const dates = DATA.transactions.map(t => t.date).sort();
+    const lastDate = dates[dates.length - 1];
+    const d = new Date(lastDate);
+    const start = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
+    const end   = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().slice(0, 10);
+    return { start, end };
+  }
+
+  // Monthly snapshot: income vs net expense for trailing month.
+  function monthlySnapshot() {
+    const { start, end } = lastMonthRange();
+    let income = 0;
+    let netExpense = 0;
+    for (const tx of DATA.transactions) {
+      if (tx.date < start || tx.date > end) continue;
+      const cat = CATEGORY_BY_ID[tx.category_id];
+      if (!cat) continue;
+      const acc = ACCOUNT_BY_ID[tx.account_id];
+      const aud = toAud(tx.amount, acc.currency, tx.date);
+      if (cat.kind === 'INCOME') {
+        income += aud;
+      } else if (cat.kind === 'EXPENSE') {
+        // Apply parent adjustment from reimbursements.
+        const adj = PARENT_ADJUSTMENT[tx.id] || 0;
+        const adjusted = Math.abs(aud) - adj;
+        netExpense += Math.max(0, adjusted);
+      }
+      // TRANSFERS excluded from both — Net Cost: linked children zeroed via ZERO_FOR_CATEGORY
+    }
+    return { start, end, income, netExpense, saved: income - netExpense };
+  }
+  const MONTHLY = monthlySnapshot();
+
+  // Category breakdown for full range, expense categories only, Net Cost applied.
+  function categoryBreakdown() {
+    const totals = {};
+    for (const tx of DATA.transactions) {
+      const cat = CATEGORY_BY_ID[tx.category_id];
+      if (!cat || cat.kind !== 'EXPENSE') continue;
+      if (ZERO_FOR_CATEGORY.has(tx.id)) continue;
+      const acc = ACCOUNT_BY_ID[tx.account_id];
+      const aud = Math.abs(toAud(tx.amount, acc.currency, tx.date));
+      const adj = PARENT_ADJUSTMENT[tx.id] || 0;
+      totals[cat.id] = (totals[cat.id] || 0) + Math.max(0, aud - adj);
+    }
+    return Object.entries(totals).map(([id, value]) => {
+      const cat = CATEGORY_BY_ID[id];
+      return { name: cat.name, value: Math.round(value), itemStyle: { color: SLOT[cat.colour_slot] } };
+    }).sort((a, b) => b.value - a.value);
+  }
+
+  // ============================================================
+  // STAT CARDS
+  // ============================================================
+  function renderStats() {
+    const slices = netWorthSlices();
+    const netWorth = slices.reduce((sum, s) => sum + s.value, 0);
+    const liquid = LIQUID_SERIES[LIQUID_SERIES.length - 1][1];
+    const netWorth12moAgo = (() => {
+      let sum = 0;
+      for (const acc of DATA.accounts) sum += SNAP.byAccount[acc.id][0] ?? 0;
+      return sum;
+    })();
+    const delta = netWorth - netWorth12moAgo;
+    const deltaPct = (delta / netWorth12moAgo) * 100;
+
+    document.getElementById('stat-net-worth').textContent = fmtAud(netWorth);
+    const dEl = document.getElementById('stat-net-worth-delta');
+    dEl.textContent = `${delta >= 0 ? '↑' : '↓'} ${fmtAud(Math.abs(delta))} (${deltaPct.toFixed(1)}%)`;
+    dEl.className = delta >= 0 ? 'up' : 'down';
+
+    document.getElementById('stat-liquid').textContent = fmtAud(liquid);
+    document.getElementById('stat-saved').textContent = fmtAud(MONTHLY.saved);
+  }
+
+  // ============================================================
+  // ECHARTS — shared options + chart instances
+  // ============================================================
+  const SHARED_GRID = { left: 56, right: 16, top: 24, bottom: 28 };
+  const AXIS_LINE = { lineStyle: { color: COLOR_BORDER_SOFT } };
+  const AXIS_LABEL = { color: COLOR_TEXT_SUBTLE, fontSize: 11, fontFamily: 'Geist Mono, monospace' };
+  const SPLIT_LINE = { lineStyle: { color: COLOR_BORDER_SOFT, type: 'dashed' } };
+
+  function makeTimeAxis() {
+    return {
+      type: 'time',
+      axisLine: AXIS_LINE,
+      axisTick: { show: false },
+      axisLabel: AXIS_LABEL,
+      splitLine: { show: false },
+    };
+  }
+  function makeValueAxis() {
+    return {
+      type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: {
+        ...AXIS_LABEL,
+        formatter: (v) => v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${v}`,
+      },
+      splitLine: SPLIT_LINE,
+    };
+  }
+
+  // -- Navigator (top scrubber) --
+  const navChart = echarts.init(document.getElementById('chart-nav'));
+  navChart.setOption({
+    grid: { left: 56, right: 16, top: 4, bottom: 28 },
+    xAxis: makeTimeAxis(),
+    yAxis: { ...makeValueAxis(), show: false, splitLine: { show: false } },
+    series: [{
+      type: 'line',
+      data: LIQUID_SERIES,
+      smooth: true,
+      symbol: 'none',
+      lineStyle: { color: COLOR_ACCENT, width: 1.5 },
+      areaStyle: { color: 'rgba(25, 60, 97, 0.08)' },
+    }],
+    dataZoom: [{
+      type: 'slider',
+      height: 28,
+      bottom: 0,
+      start: 0,
+      end: 100,
+      borderColor: 'transparent',
+      backgroundColor: 'rgba(238, 240, 242, 0.5)',
+      fillerColor: 'rgba(25, 60, 97, 0.15)',
+      handleStyle: { color: COLOR_ACCENT },
+      moveHandleStyle: { color: COLOR_ACCENT },
+      textStyle: { color: COLOR_TEXT_SUBTLE, fontSize: 10 },
+    }],
+  });
+
+  // -- Net Worth donut --
+  const netWorthChart = echarts.init(document.getElementById('chart-net-worth'));
+  const slices = netWorthSlices();
+  const netWorthTotal = slices.reduce((s, x) => s + x.value, 0);
+  netWorthChart.setOption({
+    tooltip: { trigger: 'item', valueFormatter: fmtAud },
+    legend: {
+      bottom: 0,
+      icon: 'circle',
+      textStyle: { color: COLOR_TEXT_MUTED, fontSize: 11 },
+      itemWidth: 8,
+      itemHeight: 8,
+    },
+    series: [{
+      type: 'pie',
+      radius: ['56%', '78%'],
+      center: ['50%', '45%'],
+      avoidLabelOverlap: false,
+      label: {
+        show: true,
+        position: 'center',
+        formatter: () => `{val|${fmtAud(netWorthTotal)}}\n{lbl|Net Worth · AUD}`,
+        rich: {
+          val: { fontSize: 24, fontWeight: 600, fontFamily: 'Bricolage Grotesque, sans-serif', color: COLOR_TEXT },
+          lbl: { fontSize: 11, color: COLOR_TEXT_SUBTLE, padding: [6, 0, 0, 0], fontFamily: 'Geist Mono, monospace' },
+        },
+      },
+      labelLine: { show: false },
+      data: slices,
+    }],
+  });
+
+  // -- Liquid line --
+  const liquidChart = echarts.init(document.getElementById('chart-liquid'));
+  liquidChart.setOption({
+    grid: SHARED_GRID,
+    tooltip: { trigger: 'axis', valueFormatter: fmtAud },
+    xAxis: makeTimeAxis(),
+    yAxis: makeValueAxis(),
+    series: [{
+      type: 'line',
+      data: LIQUID_SERIES,
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 6,
+      lineStyle: { color: SLOT[0], width: 2 },
+      itemStyle: { color: SLOT[0] },
+      areaStyle: { color: 'rgba(52, 128, 203, 0.12)' },
+    }],
+    dataZoom: [{ type: 'inside' }],
+  });
+
+  // -- Investments line (per-fund + total) --
+  const invChart = echarts.init(document.getElementById('chart-investments'));
+  const invSeries = INVESTMENTS.perFund.map(fund => ({
+    name: fund.name,
+    type: 'line',
+    data: fund.data,
+    smooth: true,
+    symbol: 'none',
+    lineStyle: { color: SLOT[fund.slot], width: 1.5 },
+    itemStyle: { color: SLOT[fund.slot] },
+  }));
+  invSeries.push({
+    name: 'Total',
+    type: 'line',
+    data: INVESTMENTS.totals,
+    smooth: true,
+    symbol: 'circle',
+    symbolSize: 6,
+    lineStyle: { color: COLOR_ACCENT, width: 3 },
+    itemStyle: { color: COLOR_ACCENT },
+  });
+  invChart.setOption({
+    grid: { ...SHARED_GRID, top: 36 },
+    tooltip: { trigger: 'axis', valueFormatter: fmtAud },
+    legend: {
+      top: 0,
+      icon: 'circle',
+      itemWidth: 8,
+      itemHeight: 8,
+      textStyle: { color: COLOR_TEXT_MUTED, fontSize: 11 },
+    },
+    xAxis: makeTimeAxis(),
+    yAxis: makeValueAxis(),
+    series: invSeries,
+    dataZoom: [{ type: 'inside' }],
+  });
+
+  // -- Monthly snapshot bars --
+  const monthlyChart = echarts.init(document.getElementById('chart-monthly'));
+  monthlyChart.setOption({
+    grid: SHARED_GRID,
+    tooltip: { trigger: 'axis', valueFormatter: fmtAud2 },
+    xAxis: {
+      type: 'category',
+      data: ['Income', 'Expense (Net)', 'Saved'],
+      axisLine: AXIS_LINE,
+      axisTick: { show: false },
+      axisLabel: { ...AXIS_LABEL, fontSize: 12, color: COLOR_TEXT_MUTED },
+    },
+    yAxis: makeValueAxis(),
+    series: [{
+      type: 'bar',
+      barWidth: '46%',
+      data: [
+        { value: Math.round(MONTHLY.income),     itemStyle: { color: COLOR_SUCCESS } },
+        { value: Math.round(MONTHLY.netExpense), itemStyle: { color: SLOT[5] } },
+        { value: Math.round(MONTHLY.saved),      itemStyle: { color: COLOR_ACCENT } },
+      ],
+      label: {
+        show: true,
+        position: 'top',
+        formatter: ({ value }) => fmtAud(value),
+        color: COLOR_TEXT_MUTED,
+        fontSize: 11,
+        fontFamily: 'Geist Mono, monospace',
+      },
+    }],
+  });
+
+  // -- Category pie --
+  const catChart = echarts.init(document.getElementById('chart-category'));
+  catChart.setOption({
+    tooltip: { trigger: 'item', valueFormatter: fmtAud },
+    legend: {
+      bottom: 0,
+      type: 'scroll',
+      icon: 'circle',
+      itemWidth: 8,
+      itemHeight: 8,
+      textStyle: { color: COLOR_TEXT_MUTED, fontSize: 11 },
+    },
+    series: [{
+      type: 'pie',
+      radius: ['40%', '70%'],
+      center: ['50%', '45%'],
+      avoidLabelOverlap: false,
+      label: { show: false },
+      labelLine: { show: false },
+      data: categoryBreakdown(),
+    }],
+  });
+
+  // ============================================================
+  // RECENT TRANSACTIONS LIST
+  // ============================================================
+  function renderTransactions() {
+    const linkedChildIds = new Set(DATA.transaction_links.map(l => l.child_id));
+    const parentIds = new Set(DATA.transaction_links.map(l => l.parent_id));
+    const list = [...DATA.transactions]
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 8);
+    const root = document.getElementById('tx-list');
+    root.innerHTML = list.map(tx => {
+      const acc = ACCOUNT_BY_ID[tx.account_id];
+      const cat = CATEGORY_BY_ID[tx.category_id];
+      const aud = toAud(tx.amount, acc.currency, tx.date);
+      const isCredit = aud > 0;
+      const initial = (cat?.name || '?')[0];
+      const slot = cat?.colour_slot ?? 0;
+      let note = '';
+      if (linkedChildIds.has(tx.id)) note = '<div class="tx-link-note">↳ nets against rent</div>';
+      else if (parentIds.has(tx.id))  note = '<div class="tx-link-note">↳ partly reimbursed by flatmates</div>';
+      return `
+        <div class="tx-row">
+          <div class="tx-icon" style="background: ${SLOT[slot]}1a; color: ${SLOT[slot]}; border-color: ${SLOT[slot]}33;">${initial}</div>
+          <div class="tx-info">
+            <div class="tx-name">${tx.description}</div>
+            <div class="tx-meta">${shortDate(tx.date)} · ${acc.name} · ${cat?.name || 'Uncategorised'}${note ? '' : ''}</div>
+            ${note}
+          </div>
+          <div class="tx-amount ${isCredit ? 'credit' : 'debit'}">
+            ${isCredit ? '+' : ''}${fmtAud2(aud)}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ============================================================
+  // SCRUBBER → recompute stats + range label on dataZoom
+  // ============================================================
+  function applyRangeFilter(startPct, endPct) {
+    const dates = SNAP.dates;
+    const startIdx = Math.floor((startPct / 100) * (dates.length - 1));
+    const endIdx   = Math.ceil((endPct / 100) * (dates.length - 1));
+    const startDate = dates[startIdx];
+    const endDate   = dates[endIdx];
+    document.getElementById('header-subtitle').textContent =
+      `${shortDate(startDate)} 2025 → ${shortDate(endDate)} · AUD`;
+  }
+
+  navChart.on('dataZoom', (e) => {
+    const batch = e.batch ? e.batch[0] : e;
+    applyRangeFilter(batch.start ?? 0, batch.end ?? 100);
+  });
+
+  echarts.connect([navChart, liquidChart, invChart]);
+
+  // ============================================================
+  // INITIAL RENDER + RESPONSIVE
+  // ============================================================
+  renderStats();
+  renderTransactions();
+
+  const charts = [navChart, netWorthChart, liquidChart, invChart, monthlyChart, catChart];
+  window.addEventListener('resize', () => charts.forEach(c => c.resize()));
+</script>
+
+</body>
+</html>

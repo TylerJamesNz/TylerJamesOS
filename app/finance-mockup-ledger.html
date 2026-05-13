@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#151B36" />
+  <title>Finance — Ledger Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <style>
+    /* ============================================================
+       DESIGN TOKENS — mirrored from app/finance-mockup.html
+       ============================================================ */
+    :root {
+      --color-bg:           #F7F8F9;
+      --color-surface:      #ffffff;
+      --color-surface-2:    #EEF0F2;
+      --color-border:       #DDE1E5;
+      --color-border-soft:  #EBEEF0;
+      --color-primary:      #151B36;
+      --color-accent:       #193C61;
+      --color-accent-hover: #0F2C4B;
+      --color-text:         #151B36;
+      --color-text-muted:   #4A5370;
+      --color-text-subtle:  #8F9AAF;
+      --color-success:      #16a34a;
+      --color-warning:      #d97706;
+      --color-destructive:  #dc2626;
+
+      --color-sidebar-bg:      #151B36;
+      --color-sidebar-border:  #1E274A;
+      --color-sidebar-text:    #A8B3CB;
+      --color-sidebar-text-hi: #E8EBF2;
+
+      --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono:    'Geist Mono', 'Fira Code', monospace;
+
+      --text-xs:    11px;
+      --text-sm:    13px;
+      --text-base:  15px;
+      --text-md:    17px;
+      --text-lg:    20px;
+      --text-xl:    24px;
+      --text-2xl:   32px;
+      --text-3xl:   40px;
+
+      --weight-regular: 400;
+      --weight-medium:  500;
+      --weight-semi:    600;
+      --weight-bold:    700;
+
+      --leading-tight:  1.2;
+      --leading-snug:   1.4;
+      --leading-normal: 1.6;
+
+      --space-1:  4px;
+      --space-2:  8px;
+      --space-3:  12px;
+      --space-4:  16px;
+      --space-5:  20px;
+      --space-6:  24px;
+      --space-8:  32px;
+      --space-10: 40px;
+      --space-12: 48px;
+
+      --radius-sm:   4px;
+      --radius-md:   8px;
+      --radius-lg:   12px;
+      --radius-xl:   16px;
+      --radius-full: 9999px;
+
+      --shadow-sm:  0 1px 3px rgba(21,27,54,0.08);
+      --shadow-md:  0 4px 12px rgba(21,27,54,0.10);
+
+      --ease-default: 150ms ease;
+
+      --chart-cat-0: #3480CB;
+      --chart-cat-1: #4334CB;
+      --chart-cat-2: #9E34CB;
+      --chart-cat-3: #CB349E;
+      --chart-cat-4: #CB3443;
+      --chart-cat-5: #CB8034;
+      --chart-cat-6: #BCCB34;
+      --chart-cat-7: #61CB34;
+      --chart-cat-8: #34CB61;
+      --chart-cat-9: #34CBBC;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      font-size: var(--text-base);
+      color: var(--color-text);
+      background: var(--color-bg);
+      -webkit-font-smoothing: antialiased;
+      line-height: var(--leading-normal);
+    }
+
+    .page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: var(--space-12) var(--space-8);
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+      flex-wrap: wrap;
+    }
+    .page-title {
+      font-family: var(--font-display);
+      font-size: var(--text-3xl);
+      font-weight: var(--weight-semi);
+      letter-spacing: -0.02em;
+      line-height: var(--leading-tight);
+    }
+    .page-subtitle {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin-top: var(--space-1);
+      font-family: var(--font-mono);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 0 var(--space-4);
+      height: 36px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      cursor: pointer;
+      border: none;
+      transition: background var(--ease-default);
+      white-space: nowrap;
+    }
+    .btn-primary  { background: var(--color-accent); color: #fff; }
+    .btn-primary:hover { background: var(--color-accent-hover); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+    }
+    .btn-ghost:hover { background: var(--color-surface-2); color: var(--color-text); }
+
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+    }
+    .card-title {
+      font-family: var(--font-display);
+      font-size: var(--text-md);
+      font-weight: var(--weight-semi);
+      margin-bottom: var(--space-1);
+    }
+    .card-subtitle {
+      font-size: var(--text-xs);
+      font-family: var(--font-mono);
+      color: var(--color-text-subtle);
+      margin-bottom: var(--space-4);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .row { margin-bottom: var(--space-4); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+
+    /* Compact KPI strip — single row, 3 cards, deltas inline */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+    .kpi-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4) var(--space-5);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .kpi-label {
+      font-size: var(--text-xs);
+      color: var(--color-text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: var(--weight-semi);
+    }
+    .kpi-row {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+    .kpi-value {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semi);
+      font-family: var(--font-display);
+      line-height: 1.1;
+    }
+    .kpi-delta {
+      font-size: var(--text-xs);
+      font-family: var(--font-mono);
+      color: var(--color-text-muted);
+    }
+    .kpi-delta .up   { color: var(--color-success); }
+    .kpi-delta .down { color: var(--color-destructive); }
+
+    .chart { width: 100%; height: 240px; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px var(--space-2);
+      border-radius: var(--radius-full);
+      font-size: 10px;
+      font-weight: var(--weight-medium);
+      background: rgba(25,60,97,0.08);
+      color: var(--color-accent);
+      margin-left: var(--space-2);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ============================================================
+       LEDGER (hero card)
+       ============================================================ */
+    .ledger-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .ledger-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--color-border);
+      padding: 0 var(--space-2);
+      background: var(--color-surface-2);
+      overflow-x: auto;
+    }
+    .ledger-tab {
+      flex-shrink: 0;
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      color: var(--color-text-muted);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: color var(--ease-default), border-color var(--ease-default);
+      white-space: nowrap;
+    }
+    .ledger-tab:hover { color: var(--color-text); }
+    .ledger-tab[aria-pressed="true"] {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+      font-weight: var(--weight-semi);
+    }
+    .ledger-tab .tab-count {
+      display: inline-block;
+      margin-left: var(--space-2);
+      padding: 1px var(--space-2);
+      border-radius: var(--radius-full);
+      background: var(--color-border);
+      color: var(--color-text-muted);
+      font-size: 10px;
+      font-family: var(--font-mono);
+      font-weight: var(--weight-medium);
+    }
+    .ledger-tab[aria-pressed="true"] .tab-count {
+      background: rgba(25,60,97,0.12);
+      color: var(--color-accent);
+    }
+
+    .ledger-body {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 540px;
+    }
+
+    .ledger-accounts {
+      border-right: 1px solid var(--color-border);
+      padding: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      background: var(--color-surface);
+    }
+    .ledger-accounts-header {
+      font-size: var(--text-xs);
+      color: var(--color-text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: var(--weight-semi);
+      padding: 0 var(--space-2);
+      margin-bottom: var(--space-1);
+    }
+    .ledger-account {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      background: transparent;
+      border: 1px solid transparent;
+      transition: background var(--ease-default), border-color var(--ease-default);
+      text-align: left;
+      width: 100%;
+      font-family: var(--font-sans);
+    }
+    .ledger-account:hover {
+      background: var(--color-surface-2);
+    }
+    .ledger-account[aria-pressed="true"] {
+      background: rgba(25,60,97,0.06);
+      border-color: rgba(25,60,97,0.18);
+    }
+    .ledger-account .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .ledger-account .info { flex: 1; min-width: 0; }
+    .ledger-account .name {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ledger-account .meta {
+      font-size: 10px;
+      color: var(--color-text-subtle);
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+    }
+    .ledger-account .balance {
+      font-size: var(--text-sm);
+      font-family: var(--font-mono);
+      font-weight: var(--weight-medium);
+      color: var(--color-text);
+      flex-shrink: 0;
+    }
+
+    .ledger-table-wrap {
+      overflow: auto;
+      max-height: 560px;
+    }
+    .ledger-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--text-sm);
+    }
+    .ledger-table thead th {
+      position: sticky;
+      top: 0;
+      background: var(--color-surface);
+      text-align: left;
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--text-xs);
+      color: var(--color-text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: var(--weight-semi);
+      border-bottom: 1px solid var(--color-border);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+    .ledger-table thead th.num {
+      text-align: right;
+    }
+    .ledger-table tbody td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--color-border-soft);
+      vertical-align: middle;
+    }
+    .ledger-table tbody tr:last-child td { border-bottom: none; }
+    .ledger-table tbody tr:hover { background: rgba(25,60,97,0.03); }
+
+    .ledger-table .date {
+      font-family: var(--font-mono);
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+    .ledger-table .desc {
+      font-weight: var(--weight-medium);
+      color: var(--color-text);
+    }
+    .ledger-table .desc-meta {
+      font-size: 11px;
+      color: var(--color-text-subtle);
+      font-style: italic;
+      margin-top: 2px;
+    }
+    .ledger-table .cat {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      color: var(--color-text-muted);
+    }
+    .ledger-table .cat-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .ledger-table .amount {
+      font-family: var(--font-mono);
+      text-align: right;
+      white-space: nowrap;
+      font-weight: var(--weight-medium);
+    }
+    .ledger-table .amount.credit { color: var(--color-success); }
+    .ledger-table .amount.debit  { color: var(--color-text); }
+    .ledger-table .balance {
+      font-family: var(--font-mono);
+      text-align: right;
+      white-space: nowrap;
+      color: var(--color-text-muted);
+    }
+    .ledger-empty {
+      padding: var(--space-12);
+      text-align: center;
+      color: var(--color-text-subtle);
+      font-size: var(--text-sm);
+    }
+
+    @media (max-width: 1024px) {
+      .ledger-body { grid-template-columns: 1fr; }
+      .ledger-accounts { border-right: none; border-bottom: 1px solid var(--color-border); }
+    }
+    @media (max-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .kpi-strip { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 540px) {
+      .kpi-strip { grid-template-columns: 1fr; }
+      .page { padding: var(--space-6) var(--space-4); }
+      .ledger-table thead th, .ledger-table tbody td { padding: var(--space-2) var(--space-3); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     DUMMY DATA — extends finance-mockup.html with bank field
+     and additional ING / Up accounts so the ledger has variety.
+     ============================================================ -->
+<script id="finance-data" type="application/json">
+{
+  "user_settings": { "home_currency": "AUD", "flatmate_names": ["Alex", "Sam"] },
+  "fx_rates": [
+    { "date": "2025-05-31", "base": "NZD", "quote": "AUD", "rate": 0.918 },
+    { "date": "2025-06-30", "base": "NZD", "quote": "AUD", "rate": 0.921 },
+    { "date": "2025-07-31", "base": "NZD", "quote": "AUD", "rate": 0.915 },
+    { "date": "2025-08-31", "base": "NZD", "quote": "AUD", "rate": 0.917 },
+    { "date": "2025-09-30", "base": "NZD", "quote": "AUD", "rate": 0.922 },
+    { "date": "2025-10-31", "base": "NZD", "quote": "AUD", "rate": 0.919 },
+    { "date": "2025-11-30", "base": "NZD", "quote": "AUD", "rate": 0.916 },
+    { "date": "2025-12-31", "base": "NZD", "quote": "AUD", "rate": 0.914 },
+    { "date": "2026-01-31", "base": "NZD", "quote": "AUD", "rate": 0.918 },
+    { "date": "2026-02-28", "base": "NZD", "quote": "AUD", "rate": 0.921 },
+    { "date": "2026-03-31", "base": "NZD", "quote": "AUD", "rate": 0.924 },
+    { "date": "2026-04-30", "base": "NZD", "quote": "AUD", "rate": 0.920 },
+    { "date": "2026-05-31", "base": "NZD", "quote": "AUD", "rate": 0.922 }
+  ],
+  "accounts": [
+    { "id": "anz-nz",         "name": "ANZ NZ",          "bank": "ANZ",             "account_type": "DEPOSIT",    "currency": "NZD", "colour_slot": 0 },
+    { "id": "anz-au",         "name": "ANZ AU Primary",  "bank": "ANZ",             "account_type": "DEPOSIT",    "currency": "AUD", "colour_slot": 1 },
+    { "id": "anz-au-savings", "name": "ANZ AU Savings",  "bank": "ANZ",             "account_type": "DEPOSIT",    "currency": "AUD", "colour_slot": 2 },
+    { "id": "ing-savings",    "name": "ING Savings Max", "bank": "ING",             "account_type": "DEPOSIT",    "currency": "AUD", "colour_slot": 9 },
+    { "id": "up-spending",    "name": "Up Spending",     "bank": "Up",              "account_type": "DEPOSIT",    "currency": "AUD", "colour_slot": 8 },
+    { "id": "kiwisaver",      "name": "KiwiSaver",       "bank": "KiwiSaver",       "account_type": "INVESTMENT", "currency": "NZD", "colour_slot": 3 },
+    { "id": "ausuper",        "name": "AustralianSuper", "bank": "AustralianSuper", "account_type": "INVESTMENT", "currency": "AUD", "colour_slot": 4 }
+  ],
+  "balance_snapshots": [
+    { "account_id": "anz-nz",         "date": "2025-05-31", "balance": 4200 },
+    { "account_id": "anz-nz",         "date": "2026-05-31", "balance": 5500 },
+    { "account_id": "anz-au",         "date": "2025-05-31", "balance": 3400 },
+    { "account_id": "anz-au",         "date": "2026-05-31", "balance": 4200 },
+    { "account_id": "anz-au-savings", "date": "2025-05-31", "balance": 14000 },
+    { "account_id": "anz-au-savings", "date": "2026-05-31", "balance": 22000 },
+    { "account_id": "ing-savings",    "date": "2025-05-31", "balance": 6800 },
+    { "account_id": "ing-savings",    "date": "2026-05-31", "balance": 8500 },
+    { "account_id": "up-spending",    "date": "2025-05-31", "balance": 950 },
+    { "account_id": "up-spending",    "date": "2026-05-31", "balance": 1240 },
+    { "account_id": "kiwisaver",      "date": "2025-05-31", "balance": 44500 },
+    { "account_id": "kiwisaver",      "date": "2026-05-31", "balance": 52000 },
+    { "account_id": "ausuper",        "date": "2025-05-31", "balance": 83500 },
+    { "account_id": "ausuper",        "date": "2026-05-31", "balance": 95000 }
+  ],
+  "liquid_series": [
+    ["2025-05-31", 29200], ["2025-06-30", 31100], ["2025-07-31", 31700],
+    ["2025-08-31", 33800], ["2025-09-30", 34200], ["2025-10-31", 35900],
+    ["2025-11-30", 36100], ["2025-12-31", 35800], ["2026-01-31", 38400],
+    ["2026-02-28", 38900], ["2026-03-31", 39800], ["2026-04-30", 40100],
+    ["2026-05-31", 41440]
+  ],
+  "categories": [
+    { "id": "housing",        "name": "Housing",        "kind": "EXPENSE", "colour_slot": 5 },
+    { "id": "groceries",      "name": "Groceries",      "kind": "EXPENSE", "colour_slot": 6 },
+    { "id": "dining",         "name": "Dining",         "kind": "EXPENSE", "colour_slot": 7 },
+    { "id": "transport",      "name": "Transport",      "kind": "EXPENSE", "colour_slot": 8 },
+    { "id": "subscriptions",  "name": "Subscriptions",  "kind": "EXPENSE", "colour_slot": 9 },
+    { "id": "utilities",      "name": "Utilities",      "kind": "EXPENSE", "colour_slot": 0 },
+    { "id": "health",         "name": "Health",         "kind": "EXPENSE", "colour_slot": 1 },
+    { "id": "entertainment",  "name": "Entertainment",  "kind": "EXPENSE", "colour_slot": 2 },
+    { "id": "travel",         "name": "Travel",         "kind": "EXPENSE", "colour_slot": 3 },
+    { "id": "transfers",      "name": "Transfers",      "kind": "TRANSFER","colour_slot": 4 },
+    { "id": "salary",         "name": "Salary",         "kind": "INCOME",  "colour_slot": 7 },
+    { "id": "interest",       "name": "Interest",       "kind": "INCOME",  "colour_slot": 9 }
+  ],
+  "transactions": [
+    { "id": "tx-salary-05", "account_id": "anz-au", "date": "2026-05-12", "amount":  6800, "description": "ACME PTY LTD SALARY",     "category_id": "salary" },
+    { "id": "tx-rent-05",   "account_id": "anz-au", "date": "2026-05-01", "amount": -2400, "description": "ANZ INT BANKING RENT",    "category_id": "housing" },
+    { "id": "tx-flat-a-05", "account_id": "anz-au", "date": "2026-05-03", "amount":   800, "description": "FROM ALEX FLATMATE",     "category_id": "transfers" },
+    { "id": "tx-flat-s-05", "account_id": "anz-au", "date": "2026-05-04", "amount":   800, "description": "FROM SAM FLATMATE",      "category_id": "transfers" },
+    { "id": "tx-woolies-1", "account_id": "anz-au", "date": "2026-05-06", "amount":  -142, "description": "WOOLWORTHS METRO",       "category_id": "groceries" },
+    { "id": "tx-woolies-2", "account_id": "anz-au", "date": "2026-05-11", "amount":  -118, "description": "WOOLWORTHS METRO",       "category_id": "groceries" },
+    { "id": "tx-coles-1",   "account_id": "anz-au", "date": "2026-04-29", "amount":   -96, "description": "COLES SUPERMARKETS",     "category_id": "groceries" },
+    { "id": "tx-uber-1",    "account_id": "anz-au", "date": "2026-05-08", "amount":   -24, "description": "UBER TRIP",              "category_id": "transport" },
+    { "id": "tx-uber-2",    "account_id": "anz-au", "date": "2026-05-09", "amount":   -38, "description": "UBER EATS",              "category_id": "dining" },
+    { "id": "tx-myki",      "account_id": "anz-au", "date": "2026-05-02", "amount":   -50, "description": "MYKI TOP UP",            "category_id": "transport" },
+    { "id": "tx-netflix",   "account_id": "anz-au", "date": "2026-05-05", "amount":   -20, "description": "NETFLIX.COM",            "category_id": "subscriptions" },
+    { "id": "tx-spotify",   "account_id": "anz-au", "date": "2026-05-05", "amount":   -13, "description": "SPOTIFY P05",            "category_id": "subscriptions" },
+    { "id": "tx-agl",       "account_id": "anz-au", "date": "2026-05-10", "amount":  -184, "description": "AGL ELECTRICITY",        "category_id": "utilities" },
+    { "id": "tx-telstra",   "account_id": "anz-au", "date": "2026-05-07", "amount":   -75, "description": "TELSTRA MOBILE",         "category_id": "utilities" },
+    { "id": "tx-dining-1",  "account_id": "anz-au", "date": "2026-05-09", "amount":   -68, "description": "BAR SOMA ST KILDA",      "category_id": "dining" },
+    { "id": "tx-dining-2",  "account_id": "anz-au", "date": "2026-04-26", "amount":   -42, "description": "GUZMAN Y GOMEZ",         "category_id": "dining" },
+    { "id": "tx-chemist",   "account_id": "anz-au", "date": "2026-05-08", "amount":   -28, "description": "CHEMIST WAREHOUSE",      "category_id": "health" },
+    { "id": "tx-cinema",    "account_id": "anz-au", "date": "2026-04-19", "amount":   -32, "description": "PALACE CINEMAS",         "category_id": "entertainment" },
+    { "id": "tx-flights",   "account_id": "anz-au", "date": "2026-04-12", "amount":  -420, "description": "AIR NZ FLIGHTS",         "category_id": "travel" },
+    { "id": "tx-anznz-1",   "account_id": "anz-nz", "date": "2026-04-22", "amount":  -180, "description": "COUNTDOWN WGTN",         "category_id": "groceries" },
+    { "id": "tx-anznz-2",   "account_id": "anz-nz", "date": "2026-04-15", "amount":   -55, "description": "Z ENERGY",               "category_id": "transport" },
+    { "id": "tx-anznz-3",   "account_id": "anz-nz", "date": "2026-03-28", "amount":  -120, "description": "MERCURY ENERGY",         "category_id": "utilities" },
+    { "id": "tx-anznz-4",   "account_id": "anz-nz", "date": "2026-03-10", "amount":   -88, "description": "NEW WORLD",              "category_id": "groceries" },
+    { "id": "tx-salary-04", "account_id": "anz-au", "date": "2026-04-12", "amount":  6800, "description": "ACME PTY LTD SALARY",     "category_id": "salary" },
+    { "id": "tx-rent-04",   "account_id": "anz-au", "date": "2026-04-01", "amount": -2400, "description": "ANZ INT BANKING RENT",    "category_id": "housing" },
+    { "id": "tx-flat-a-04", "account_id": "anz-au", "date": "2026-04-03", "amount":   800, "description": "FROM ALEX FLATMATE",     "category_id": "transfers" },
+    { "id": "tx-flat-s-04", "account_id": "anz-au", "date": "2026-04-05", "amount":   800, "description": "FROM SAM FLATMATE",      "category_id": "transfers" },
+    { "id": "tx-anzsav-1",  "account_id": "anz-au-savings", "date": "2026-05-15", "amount":  1500, "description": "TRANSFER FROM ANZ PRIMARY", "category_id": "transfers" },
+    { "id": "tx-anzsav-2",  "account_id": "anz-au-savings", "date": "2026-04-15", "amount":  1200, "description": "TRANSFER FROM ANZ PRIMARY", "category_id": "transfers" },
+    { "id": "tx-anzsav-3",  "account_id": "anz-au-savings", "date": "2026-05-31", "amount":    62, "description": "INTEREST",                  "category_id": "interest"  },
+    { "id": "tx-ing-1",     "account_id": "ing-savings",    "date": "2026-05-31", "amount":   148, "description": "INTEREST PAYMENT",       "category_id": "interest" },
+    { "id": "tx-ing-2",     "account_id": "ing-savings",    "date": "2026-05-18", "amount":  1000, "description": "TRANSFER FROM ANZ",       "category_id": "transfers" },
+    { "id": "tx-ing-3",     "account_id": "ing-savings",    "date": "2026-04-30", "amount":   141, "description": "INTEREST PAYMENT",       "category_id": "interest" },
+    { "id": "tx-ing-4",     "account_id": "ing-savings",    "date": "2026-04-18", "amount":   500, "description": "TRANSFER FROM ANZ",       "category_id": "transfers" },
+    { "id": "tx-up-1",      "account_id": "up-spending",    "date": "2026-05-11", "amount":   -64, "description": "BREW & BREW COFFEE",     "category_id": "dining" },
+    { "id": "tx-up-2",      "account_id": "up-spending",    "date": "2026-05-08", "amount":   -22, "description": "SEVEN ELEVEN",           "category_id": "transport" },
+    { "id": "tx-up-3",      "account_id": "up-spending",    "date": "2026-05-06", "amount":   -19, "description": "SMITH ST CAFE",          "category_id": "dining" },
+    { "id": "tx-up-4",      "account_id": "up-spending",    "date": "2026-05-02", "amount":   200, "description": "TRANSFER FROM ANZ",      "category_id": "transfers" },
+    { "id": "tx-up-5",      "account_id": "up-spending",    "date": "2026-04-29", "amount":   -45, "description": "BAR SOMA",               "category_id": "dining" }
+  ],
+  "transaction_links": [
+    { "parent_id": "tx-rent-05", "child_id": "tx-flat-a-05", "link_type": "NETS_AGAINST" },
+    { "parent_id": "tx-rent-05", "child_id": "tx-flat-s-05", "link_type": "NETS_AGAINST" },
+    { "parent_id": "tx-rent-04", "child_id": "tx-flat-a-04", "link_type": "NETS_AGAINST" },
+    { "parent_id": "tx-rent-04", "child_id": "tx-flat-s-04", "link_type": "NETS_AGAINST" }
+  ]
+}
+</script>
+
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Finance</h1>
+      <div class="page-subtitle">Last 12 months · AUD · Ledger view</div>
+    </div>
+    <div style="display:flex; gap: var(--space-2);">
+      <button class="btn btn-ghost">Refresh</button>
+      <button class="btn btn-primary">Import statement</button>
+    </div>
+  </header>
+
+  <!-- Compact KPI strip -->
+  <div class="kpi-strip">
+    <div class="kpi-card">
+      <div class="kpi-label">Net Worth</div>
+      <div class="kpi-row">
+        <span class="kpi-value" id="kpi-net-worth">—</span>
+        <span class="kpi-delta"><span class="up" id="kpi-net-worth-delta">—</span> vs 12mo</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Liquid</div>
+      <div class="kpi-row">
+        <span class="kpi-value" id="kpi-liquid">—</span>
+        <span class="kpi-delta">deposit accounts</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Saved this month</div>
+      <div class="kpi-row">
+        <span class="kpi-value" id="kpi-saved">—</span>
+        <span class="kpi-delta">income − net expense <span class="pill">Net Cost</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two compact charts -->
+  <div class="grid-2 row">
+    <div class="card">
+      <div class="card-title">Net Worth</div>
+      <div class="card-subtitle">As of period end · by account</div>
+      <div id="chart-net-worth" class="chart"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Liquid</div>
+      <div class="card-subtitle">Deposit accounts · running total · AUD</div>
+      <div id="chart-liquid" class="chart"></div>
+    </div>
+  </div>
+
+  <!-- Hero: bank-tabbed account ledger -->
+  <div class="ledger-card">
+    <div class="ledger-tabs" id="ledger-tabs" role="tablist" aria-label="Banks"></div>
+    <div class="ledger-body">
+      <div class="ledger-accounts" id="ledger-accounts">
+        <div class="ledger-accounts-header">Accounts</div>
+      </div>
+      <div class="ledger-table-wrap">
+        <table class="ledger-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th class="num">Amount</th>
+              <th class="num">Balance</th>
+            </tr>
+          </thead>
+          <tbody id="ledger-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // PARSE DATA + COLOUR PALETTE
+  // ============================================================
+  const DATA = JSON.parse(document.getElementById('finance-data').textContent);
+
+  const root = getComputedStyle(document.documentElement);
+  const cssVar = (name) => root.getPropertyValue(name).trim();
+  const SLOT = Array.from({ length: 10 }, (_, i) => cssVar(`--chart-cat-${i}`));
+  const COLOR_TEXT = cssVar('--color-text');
+  const COLOR_TEXT_SUBTLE = cssVar('--color-text-subtle');
+  const COLOR_TEXT_MUTED = cssVar('--color-text-muted');
+  const COLOR_BORDER_SOFT = cssVar('--color-border-soft');
+  const COLOR_ACCENT = cssVar('--color-accent');
+
+  const ACCOUNT_BY_ID = Object.fromEntries(DATA.accounts.map(a => [a.id, a]));
+  const CATEGORY_BY_ID = Object.fromEntries(DATA.categories.map(c => [c.id, c]));
+  const FX_BY_DATE = Object.fromEntries(DATA.fx_rates.map(r => [r.date, r.rate]));
+  const FX_DATES_SORTED = DATA.fx_rates.map(r => r.date).sort();
+
+  function toAud(amount, currency, date) {
+    if (currency === 'AUD') return amount;
+    const earlier = FX_DATES_SORTED.filter(d => d <= date);
+    const fxDate = earlier.length ? earlier[earlier.length - 1] : FX_DATES_SORTED[0];
+    return amount * FX_BY_DATE[fxDate];
+  }
+
+  // Net Cost adjustments
+  const ZERO_FOR_CATEGORY = new Set();
+  const PARENT_ADJUSTMENT = {};
+  for (const link of DATA.transaction_links) {
+    if (link.link_type !== 'NETS_AGAINST') continue;
+    const child = DATA.transactions.find(t => t.id === link.child_id);
+    const parent = DATA.transactions.find(t => t.id === link.parent_id);
+    if (!child || !parent) continue;
+    ZERO_FOR_CATEGORY.add(child.id);
+    PARENT_ADJUSTMENT[parent.id] = (PARENT_ADJUSTMENT[parent.id] || 0) + Math.abs(child.amount);
+  }
+
+  const fmtAud = (n) => new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(n);
+  const fmtAud2 = (n) => new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 2 }).format(n);
+  const fmtNative = (n, ccy) => new Intl.NumberFormat('en-AU', { style: 'currency', currency: ccy, maximumFractionDigits: 0 }).format(n);
+  function shortDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-AU', { day: '2-digit', month: 'short' });
+  }
+
+  // ============================================================
+  // KPI VALUES
+  // ============================================================
+  function currentBalance(accId) {
+    const snaps = DATA.balance_snapshots
+      .filter(s => s.account_id === accId)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    return snaps.length ? snaps[snaps.length - 1].balance : 0;
+  }
+  function balance12mAgo(accId) {
+    const snaps = DATA.balance_snapshots
+      .filter(s => s.account_id === accId)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    return snaps.length ? snaps[0].balance : 0;
+  }
+  function netWorthAud() {
+    let sum = 0;
+    for (const acc of DATA.accounts) {
+      sum += toAud(currentBalance(acc.id), acc.currency, '2026-05-31');
+    }
+    return sum;
+  }
+  function netWorth12mAgoAud() {
+    let sum = 0;
+    for (const acc of DATA.accounts) {
+      sum += toAud(balance12mAgo(acc.id), acc.currency, '2025-05-31');
+    }
+    return sum;
+  }
+  function liquidAud() {
+    return DATA.liquid_series[DATA.liquid_series.length - 1][1];
+  }
+  function savedThisMonth() {
+    const dates = DATA.transactions.map(t => t.date).sort();
+    const lastDate = dates[dates.length - 1];
+    const d = new Date(lastDate);
+    const start = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
+    const end   = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().slice(0, 10);
+    let income = 0, netExpense = 0;
+    for (const tx of DATA.transactions) {
+      if (tx.date < start || tx.date > end) continue;
+      const cat = CATEGORY_BY_ID[tx.category_id];
+      if (!cat) continue;
+      const acc = ACCOUNT_BY_ID[tx.account_id];
+      const aud = toAud(tx.amount, acc.currency, tx.date);
+      if (cat.kind === 'INCOME') {
+        income += aud;
+      } else if (cat.kind === 'EXPENSE') {
+        const adj = PARENT_ADJUSTMENT[tx.id] || 0;
+        netExpense += Math.max(0, Math.abs(aud) - adj);
+      }
+    }
+    return income - netExpense;
+  }
+
+  function renderKpis() {
+    const nw = netWorthAud();
+    const nw12 = netWorth12mAgoAud();
+    const delta = nw - nw12;
+    const deltaPct = (delta / nw12) * 100;
+    document.getElementById('kpi-net-worth').textContent = fmtAud(nw);
+    const dEl = document.getElementById('kpi-net-worth-delta');
+    dEl.textContent = `${delta >= 0 ? '↑' : '↓'} ${fmtAud(Math.abs(delta))} (${deltaPct.toFixed(1)}%)`;
+    dEl.className = delta >= 0 ? 'up' : 'down';
+    document.getElementById('kpi-liquid').textContent = fmtAud(liquidAud());
+    document.getElementById('kpi-saved').textContent  = fmtAud(savedThisMonth());
+  }
+
+  // ============================================================
+  // ECHARTS — Net Worth donut + Liquid line
+  // ============================================================
+  const SHARED_GRID = { left: 56, right: 16, top: 16, bottom: 28 };
+  const AXIS_LABEL = { color: COLOR_TEXT_SUBTLE, fontSize: 11, fontFamily: 'Geist Mono, monospace' };
+
+  function makeTimeAxis() {
+    return {
+      type: 'time',
+      axisLine: { lineStyle: { color: COLOR_BORDER_SOFT } },
+      axisTick: { show: false },
+      axisLabel: AXIS_LABEL,
+      splitLine: { show: false },
+    };
+  }
+  function makeValueAxis() {
+    return {
+      type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: {
+        ...AXIS_LABEL,
+        formatter: (v) => v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${v}`,
+      },
+      splitLine: { lineStyle: { color: COLOR_BORDER_SOFT, type: 'dashed' } },
+    };
+  }
+
+  const netWorthChart = echarts.init(document.getElementById('chart-net-worth'));
+  const nwSlices = DATA.accounts.map(acc => ({
+    name: acc.name,
+    value: Math.round(toAud(currentBalance(acc.id), acc.currency, '2026-05-31')),
+    itemStyle: { color: SLOT[acc.colour_slot] },
+  }));
+  const nwTotal = nwSlices.reduce((s, x) => s + x.value, 0);
+  netWorthChart.setOption({
+    tooltip: { trigger: 'item', valueFormatter: fmtAud },
+    legend: {
+      bottom: 0, icon: 'circle', textStyle: { color: COLOR_TEXT_MUTED, fontSize: 11 },
+      itemWidth: 8, itemHeight: 8, type: 'scroll',
+    },
+    series: [{
+      type: 'pie',
+      radius: ['54%', '76%'],
+      center: ['50%', '42%'],
+      avoidLabelOverlap: false,
+      label: {
+        show: true,
+        position: 'center',
+        formatter: () => `{val|${fmtAud(nwTotal)}}\n{lbl|Net Worth · AUD}`,
+        rich: {
+          val: { fontSize: 20, fontWeight: 600, fontFamily: 'Bricolage Grotesque, sans-serif', color: COLOR_TEXT },
+          lbl: { fontSize: 10, color: COLOR_TEXT_SUBTLE, padding: [4, 0, 0, 0], fontFamily: 'Geist Mono, monospace' },
+        },
+      },
+      labelLine: { show: false },
+      data: nwSlices,
+    }],
+  });
+
+  const liquidChart = echarts.init(document.getElementById('chart-liquid'));
+  liquidChart.setOption({
+    grid: SHARED_GRID,
+    tooltip: { trigger: 'axis', valueFormatter: fmtAud },
+    xAxis: makeTimeAxis(),
+    yAxis: makeValueAxis(),
+    series: [{
+      type: 'line',
+      data: DATA.liquid_series,
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 5,
+      lineStyle: { color: SLOT[0], width: 2 },
+      itemStyle: { color: SLOT[0] },
+      areaStyle: { color: 'rgba(52, 128, 203, 0.12)' },
+    }],
+  });
+
+  // ============================================================
+  // LEDGER — bank tabs, account list, transaction table
+  // ============================================================
+  // Pre-compute running balance per account (chronological from earliest snapshot).
+  function buildAccountLedger(accId) {
+    const acc = ACCOUNT_BY_ID[accId];
+    const txs = DATA.transactions
+      .filter(t => t.account_id === accId)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    // Opening balance: current balance minus all known transaction amounts.
+    const txSum = txs.reduce((s, t) => s + t.amount, 0);
+    let runningBalance = currentBalance(accId) - txSum;
+    return txs.map(tx => {
+      runningBalance += tx.amount;
+      return { ...tx, balance: runningBalance, currency: acc.currency };
+    }).reverse(); // newest first for display
+  }
+
+  // Build bank list from accounts.
+  const BANKS = (() => {
+    const order = [];
+    const seen = new Set();
+    for (const acc of DATA.accounts) {
+      if (!seen.has(acc.bank)) {
+        order.push(acc.bank);
+        seen.add(acc.bank);
+      }
+    }
+    return order;
+  })();
+
+  let activeBank = 'All';
+  let activeAccount = null; // will be set on first render
+
+  function accountsForBank(bank) {
+    return bank === 'All' ? DATA.accounts : DATA.accounts.filter(a => a.bank === bank);
+  }
+
+  function txCountForBank(bank) {
+    const accIds = accountsForBank(bank).map(a => a.id);
+    return DATA.transactions.filter(t => accIds.includes(t.account_id)).length;
+  }
+
+  function renderTabs() {
+    const root = document.getElementById('ledger-tabs');
+    const tabs = ['All', ...BANKS];
+    root.innerHTML = tabs.map(b => {
+      const count = txCountForBank(b);
+      const active = b === activeBank ? 'true' : 'false';
+      return `<button class="ledger-tab" role="tab" aria-pressed="${active}" data-bank="${b}">${b}<span class="tab-count">${count}</span></button>`;
+    }).join('');
+    root.querySelectorAll('.ledger-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeBank = btn.dataset.bank;
+        const accs = accountsForBank(activeBank);
+        activeAccount = accs.length ? accs[0].id : null;
+        renderTabs();
+        renderAccounts();
+        renderLedgerTable();
+      });
+    });
+  }
+
+  function renderAccounts() {
+    const root = document.getElementById('ledger-accounts');
+    const accs = accountsForBank(activeBank);
+    if (activeAccount == null && accs.length) activeAccount = accs[0].id;
+    const header = '<div class="ledger-accounts-header">Accounts</div>';
+    const items = accs.map(acc => {
+      const bal = currentBalance(acc.id);
+      const active = acc.id === activeAccount ? 'true' : 'false';
+      return `
+        <button class="ledger-account" aria-pressed="${active}" data-account="${acc.id}">
+          <span class="dot" style="background: ${SLOT[acc.colour_slot]};"></span>
+          <span class="info">
+            <span class="name">${acc.name}</span>
+            <span class="meta">${acc.bank} · ${acc.currency}</span>
+          </span>
+          <span class="balance">${fmtNative(bal, acc.currency)}</span>
+        </button>`;
+    }).join('');
+    root.innerHTML = header + items;
+    root.querySelectorAll('.ledger-account').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeAccount = btn.dataset.account;
+        renderAccounts();
+        renderLedgerTable();
+      });
+    });
+  }
+
+  function renderLedgerTable() {
+    const tbody = document.getElementById('ledger-tbody');
+    if (!activeAccount) {
+      tbody.innerHTML = '<tr><td colspan="5" class="ledger-empty">No account selected.</td></tr>';
+      return;
+    }
+    const acc = ACCOUNT_BY_ID[activeAccount];
+    const rows = buildAccountLedger(activeAccount);
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="ledger-empty">No transactions in this account.</td></tr>';
+      return;
+    }
+    const linkedChildIds = new Set(DATA.transaction_links.map(l => l.child_id));
+    const parentIds = new Set(DATA.transaction_links.map(l => l.parent_id));
+    tbody.innerHTML = rows.map(tx => {
+      const cat = CATEGORY_BY_ID[tx.category_id];
+      const slot = cat?.colour_slot ?? 0;
+      const isCredit = tx.amount > 0;
+      let meta = '';
+      if (linkedChildIds.has(tx.id)) meta = '<div class="desc-meta">↳ nets against rent</div>';
+      else if (parentIds.has(tx.id)) meta = '<div class="desc-meta">↳ partly reimbursed by flatmates</div>';
+      const amtStr = `${isCredit ? '+' : ''}${fmtNative(tx.amount, tx.currency)}`;
+      return `
+        <tr>
+          <td class="date">${shortDate(tx.date)}</td>
+          <td class="desc">${tx.description}${meta}</td>
+          <td><span class="cat"><span class="cat-dot" style="background: ${SLOT[slot]};"></span>${cat?.name || 'Uncategorised'}</span></td>
+          <td class="amount ${isCredit ? 'credit' : 'debit'}">${amtStr}</td>
+          <td class="balance">${fmtNative(tx.balance, tx.currency)}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  renderKpis();
+  // First account in 'All' is the default.
+  activeAccount = DATA.accounts[0].id;
+  renderTabs();
+  renderAccounts();
+  renderLedgerTable();
+
+  const charts = [netWorthChart, liquidChart];
+  window.addEventListener('resize', () => charts.forEach(c => c.resize()));
+</script>
+
+</body>
+</html>

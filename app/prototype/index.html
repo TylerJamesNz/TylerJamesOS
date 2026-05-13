@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prototype harness</title>
+  <link rel="stylesheet" href="./harness.css">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+  <header id="chrome" aria-label="Prototype harness chrome">
+    <div class="chrome-left">
+      <span id="title">Prototype</span>
+      <nav id="tabs" aria-label="Variants"></nav>
+    </div>
+    <div class="chrome-right">
+      <button id="btn-annotate" type="button" aria-pressed="false" title="Toggle annotation mode">✏️ Annotate</button>
+      <button id="btn-pick" type="button" title="Mark active variant as the winner">🔬 Pick this variant</button>
+      <button id="btn-clear" type="button" title="Clear annotations on this variant">Clear</button>
+      <button id="btn-submit" type="button" disabled title="Submit annotations (≥ 1 required)">Submit feedback</button>
+    </div>
+  </header>
+  <main id="stage">
+    <iframe id="variant-frame" title="Active prototype variant"></iframe>
+    <canvas id="overlay" aria-hidden="true"></canvas>
+    <div id="popover" role="dialog" aria-label="Label this region" hidden>
+      <button data-label="like" type="button" title="Like">👍 Like</button>
+      <button data-label="dislike" type="button" title="Don't like">👎 Don't like</button>
+      <button data-label="note" type="button" title="Add a note">✏️ Note</button>
+      <div id="note-input" hidden>
+        <textarea id="note-text" maxlength="200" placeholder="Note (200 char max)"></textarea>
+        <div class="note-actions">
+          <button id="note-confirm" type="button">Save</button>
+          <button id="note-cancel" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+  <script type="module" src="./harness.js"></script>
+</body>
+</html>

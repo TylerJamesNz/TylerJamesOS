@@ -16,3 +16,8 @@ client_secret*.json
 # Real bank statement samples dropped at the project root for ad-hoc work.
 # Anonymised fixtures used by parsers live under app/src/lib/finance/import/parsers/__fixtures__/.
 /*.pdf
+
+# Prototype harness feedback bundles. Local-only; never committed.
+app/prototype/feedback/*
+!app/prototype/feedback/.gitkeep
+
