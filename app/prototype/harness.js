@@ -239,6 +239,12 @@ els.overlay.addEventListener('mouseup', (e) => {
 
 // ---------- Popover ----------
 
+const PLACEHOLDERS = {
+  like: 'what made you like this?',
+  dislike: "what didn't work?",
+  note: 'note…',
+};
+
 function showPopover(rect) {
   const stageRect = els.stage.getBoundingClientRect();
   const x = rect.x;
@@ -248,32 +254,54 @@ function showPopover(rect) {
   els.popover.hidden = false;
   els.noteInput.hidden = true;
   els.noteText.value = '';
+  els.popover.dataset.label = '';
+  els.popover.querySelectorAll('button[data-label]').forEach(b => b.removeAttribute('aria-pressed'));
 }
 
 function hidePopover() {
   els.popover.hidden = true;
   els.noteInput.hidden = true;
+  els.popover.dataset.label = '';
+  els.popover.querySelectorAll('button[data-label]').forEach(b => b.removeAttribute('aria-pressed'));
   pendingRect = null;
   redraw();
+}
+
+function setActiveVerb(label) {
+  els.popover.dataset.label = label;
+  els.popover.querySelectorAll('button[data-label]').forEach(b => {
+    b.setAttribute('aria-pressed', String(b.dataset.label === label));
+  });
+}
+
+function commitFromInput() {
+  const label = els.popover.dataset.label || 'note';
+  commitAnnotation(label, els.noteText.value.trim().slice(0, 200));
 }
 
 els.popover.querySelectorAll('button[data-label]').forEach(btn => {
   btn.addEventListener('click', () => {
     const label = btn.dataset.label;
-    if (label === 'note') {
-      els.noteInput.hidden = false;
-      els.noteText.focus();
-      return;
-    }
-    commitAnnotation(label, '');
+    setActiveVerb(label);
+    els.noteInput.hidden = false;
+    els.noteText.placeholder = PLACEHOLDERS[label] || 'note…';
+    els.noteText.value = '';
+    els.noteText.focus();
   });
 });
 
-els.noteConfirm.addEventListener('click', () => {
-  commitAnnotation('note', els.noteText.value.trim().slice(0, 200));
-});
-
+els.noteConfirm.addEventListener('click', commitFromInput);
 els.noteCancel.addEventListener('click', () => hidePopover());
+
+els.noteText.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    commitFromInput();
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    hidePopover();
+  }
+});
 
 function commitAnnotation(label, note) {
   if (!pendingRect) return;
