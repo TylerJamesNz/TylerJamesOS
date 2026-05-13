@@ -21,3 +21,13 @@ client_secret*.json
 app/prototype/feedback/*
 !app/prototype/feedback/.gitkeep
 
+# Playwright MCP scratch dir (smoke bundles, console logs, page snapshots).
+.playwright-mcp/
+
+# Ad-hoc screenshots and mockups dropped at the repo root.
+/*.png
+
+# Real bank statement samples (PII). Synthetic fixtures live under
+# app/src/lib/finance/import/parsers/__fixtures__/.
+/statements/
+
