@@ -4,18 +4,8 @@
   "variants": [
     {
       "key": "A",
-      "name": "Composite",
-      "path": "../finance-mockup-r2-composite.html"
-    },
-    {
-      "key": "B",
-      "name": "Cashflow",
-      "path": "../finance-mockup-r2-cashflow.html"
-    },
-    {
-      "key": "C",
-      "name": "Drilldown",
-      "path": "../finance-mockup-r2-drilldown.html"
+      "name": "r4 Cashflow",
+      "path": "../finance-mockup-r4-cashflow.html"
     }
   ]
 }
