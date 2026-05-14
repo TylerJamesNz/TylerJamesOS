@@ -4,18 +4,18 @@
   "variants": [
     {
       "key": "A",
-      "name": "Balanced",
-      "path": "../finance-mockup.html"
+      "name": "Composite",
+      "path": "../finance-mockup-r2-composite.html"
     },
     {
       "key": "B",
-      "name": "Ledger",
-      "path": "../finance-mockup-ledger.html"
+      "name": "Cashflow",
+      "path": "../finance-mockup-r2-cashflow.html"
     },
     {
       "key": "C",
-      "name": "Flow",
-      "path": "../finance-mockup-flow.html"
+      "name": "Drilldown",
+      "path": "../finance-mockup-r2-drilldown.html"
     }
   ]
 }
