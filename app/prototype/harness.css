@@ -200,7 +200,7 @@ body.annotate #variant-frame { pointer-events: none; }
   justify-content: flex-end;
 }
 
-#note-confirm, #note-cancel {
+#note-confirm, #note-cancel, #note-delete {
   appearance: none;
   border: 1px solid var(--chrome-border);
   background: var(--chrome-bg);
@@ -215,6 +215,17 @@ body.annotate #variant-frame { pointer-events: none; }
   background: var(--chrome-accent);
   color: #fff;
   border-color: var(--chrome-accent);
+}
+
+#note-delete {
+  margin-right: auto;
+  color: var(--chrome-danger);
+  border-color: var(--chrome-danger);
+}
+
+#note-delete:hover {
+  background: var(--chrome-danger);
+  color: #fff;
 }
 
 #toast {

@@ -14,6 +14,7 @@ const els = {
   noteText: $('#note-text'),
   noteConfirm: $('#note-confirm'),
   noteCancel: $('#note-cancel'),
+  noteDelete: $('#note-delete'),
   btnAnnotate: $('#btn-annotate'),
   btnPick: $('#btn-pick'),
   btnClear: $('#btn-clear'),
@@ -30,6 +31,13 @@ let winner = null;
 let dragStart = null;
 let dragCurrent = null;
 let pendingRect = null;
+let mouseDownPoint = null;
+let editTargetId = null;
+let editingAnnotationId = null;
+
+const CLICK_THRESHOLD_PX = 3;
+const CAPTION_HEIGHT = 18;
+const CAPTION_TRUNCATE_LEN = 40;
 
 // ---------- Manifest load + tabs ----------
 
@@ -129,18 +137,35 @@ function redraw() {
   const ctx = els.overlay.getContext('2d');
   ctx.clearRect(0, 0, els.overlay.width, els.overlay.height);
   const colorFor = (label) => label === 'like' ? '#1a7f37' : label === 'dislike' ? '#cf222e' : '#0969da';
+  const pad = 4;
   for (const a of annotations()) {
-    ctx.strokeStyle = colorFor(a.label);
+    const color = colorFor(a.label);
+    ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.strokeRect(a.rect.x, a.rect.y, a.rect.w, a.rect.h);
-    ctx.fillStyle = colorFor(a.label);
+    ctx.fillStyle = color;
     const labelText = a.label === 'like' ? '👍' : a.label === 'dislike' ? '👎' : '✏️';
     ctx.font = '14px -apple-system, sans-serif';
-    const pad = 4;
     const tw = ctx.measureText(labelText).width + pad * 2;
     ctx.fillRect(a.rect.x, a.rect.y - 22, tw, 22);
     ctx.fillStyle = '#fff';
     ctx.fillText(labelText, a.rect.x + pad, a.rect.y - 6);
+
+    const hasRef = !!(a.referenceImage || a.referenceUrl);
+    if (a.note || hasRef) {
+      ctx.font = '12px -apple-system, sans-serif';
+      const display = (() => {
+        const base = a.note
+          ? (a.note.length > CAPTION_TRUNCATE_LEN ? a.note.slice(0, CAPTION_TRUNCATE_LEN - 1) + '…' : a.note)
+          : '';
+        return hasRef ? (base ? `${base} 📎` : '📎') : base;
+      })();
+      const cw = ctx.measureText(display).width + pad * 2;
+      ctx.fillStyle = color;
+      ctx.fillRect(a.rect.x, a.rect.y + a.rect.h, cw, CAPTION_HEIGHT);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(display, a.rect.x + pad, a.rect.y + a.rect.h + 13);
+    }
   }
   if (dragStart && dragCurrent) {
     const r = normalizeRect(dragStart, dragCurrent);
@@ -150,6 +175,22 @@ function redraw() {
     ctx.strokeRect(r.x, r.y, r.w, r.h);
     ctx.setLineDash([]);
   }
+}
+
+function hitTestAnnotation(point) {
+  for (let i = annotations().length - 1; i >= 0; i--) {
+    const a = annotations()[i];
+    if (!a.id) continue;
+    if (
+      point.x >= a.rect.x &&
+      point.x <= a.rect.x + a.rect.w &&
+      point.y >= a.rect.y &&
+      point.y <= a.rect.y + a.rect.h + CAPTION_HEIGHT
+    ) {
+      return a;
+    }
+  }
+  return null;
 }
 
 function normalizeRect(a, b) {
@@ -173,8 +214,12 @@ function clearOverlay() {
 
 els.overlay.addEventListener('mousedown', (e) => {
   if (!annotateMode) return;
-  dragStart = clientToOverlay(e);
-  dragCurrent = dragStart;
+  const point = clientToOverlay(e);
+  mouseDownPoint = point;
+  const hit = hitTestAnnotation(point);
+  editTargetId = hit ? hit.id : null;
+  dragStart = point;
+  dragCurrent = point;
   hidePopover();
 });
 
@@ -185,17 +230,40 @@ els.overlay.addEventListener('mousemove', (e) => {
 });
 
 els.overlay.addEventListener('mouseup', (e) => {
-  if (!annotateMode || !dragStart) return;
-  dragCurrent = clientToOverlay(e);
-  const rect = normalizeRect(dragStart, dragCurrent);
+  if (!annotateMode || !mouseDownPoint) return;
+  const start = mouseDownPoint;
+  const end = clientToOverlay(e);
+  const dx = Math.abs(end.x - start.x);
+  const dy = Math.abs(end.y - start.y);
+  const isClick = (dx + dy) < CLICK_THRESHOLD_PX;
+  const targetId = editTargetId;
   dragStart = null;
   dragCurrent = null;
-  if (rect.w < 6 || rect.h < 6) {
+  mouseDownPoint = null;
+  editTargetId = null;
+
+  if (isClick && targetId) {
+    const existing = annotations().find(a => a.id === targetId);
+    if (existing) {
+      editingAnnotationId = existing.id;
+      pendingRect = existing.rect;
+      showPopover(existing.rect, existing);
+      return;
+    }
+  }
+
+  if (isClick) {
     redraw();
     return;
   }
-  pendingRect = rect;
-  showPopover(rect);
+
+  const finalRect = normalizeRect(start, end);
+  if (finalRect.w < 6 || finalRect.h < 6) {
+    redraw();
+    return;
+  }
+  pendingRect = finalRect;
+  showPopover(finalRect);
 });
 
 // ---------- Popover ----------
@@ -206,25 +274,38 @@ const PLACEHOLDERS = {
   note: 'note…',
 };
 
-function showPopover(rect) {
+function showPopover(rect, existing = null) {
   const stageRect = els.stage.getBoundingClientRect();
   const x = rect.x;
   const y = rect.y + rect.h + 6;
   els.popover.style.left = `${Math.min(x, stageRect.width - 220)}px`;
   els.popover.style.top = `${Math.min(y, stageRect.height - 80)}px`;
   els.popover.hidden = false;
-  els.noteInput.hidden = true;
-  els.noteText.value = '';
-  els.popover.dataset.label = '';
   els.popover.querySelectorAll('button[data-label]').forEach(b => b.removeAttribute('aria-pressed'));
+
+  if (existing) {
+    setActiveVerb(existing.label);
+    els.noteInput.hidden = false;
+    els.noteText.placeholder = PLACEHOLDERS[existing.label] || 'note…';
+    els.noteText.value = existing.note || '';
+    els.noteDelete.hidden = false;
+    setTimeout(() => els.noteText.focus(), 0);
+  } else {
+    els.popover.dataset.label = '';
+    els.noteInput.hidden = true;
+    els.noteText.value = '';
+    els.noteDelete.hidden = true;
+  }
 }
 
 function hidePopover() {
   els.popover.hidden = true;
   els.noteInput.hidden = true;
+  els.noteDelete.hidden = true;
   els.popover.dataset.label = '';
   els.popover.querySelectorAll('button[data-label]').forEach(b => b.removeAttribute('aria-pressed'));
   pendingRect = null;
+  editingAnnotationId = null;
   redraw();
 }
 
@@ -253,6 +334,14 @@ els.popover.querySelectorAll('button[data-label]').forEach(btn => {
 
 els.noteConfirm.addEventListener('click', commitFromInput);
 els.noteCancel.addEventListener('click', () => hidePopover());
+els.noteDelete.addEventListener('click', () => {
+  if (!editingAnnotationId) return;
+  const arr = annotations();
+  const idx = arr.findIndex(a => a.id === editingAnnotationId);
+  if (idx >= 0) arr.splice(idx, 1);
+  hidePopover();
+  refreshSubmitEnabled();
+});
 
 els.noteText.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) {
@@ -266,10 +355,23 @@ els.noteText.addEventListener('keydown', (e) => {
 
 function commitAnnotation(label, note) {
   if (!pendingRect) return;
-  const elements = captureElements(pendingRect);
-  annotations().push({ rect: pendingRect, label, note, elements });
+  if (editingAnnotationId) {
+    const existing = annotations().find(a => a.id === editingAnnotationId);
+    if (existing) {
+      existing.label = label;
+      existing.note = note;
+    }
+  } else {
+    const elements = captureElements(pendingRect);
+    annotations().push({
+      id: crypto.randomUUID(),
+      rect: pendingRect,
+      label,
+      note,
+      elements,
+    });
+  }
   hidePopover();
-  redraw();
   refreshSubmitEnabled();
 }
 
