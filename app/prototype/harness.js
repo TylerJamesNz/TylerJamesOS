@@ -345,7 +345,7 @@ function setActiveVerb(label) {
 
 function commitFromInput() {
   const label = els.popover.dataset.label || 'note';
-  commitAnnotation(label, els.noteText.value.trim().slice(0, 200));
+  commitAnnotation(label, els.noteText.value.trim());
 }
 
 els.popover.querySelectorAll('button[data-label]').forEach(btn => {
