@@ -615,8 +615,7 @@ async function loadAndScreenshot(variant) {
 
 async function captureScreenshot() {
   const doc = els.frame.contentDocument;
-  const canvas = await window.html2canvas(doc.body, { useCORS: true, scale: 1, logging: false });
-  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  return await window.htmlToImage.toBlob(doc.body, { cacheBust: true, pixelRatio: 1 });
 }
 
 function blobToBase64(blob) {
