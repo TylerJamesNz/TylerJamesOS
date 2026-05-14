@@ -25,6 +25,8 @@ const els = {
   btnClear: $('#btn-clear'),
   btnSubmit: $('#btn-submit'),
   toast: $('#toast'),
+  submittedOverlay: $('#submitted-overlay'),
+  submittedPath: $('#submitted-overlay .submitted-path'),
 };
 
 let manifest = null;
@@ -584,7 +586,7 @@ async function submit() {
     const keyList = annotated.map(v => v.key).join('/');
     const clipboardMsg = `claude, read ${path}/data.json and view the per-variant screenshots (${keyList})`;
     try { await navigator.clipboard.writeText(clipboardMsg); } catch (e) { console.warn('clipboard write failed', e); }
-    toast(`Submitted. ${path}. Claude is watching.`, 8000);
+    showSubmitted(path);
   } catch (e) {
     console.error('submit failed', e);
     toast(`Submit failed: ${e.message || e}`, 10000);
@@ -676,6 +678,27 @@ function toast(msg, ms = 4000) {
   if (toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { els.toast.hidden = true; }, ms);
 }
+
+// ---------- Submitted overlay ----------
+
+let submittedTimer = null;
+
+function showSubmitted(pathStr) {
+  els.submittedPath.textContent = pathStr;
+  els.submittedOverlay.hidden = false;
+  if (submittedTimer) clearTimeout(submittedTimer);
+  submittedTimer = setTimeout(hideSubmitted, 8000);
+}
+
+function hideSubmitted() {
+  els.submittedOverlay.hidden = true;
+  if (submittedTimer) { clearTimeout(submittedTimer); submittedTimer = null; }
+}
+
+els.submittedOverlay.addEventListener('click', hideSubmitted);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !els.submittedOverlay.hidden) hideSubmitted();
+});
 
 // ---------- Utilities ----------
 
