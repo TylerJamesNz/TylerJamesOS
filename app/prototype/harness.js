@@ -26,78 +26,10 @@ let activeKey = null;
 let annotateMode = false;
 let annotationsByVariant = new Map();
 let winner = null;
-let prototypeDirHandle = null;
 
 let dragStart = null;
 let dragCurrent = null;
 let pendingRect = null;
-
-// ---------- IndexedDB (handle persistence) ----------
-
-const DB_NAME = 'prototype-harness';
-const STORE = 'handles';
-
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(STORE);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function idbGet(key) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readonly');
-    const req = tx.objectStore(STORE).get(key);
-    req.onsuccess = () => resolve(req.result || null);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function idbSet(key, value) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).put(value, key);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-// ---------- Directory handle ----------
-
-async function ensurePrototypeDir() {
-  if (prototypeDirHandle) {
-    const perm = await prototypeDirHandle.queryPermission({ mode: 'readwrite' });
-    if (perm === 'granted') return prototypeDirHandle;
-    const req = await prototypeDirHandle.requestPermission({ mode: 'readwrite' });
-    if (req === 'granted') return prototypeDirHandle;
-    prototypeDirHandle = null;
-  }
-  const cached = await idbGet(manifest.title);
-  if (cached) {
-    try {
-      const perm = await cached.queryPermission({ mode: 'readwrite' });
-      if (perm === 'granted') {
-        prototypeDirHandle = cached;
-        return prototypeDirHandle;
-      }
-      const req = await cached.requestPermission({ mode: 'readwrite' });
-      if (req === 'granted') {
-        prototypeDirHandle = cached;
-        return prototypeDirHandle;
-      }
-    } catch (e) {
-      // stale; fall through to picker
-    }
-  }
-  toast('Pick the prototype/ directory (where index.html lives) so feedback can be written.', 6000);
-  prototypeDirHandle = await window.showDirectoryPicker({ id: 'prototype-root', mode: 'readwrite' });
-  await idbSet(manifest.title, prototypeDirHandle);
-  return prototypeDirHandle;
-}
 
 // ---------- Manifest load + tabs ----------
 
@@ -411,7 +343,7 @@ async function submit() {
       els.btnSubmit.textContent = `Capturing ${v.key} (${i + 1}/${annotated.length})…`;
       const blob = await loadAndScreenshot(v);
       const filename = `${v.key}.png`;
-      screenshots.push({ filename, blob });
+      screenshots.push({ filename, base64: await blobToBase64(blob) });
       variantsOut.push({
         key: v.key,
         name: v.name,
@@ -426,35 +358,25 @@ async function submit() {
       viewport: { w: window.innerWidth, h: window.innerHeight },
       variants: variantsOut,
     };
-    const dataJson = JSON.stringify(bundle, null, 2);
-    let written = false;
-    let writePath = null;
-    try {
-      const root = await ensurePrototypeDir();
-      const feedbackDir = await root.getDirectoryHandle('feedback', { create: true });
-      const tsDir = await feedbackDir.getDirectoryHandle(timestamp, { create: true });
-      await writeFile(tsDir, 'data.json', dataJson);
-      for (const s of screenshots) {
-        await writeFile(tsDir, s.filename, s.blob);
-      }
-      written = true;
-      writePath = `${manifest.pathFromRepoRoot || 'prototype'}/feedback/${timestamp}`;
-    } catch (e) {
-      console.warn('FS Access write failed; falling back to download', e);
-      triggerDownload(`${timestamp}-data.json`, new Blob([dataJson], { type: 'application/json' }));
-      for (const s of screenshots) {
-        triggerDownload(`${timestamp}-${s.filename}`, s.blob);
-      }
-      writePath = `~/Downloads/${timestamp}-*`;
+    els.btnSubmit.textContent = 'Uploading…';
+    const res = await fetch('/__harness/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ timestamp, data: bundle, screenshots }),
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => `${res.status} ${res.statusText}`);
+      toast(`Submit failed: ${errText}`, 10000);
+      return;
     }
+    const { path } = await res.json();
     const keyList = annotated.map(v => v.key).join('/');
-    const clipboardMsg = written
-      ? `claude, read ${writePath}/data.json and view the per-variant screenshots (${keyList})`
-      : `claude, read the ${timestamp}-* files I just downloaded from the prototype harness`;
+    const clipboardMsg = `claude, read ${path}/data.json and view the per-variant screenshots (${keyList})`;
     try { await navigator.clipboard.writeText(clipboardMsg); } catch (e) { console.warn('clipboard write failed', e); }
-    toast(written
-      ? `Wrote ${writePath}/ (${annotated.length} variant${annotated.length > 1 ? 's' : ''}). Clipboard ready to paste.`
-      : `Downloaded data.json + ${annotated.length} screenshot${annotated.length > 1 ? 's' : ''}. Move them to ${manifest.pathFromRepoRoot || 'prototype'}/feedback/${timestamp}/.`, 8000);
+    toast(`Submitted. ${path}. Claude is watching.`, 8000);
+  } catch (e) {
+    console.error('submit failed', e);
+    toast(`Submit failed: ${e.message || e}`, 10000);
   } finally {
     if (activeKey !== originalKey) switchTo(originalKey);
     els.btnSubmit.textContent = 'Submit feedback';
@@ -484,21 +406,17 @@ async function captureScreenshot() {
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 }
 
-async function writeFile(dirHandle, name, content) {
-  const fileHandle = await dirHandle.getFileHandle(name, { create: true });
-  const stream = await fileHandle.createWritable();
-  await stream.write(content);
-  await stream.close();
-}
-
-function triggerDownload(name, blob) {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      const comma = result.indexOf(',');
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
 }
 
 // ---------- Pick winner ----------
@@ -508,15 +426,22 @@ async function pickWinner() {
   if (!variant) return;
   winner = { ...variant, timestamp: isoStamp() };
   renderTabs();
-  const json = JSON.stringify(winner, null, 2);
   try {
-    const root = await ensurePrototypeDir();
-    await writeFile(root, 'winner.json', json);
-    toast(`Pinned ${variant.key}: ${variant.name} as winner. winner.json written.`);
+    const res = await fetch('/__harness/pick-winner', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(winner),
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => `${res.status} ${res.statusText}`);
+      toast(`Pick winner failed: ${errText}`, 10000);
+      return;
+    }
+    const { path } = await res.json();
+    toast(`Pinned ${variant.key}: ${variant.name} as winner. ${path}`);
   } catch (e) {
-    console.warn('winner.json write failed; falling back to download', e);
-    triggerDownload('winner.json', new Blob([json], { type: 'application/json' }));
-    toast(`Downloaded winner.json. Move it to ${manifest.pathFromRepoRoot || 'prototype'}/winner.json.`, 8000);
+    console.error('pick winner failed', e);
+    toast(`Pick winner failed: ${e.message || e}`, 10000);
   }
 }
 
