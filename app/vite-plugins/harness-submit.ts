@@ -35,24 +35,39 @@ function sendJson(res: ServerResponse, status: number, payload: unknown) {
   res.end(JSON.stringify(payload))
 }
 
+type ReferenceFile = {
+  annotationId: string
+  filename: string
+  base64: string
+  mime: string
+}
+
 type SubmitPayload = {
   timestamp: string
   data: unknown
   screenshots: Array<{ filename: string; base64: string }>
+  referenceFiles?: ReferenceFile[]
 }
 
 function isSubmitPayload(value: unknown): value is SubmitPayload {
   if (!value || typeof value !== 'object') return false
   const v = value as Record<string, unknown>
-  return (
-    typeof v.timestamp === 'string' &&
-    typeof v.data === 'object' &&
-    Array.isArray(v.screenshots)
-  )
+  if (typeof v.timestamp !== 'string') return false
+  if (typeof v.data !== 'object') return false
+  if (!Array.isArray(v.screenshots)) return false
+  if (v.referenceFiles !== undefined && !Array.isArray(v.referenceFiles)) return false
+  return true
 }
 
 const SAFE_TIMESTAMP = /^[0-9TZ:.-]+$/
 const SAFE_FILENAME = /^[A-Za-z0-9._-]+$/
+const SAFE_ANNOTATION_ID = /^[A-Za-z0-9-]{8,}$/
+const ALLOWED_REF_MIMES: Record<string, string> = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/gif': 'gif',
+  'image/webp': 'webp',
+}
 
 export default function harnessSubmit(): Plugin {
   return {
@@ -92,6 +107,27 @@ export default function harnessSubmit(): Plugin {
             }
             const png = Buffer.from(shot.base64, 'base64')
             await fs.writeFile(path.join(bundleDir, shot.filename), png)
+          }
+          if (body.referenceFiles && body.referenceFiles.length > 0) {
+            const refsDir = path.join(bundleDir, 'refs')
+            await fs.mkdir(refsDir, { recursive: true })
+            for (const ref of body.referenceFiles) {
+              if (!SAFE_ANNOTATION_ID.test(ref.annotationId)) {
+                sendJson(res, 400, { ok: false, error: `unsafe annotationId: ${ref.annotationId}` })
+                return
+              }
+              if (!SAFE_FILENAME.test(ref.filename)) {
+                sendJson(res, 400, { ok: false, error: `unsafe ref filename: ${ref.filename}` })
+                return
+              }
+              const ext = ALLOWED_REF_MIMES[ref.mime]
+              if (!ext) {
+                sendJson(res, 400, { ok: false, error: `unsupported ref mime: ${ref.mime}` })
+                return
+              }
+              const bytes = Buffer.from(ref.base64, 'base64')
+              await fs.writeFile(path.join(refsDir, `${ref.annotationId}.${ext}`), bytes)
+            }
           }
           await fs.appendFile(logPath, `${body.timestamp}\t${bundleDir}\n`, 'utf8')
           const relPath = path.relative(path.dirname(projectRoot), bundleDir)

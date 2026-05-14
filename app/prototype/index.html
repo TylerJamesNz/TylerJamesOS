@@ -30,6 +30,17 @@
       <div id="note-input" hidden>
         <textarea id="note-text" maxlength="200" placeholder="Note (200 char max)"></textarea>
         <small class="note-hint">Enter to lock in · Shift+Enter for newline · Esc to cancel</small>
+        <div class="popover-refs">
+          <label class="popover-ref-upload">
+            <input id="ref-upload" type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
+            <span>📎 Add image</span>
+          </label>
+          <input id="ref-url" type="url" class="popover-ref-url" placeholder="Reference URL (https://…)">
+          <div id="ref-preview" class="popover-ref-preview" hidden>
+            <img id="ref-thumb" alt="Reference preview">
+            <button id="ref-remove" type="button" title="Remove image">×</button>
+          </div>
+        </div>
         <div class="note-actions">
           <button id="note-confirm" type="button">Save</button>
           <button id="note-cancel" type="button">Cancel</button>

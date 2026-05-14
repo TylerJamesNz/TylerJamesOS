@@ -15,6 +15,11 @@ const els = {
   noteConfirm: $('#note-confirm'),
   noteCancel: $('#note-cancel'),
   noteDelete: $('#note-delete'),
+  refUpload: $('#ref-upload'),
+  refUrl: $('#ref-url'),
+  refPreview: $('#ref-preview'),
+  refThumb: $('#ref-thumb'),
+  refRemove: $('#ref-remove'),
   btnAnnotate: $('#btn-annotate'),
   btnPick: $('#btn-pick'),
   btnClear: $('#btn-clear'),
@@ -34,10 +39,14 @@ let pendingRect = null;
 let mouseDownPoint = null;
 let editTargetId = null;
 let editingAnnotationId = null;
+let pendingRefImage = null;
 
 const CLICK_THRESHOLD_PX = 3;
 const CAPTION_HEIGHT = 18;
 const CAPTION_TRUNCATE_LEN = 40;
+const REF_IMAGE_MAX_WIDTH = 1280;
+const REF_IMAGE_QUALITY = 0.85;
+const URL_RE = /^https?:\/\/\S+$/;
 
 // ---------- Manifest load + tabs ----------
 
@@ -288,12 +297,26 @@ function showPopover(rect, existing = null) {
     els.noteInput.hidden = false;
     els.noteText.placeholder = PLACEHOLDERS[existing.label] || 'note…';
     els.noteText.value = existing.note || '';
+    els.refUrl.value = existing.referenceUrl || '';
+    if (existing.referenceImage && typeof existing.referenceImage === 'object') {
+      pendingRefImage = existing.referenceImage;
+      els.refThumb.src = existing.referenceImage.dataUrl;
+      els.refPreview.hidden = false;
+    } else {
+      pendingRefImage = null;
+      els.refThumb.removeAttribute('src');
+      els.refPreview.hidden = true;
+    }
     els.noteDelete.hidden = false;
     setTimeout(() => els.noteText.focus(), 0);
   } else {
     els.popover.dataset.label = '';
     els.noteInput.hidden = true;
     els.noteText.value = '';
+    els.refUrl.value = '';
+    pendingRefImage = null;
+    els.refThumb.removeAttribute('src');
+    els.refPreview.hidden = true;
     els.noteDelete.hidden = true;
   }
 }
@@ -302,6 +325,10 @@ function hidePopover() {
   els.popover.hidden = true;
   els.noteInput.hidden = true;
   els.noteDelete.hidden = true;
+  els.refUrl.value = '';
+  pendingRefImage = null;
+  els.refThumb.removeAttribute('src');
+  els.refPreview.hidden = true;
   els.popover.dataset.label = '';
   els.popover.querySelectorAll('button[data-label]').forEach(b => b.removeAttribute('aria-pressed'));
   pendingRect = null;
@@ -355,25 +382,82 @@ els.noteText.addEventListener('keydown', (e) => {
 
 function commitAnnotation(label, note) {
   if (!pendingRect) return;
+  const rawUrl = els.refUrl.value.trim();
+  const referenceUrl = URL_RE.test(rawUrl) ? rawUrl : '';
+  const referenceImage = pendingRefImage;
   if (editingAnnotationId) {
     const existing = annotations().find(a => a.id === editingAnnotationId);
     if (existing) {
       existing.label = label;
       existing.note = note;
+      if (referenceUrl) existing.referenceUrl = referenceUrl;
+      else delete existing.referenceUrl;
+      if (referenceImage) existing.referenceImage = referenceImage;
+      else delete existing.referenceImage;
     }
   } else {
     const elements = captureElements(pendingRect);
-    annotations().push({
+    const next = {
       id: crypto.randomUUID(),
       rect: pendingRect,
       label,
       note,
       elements,
-    });
+    };
+    if (referenceUrl) next.referenceUrl = referenceUrl;
+    if (referenceImage) next.referenceImage = referenceImage;
+    annotations().push(next);
   }
   hidePopover();
   refreshSubmitEnabled();
 }
+
+async function downscaleImage(file) {
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+  const img = await new Promise((resolve, reject) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = () => reject(new Error('image decode failed'));
+    i.src = dataUrl;
+  });
+  const ratio = Math.min(1, REF_IMAGE_MAX_WIDTH / img.width);
+  const w = Math.round(img.width * ratio);
+  const h = Math.round(img.height * ratio);
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+  const outMime = ['image/png', 'image/jpeg', 'image/webp'].includes(file.type) ? file.type : 'image/png';
+  const outDataUrl = canvas.toDataURL(outMime, REF_IMAGE_QUALITY);
+  return { filename: file.name, dataUrl: outDataUrl, mime: outMime };
+}
+
+els.refUpload.addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  try {
+    pendingRefImage = await downscaleImage(file);
+    els.refThumb.src = pendingRefImage.dataUrl;
+    els.refPreview.hidden = false;
+  } catch (err) {
+    console.error('image processing failed', err);
+    toast(`Image failed: ${err.message || err}`, 5000);
+  } finally {
+    e.target.value = '';
+  }
+});
+
+els.refRemove.addEventListener('click', () => {
+  pendingRefImage = null;
+  els.refThumb.removeAttribute('src');
+  els.refPreview.hidden = true;
+});
 
 // ---------- DOM selector capture ----------
 
@@ -440,18 +524,41 @@ async function submit() {
     const timestamp = isoStamp();
     const variantsOut = [];
     const screenshots = [];
+    const referenceFiles = [];
     for (let i = 0; i < annotated.length; i++) {
       const v = annotated[i];
       els.btnSubmit.textContent = `Capturing ${v.key} (${i + 1}/${annotated.length})…`;
       const blob = await loadAndScreenshot(v);
       const filename = `${v.key}.png`;
       screenshots.push({ filename, base64: await blobToBase64(blob) });
+      const rawAnns = annotationsByVariant.get(v.key) || [];
+      const annsOut = rawAnns.map(a => {
+        const out = {
+          id: a.id,
+          rect: a.rect,
+          label: a.label,
+          note: a.note,
+          elements: a.elements,
+        };
+        if (a.referenceUrl) out.referenceUrl = a.referenceUrl;
+        if (a.referenceImage && a.referenceImage.dataUrl) {
+          const ext = mimeToExt(a.referenceImage.mime);
+          out.referenceImage = `refs/${a.id}.${ext}`;
+          referenceFiles.push({
+            annotationId: a.id,
+            filename: `${a.id}.${ext}`,
+            base64: stripDataUrl(a.referenceImage.dataUrl),
+            mime: a.referenceImage.mime,
+          });
+        }
+        return out;
+      });
       variantsOut.push({
         key: v.key,
         name: v.name,
         path: v.path,
         screenshot: filename,
-        annotations: annotationsByVariant.get(v.key) || [],
+        annotations: annsOut,
       });
     }
     const bundle = {
@@ -460,11 +567,13 @@ async function submit() {
       viewport: { w: window.innerWidth, h: window.innerHeight },
       variants: variantsOut,
     };
+    const body = { timestamp, data: bundle, screenshots };
+    if (referenceFiles.length > 0) body.referenceFiles = referenceFiles;
     els.btnSubmit.textContent = 'Uploading…';
     const res = await fetch('/__harness/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ timestamp, data: bundle, screenshots }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) {
       const errText = await res.text().catch(() => `${res.status} ${res.statusText}`);
@@ -511,14 +620,25 @@ async function captureScreenshot() {
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result;
-      const comma = result.indexOf(',');
-      resolve(comma >= 0 ? result.slice(comma + 1) : result);
-    };
+    reader.onload = () => resolve(stripDataUrl(reader.result));
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(blob);
   });
+}
+
+function stripDataUrl(dataUrl) {
+  const comma = dataUrl.indexOf(',');
+  return comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+}
+
+function mimeToExt(mime) {
+  switch (mime) {
+    case 'image/png': return 'png';
+    case 'image/jpeg': return 'jpg';
+    case 'image/gif': return 'gif';
+    case 'image/webp': return 'webp';
+    default: return 'png';
+  }
 }
 
 // ---------- Pick winner ----------
