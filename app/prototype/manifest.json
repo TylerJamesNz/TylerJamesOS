@@ -4,8 +4,8 @@
   "variants": [
     {
       "key": "A",
-      "name": "r4 Cashflow",
-      "path": "../finance-mockup-r4-cashflow.html"
+      "name": "r5 Cashflow",
+      "path": "../finance-mockup-r5-cashflow.html"
     }
   ]
 }

@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#151B36" />
+  <title>Finance — Cashflow Mockup (r5)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <style>
+    :root {
+      --color-bg:           #F7F8F9;
+      --color-surface:      #ffffff;
+      --color-surface-2:    #EEF0F2;
+      --color-border:       #DDE1E5;
+      --color-border-soft:  #EBEEF0;
+      --color-primary:      #151B36;
+      --color-accent:       #193C61;
+      --color-accent-hover: #0F2C4B;
+      --color-text:         #151B36;
+      --color-text-muted:   #4A5370;
+      --color-text-subtle:  #8F9AAF;
+      --color-success:      #16a34a;
+      --color-warning:      #d97706;
+      --color-destructive:  #dc2626;
+      --color-info:         #193C61;
+
+      --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono:    'Geist Mono', 'Fira Code', monospace;
+
+      --text-xs:    11px;
+      --text-sm:    13px;
+      --text-base:  15px;
+      --text-md:    17px;
+      --text-lg:    20px;
+      --text-xl:    24px;
+      --text-2xl:   32px;
+      --text-3xl:   40px;
+
+      --weight-regular: 400;
+      --weight-medium:  500;
+      --weight-semi:    600;
+      --weight-bold:    700;
+
+      --leading-tight:  1.2;
+      --leading-snug:   1.4;
+      --leading-normal: 1.6;
+
+      --space-1:  4px;
+      --space-2:  8px;
+      --space-3:  12px;
+      --space-4:  16px;
+      --space-5:  20px;
+      --space-6:  24px;
+      --space-8:  32px;
+      --space-10: 40px;
+      --space-12: 48px;
+
+      --radius-sm:   4px;
+      --radius-md:   8px;
+      --radius-lg:   12px;
+      --radius-xl:   16px;
+      --radius-full: 9999px;
+
+      --shadow-sm:  0 1px 3px rgba(21,27,54,0.08);
+      --shadow-md:  0 4px 12px rgba(21,27,54,0.10);
+
+      --ease-default: 150ms ease;
+
+      --chart-cat-0: #3480CB;
+      --chart-cat-1: #4334CB;
+      --chart-cat-2: #9E34CB;
+      --chart-cat-3: #CB349E;
+      --chart-cat-4: #CB3443;
+      --chart-cat-5: #CB8034;
+      --chart-cat-6: #BCCB34;
+      --chart-cat-7: #61CB34;
+      --chart-cat-8: #34CB61;
+      --chart-cat-9: #34CBBC;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      font-size: var(--text-base);
+      color: var(--color-text);
+      background: var(--color-bg);
+      -webkit-font-smoothing: antialiased;
+      line-height: var(--leading-normal);
+    }
+
+    .page {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: var(--space-12) var(--space-8);
+    }
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-8);
+      flex-wrap: wrap;
+    }
+    .page-title {
+      font-family: var(--font-display);
+      font-size: var(--text-3xl);
+      font-weight: var(--weight-semi);
+      letter-spacing: -0.02em;
+      line-height: var(--leading-tight);
+    }
+    .page-subtitle {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin-top: var(--space-1);
+      font-family: var(--font-mono);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 0 var(--space-4);
+      height: 36px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      cursor: pointer;
+      border: none;
+      transition: background var(--ease-default);
+      white-space: nowrap;
+    }
+    .btn-primary  { background: var(--color-accent); color: #fff; }
+    .btn-primary:hover { background: var(--color-accent-hover); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+    }
+    .btn-ghost:hover { background: var(--color-surface-2); color: var(--color-text); }
+
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+    }
+    .card-title {
+      font-family: var(--font-display);
+      font-size: var(--text-md);
+      font-weight: var(--weight-semi);
+      margin-bottom: var(--space-1);
+    }
+    .card-subtitle {
+      font-size: var(--text-xs);
+      font-family: var(--font-mono);
+      color: var(--color-text-subtle);
+      margin-bottom: var(--space-4);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .row { margin-bottom: var(--space-4); }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--space-4); }
+    .stat-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+    }
+    .stat-label {
+      font-size: var(--text-xs);
+      color: var(--color-text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: var(--weight-semi);
+    }
+    .stat-value {
+      font-size: var(--text-2xl);
+      font-weight: var(--weight-semi);
+      font-family: var(--font-display);
+      margin: var(--space-1) 0;
+      line-height: 1;
+    }
+    .stat-change { font-size: var(--text-xs); color: var(--color-text-muted); }
+    .stat-change .up   { color: var(--color-success); }
+    .stat-change .down { color: var(--color-destructive); }
+
+    .period-bar {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-4);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-3) var(--space-4);
+    }
+    .period-arrow {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      font-size: var(--text-lg);
+      font-weight: var(--weight-medium);
+      transition: background var(--ease-default);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .period-arrow:hover { background: var(--color-surface-2); color: var(--color-text); }
+    .period-current { display: inline-flex; align-items: center; gap: var(--space-3); }
+    .period-shortcuts {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .period-shortcut {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      padding: 6px var(--space-3);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: color var(--ease-default), border-color var(--ease-default), background var(--ease-default), opacity var(--ease-default);
+    }
+    .period-shortcut:hover {
+      color: var(--color-text);
+      border-color: var(--color-text-muted);
+    }
+    .period-shortcut[aria-pressed="true"] {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: #fff;
+    }
+    .period-shortcut[aria-disabled="true"] {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .period-label {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semi);
+      letter-spacing: -0.01em;
+      min-width: 160px;
+      text-align: center;
+    }
+    .period-cal {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: background var(--ease-default), color var(--ease-default);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .period-cal:hover { background: var(--color-surface-2); color: var(--color-text); }
+    .period-cal svg { display: block; }
+    .period-popover {
+      position: absolute;
+      top: calc(100% + var(--space-2));
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      box-shadow: var(--shadow-md);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      min-width: 280px;
+    }
+    .period-popover[hidden] { display: none; }
+    .period-popover label {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .period-popover input[type="date"] {
+      padding: 6px var(--space-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      color: var(--color-text);
+      background: var(--color-surface);
+    }
+    .period-popover .popover-actions {
+      display: flex;
+      gap: var(--space-2);
+      justify-content: flex-end;
+      margin-top: var(--space-1);
+    }
+
+    /* Cashflow: top row is accounts | chart; transactions table sits full-width below */
+    .cashflow-grid {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(0, 4fr);
+      gap: var(--space-4);
+    }
+    .account-rail {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      max-height: 520px;
+      overflow-y: auto;
+    }
+    .cashflow-tx-wrap {
+      margin-top: var(--space-4);
+    }
+    .cashflow-tx-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+      padding: 0 var(--space-2);
+    }
+
+    .chart-card {
+      display: flex;
+      flex-direction: column;
+    }
+    .chart-card .chart-hero {
+      flex: 1;
+      width: 100%;
+      min-height: 420px;
+    }
+    .chart-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+    }
+    .toolbar-toggle {
+      display: inline-flex;
+      background: var(--color-surface-2);
+      border-radius: var(--radius-md);
+      padding: 2px;
+      gap: 2px;
+    }
+    .toolbar-toggle button {
+      border: none;
+      background: transparent;
+      padding: 4px var(--space-2);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .toolbar-toggle button[aria-pressed="true"] {
+      background: var(--color-surface);
+      color: var(--color-text);
+      box-shadow: 0 1px 2px rgba(21,27,54,0.06);
+    }
+    .toolbar-hint {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--color-text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Account rows — merchlab batch-card left-bar treatment */
+    .account-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-3) var(--space-3) calc(var(--space-3) - 3px);
+      border-left: 3px solid transparent;
+      border-bottom: 1px solid var(--color-border-soft);
+      cursor: pointer;
+      transition: background var(--ease-default), border-color var(--ease-default), opacity var(--ease-default);
+    }
+    .account-row:last-child { border-bottom: none; }
+    .account-row:hover { background: var(--color-surface-2); }
+    .account-row[aria-selected="true"] {
+      background: color-mix(in srgb, var(--row-accent, var(--color-accent)) 8%, transparent);
+      border-left-color: var(--row-accent, var(--color-accent));
+    }
+    .account-row.dimmed { opacity: 0.35; }
+
+    .account-swatch {
+      width: 10px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      flex-shrink: 0;
+    }
+    .account-info { flex: 1; min-width: 0; }
+    .account-name {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .account-meta {
+      font-size: 10px;
+      color: var(--color-text-subtle);
+      margin-top: 2px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .account-balance {
+      font-size: var(--text-sm);
+      font-family: var(--font-mono);
+      font-weight: var(--weight-medium);
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .account-delta {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      text-align: right;
+      margin-top: 2px;
+    }
+    .account-delta.up   { color: var(--color-success); }
+    .account-delta.down { color: var(--color-destructive); }
+
+    /* Transactions table — merchlab trends-sync .msd-grid treatment */
+    .tx-table-wrap {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+    .tx-table { width: 100%; border-collapse: collapse; }
+    .tx-table thead th {
+      background: var(--color-surface-2);
+      color: var(--color-text-muted);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: var(--weight-semi);
+      text-align: left;
+      padding: 10px var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+      white-space: nowrap;
+    }
+    .tx-table tbody td {
+      padding: 12px var(--space-4);
+      border-bottom: 1px solid var(--color-border-soft);
+      font-size: var(--text-sm);
+      vertical-align: middle;
+    }
+    .tx-table tbody tr:last-child td { border-bottom: 0; }
+    .tx-table tbody tr {
+      cursor: pointer;
+      transition: background var(--ease-default), opacity var(--ease-default);
+    }
+    .tx-table tbody tr > td:first-child {
+      border-left: 3px solid var(--row-accent, transparent);
+      padding-left: calc(var(--space-4) - 3px);
+    }
+    .tx-table tbody tr:hover td { background: var(--color-surface-2); }
+    .tx-table tbody tr.dimmed { opacity: 0.35; }
+    .tx-col-date {
+      width: 92px;
+      font-family: var(--font-mono);
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+    .tx-col-account {
+      width: 180px;
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+      color: var(--color-text);
+    }
+    .tx-col-desc { font-weight: var(--weight-medium); }
+    .tx-col-desc .tx-note {
+      display: block;
+      margin-top: 2px;
+      font-size: 10px;
+      color: var(--color-text-subtle);
+      font-family: var(--font-mono);
+      font-weight: var(--weight-regular);
+      font-style: italic;
+    }
+    .tx-col-category {
+      color: var(--color-text-muted);
+      font-size: var(--text-xs);
+      width: 160px;
+    }
+    .tx-col-amount {
+      width: 130px;
+      text-align: right;
+      font-family: var(--font-mono);
+      font-weight: var(--weight-medium);
+      white-space: nowrap;
+    }
+    .tx-col-amount.credit { color: var(--color-success); }
+    .tx-empty {
+      padding: var(--space-6) 0;
+      text-align: center;
+      color: var(--color-text-subtle);
+      font-size: var(--text-sm);
+    }
+    .tx-empty-row td {
+      padding: var(--space-6) 0;
+      text-align: center;
+      color: var(--color-text-subtle);
+      font-size: var(--text-sm);
+      border-bottom: 0;
+    }
+
+    /* Sortable column headers — merchlab .msd-th[data-msd-sort] treatment */
+    .tx-table thead th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+    .tx-table thead th.sortable:hover { color: var(--color-text); }
+    .tx-table thead th.sortable:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: -2px;
+    }
+    .sort-indicator {
+      display: inline-block;
+      margin-left: 4px;
+      font-size: 12px;
+      line-height: 1;
+      color: var(--color-text-muted);
+      opacity: 0.45;
+      transition: opacity var(--ease-default), color var(--ease-default);
+      vertical-align: -1px;
+    }
+    .sort-indicator::before { content: '\2195'; }
+    .tx-table thead th.sortable:hover .sort-indicator { opacity: 0.8; }
+    .tx-table thead th[aria-sort="ascending"]  .sort-indicator,
+    .tx-table thead th[aria-sort="descending"] .sort-indicator {
+      opacity: 1;
+      color: var(--color-text);
+    }
+    .tx-table thead th[aria-sort="ascending"]  .sort-indicator::before { content: '\2191'; }
+    .tx-table thead th[aria-sort="descending"] .sort-indicator::before { content: '\2193'; }
+
+    /* Filter banner — merchlab .msd-status-context treatment */
+    .tx-filter-banner {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      background: color-mix(in srgb, var(--banner-accent, var(--color-accent)) 7%, var(--color-surface));
+      border: 1px solid var(--color-border);
+      border-left: 4px solid var(--banner-accent, var(--color-accent));
+      border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-4);
+      margin-bottom: var(--space-3);
+    }
+    .tx-filter-banner[hidden] { display: none; }
+    .tx-filter-banner-body { flex: 1; min-width: 0; }
+    .tx-filter-banner-title {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semi);
+      color: var(--color-text);
+    }
+    .tx-filter-banner-desc {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      margin-top: 2px;
+      font-family: var(--font-mono);
+    }
+    .tx-filter-banner-clear {
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      padding: 4px 12px;
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: color var(--ease-default), border-color var(--ease-default), background var(--ease-default);
+    }
+    .tx-filter-banner-clear:hover {
+      color: var(--color-text);
+      border-color: var(--color-text-muted);
+      background: var(--color-surface-2);
+    }
+
+    /* Category chips — merchlab .msd-chip treatment */
+    .cat-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-bottom: var(--space-3);
+    }
+    .cat-chip {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      padding: 5px var(--space-3);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color var(--ease-default), border-color var(--ease-default), background var(--ease-default);
+    }
+    .cat-chip:hover {
+      color: var(--color-text);
+      border-color: var(--color-text-muted);
+    }
+    .cat-chip[aria-pressed="true"] {
+      background: var(--chip-accent, var(--color-accent));
+      border-color: var(--chip-accent, var(--color-accent));
+      color: #fff;
+    }
+    .cat-chip-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--chip-accent, var(--color-text-subtle));
+    }
+    .cat-chip[aria-pressed="true"] .cat-chip-dot {
+      background: #fff;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px var(--space-2);
+      border-radius: var(--radius-full);
+      font-size: 10px;
+      font-weight: var(--weight-medium);
+      background: rgba(25,60,97,0.08);
+      color: var(--color-accent);
+      margin-left: var(--space-2);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 1100px) {
+      .cashflow-grid { grid-template-columns: 1fr; }
+      .account-rail { max-height: 280px; }
+    }
+    @media (max-width: 760px) {
+      .cashflow-grid { grid-template-columns: 1fr; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+      .account-rail { max-height: none; }
+      .tx-col-category { display: none; }
+    }
+    @media (max-width: 540px) {
+      .stat-grid { grid-template-columns: 1fr; }
+      .page { padding: var(--space-6) var(--space-4); }
+      .period-label { min-width: 120px; font-size: var(--text-md); }
+    }
+  </style>
+</head>
+<body>
+
+<script id="finance-data" type="application/json">
+{
+  "user_settings": { "home_currency": "AUD" },
+  "fx_rates": [
+    { "date": "2025-05-31", "base": "NZD", "quote": "AUD", "rate": 0.918 },
+    { "date": "2026-05-31", "base": "NZD", "quote": "AUD", "rate": 0.922 }
+  ],
+  "accounts": [
+    { "id": "anz-nz",         "name": "ANZ NZ",          "account_type": "DEPOSIT",    "currency": "NZD", "colour_slot": 0 },
+    { "id": "anz-au",         "name": "ANZ AU Primary",  "account_type": "DEPOSIT",    "currency": "AUD", "colour_slot": 4 },
+    { "id": "anz-au-savings", "name": "ANZ AU Savings",  "account_type": "DEPOSIT",    "currency": "AUD", "colour_slot": 8 },
+    { "id": "kiwisaver",      "name": "KiwiSaver",       "account_type": "INVESTMENT", "currency": "NZD", "colour_slot": 2 },
+    { "id": "ausuper",        "name": "AustralianSuper", "account_type": "INVESTMENT", "currency": "AUD", "colour_slot": 5 }
+  ],
+  "balance_snapshots_latest": {
+    "anz-nz": 5500, "anz-au": 4200, "anz-au-savings": 22000, "kiwisaver": 52000, "ausuper": 95000
+  },
+  "balance_snapshots_year_ago": {
+    "anz-nz": 4200, "anz-au": 3400, "anz-au-savings": 14000, "kiwisaver": 44500, "ausuper": 83500
+  },
+  "liquid_now_aud": 30700,
+  "income_expense_by_month": [
+    { "month": "2025-06", "income": 6800, "expense": 4180 },
+    { "month": "2025-07", "income": 6800, "expense": 4860 },
+    { "month": "2025-08", "income": 6800, "expense": 4220 },
+    { "month": "2025-09", "income": 6800, "expense": 5050 },
+    { "month": "2025-10", "income": 6800, "expense": 4310 },
+    { "month": "2025-11", "income": 6800, "expense": 4790 },
+    { "month": "2025-12", "income": 6800, "expense": 5320 },
+    { "month": "2026-01", "income": 6800, "expense": 4140 },
+    { "month": "2026-02", "income": 6800, "expense": 4380 },
+    { "month": "2026-03", "income": 6800, "expense": 4170 },
+    { "month": "2026-04", "income": 6800, "expense": 4630 },
+    { "month": "2026-05", "income": 6800, "expense": 4290 }
+  ],
+  "expense_by_category_by_month": [
+    { "month": "2025-06", "housing": 1600, "groceries": 540, "dining": 220, "transport": 180, "subscriptions": 33, "utilities": 230, "health": 50, "entertainment": 90, "travel": 1237 },
+    { "month": "2025-07", "housing": 1600, "groceries": 620, "dining": 280, "transport": 200, "subscriptions": 33, "utilities": 290, "health": 80, "entertainment": 110, "travel": 1647 },
+    { "month": "2025-08", "housing": 1600, "groceries": 580, "dining": 240, "transport": 170, "subscriptions": 33, "utilities": 260, "health": 60, "entertainment": 100, "travel": 1177 },
+    { "month": "2025-09", "housing": 1600, "groceries": 660, "dining": 320, "transport": 220, "subscriptions": 33, "utilities": 280, "health": 90, "entertainment": 120, "travel": 1727 },
+    { "month": "2025-10", "housing": 1600, "groceries": 540, "dining": 260, "transport": 190, "subscriptions": 33, "utilities": 240, "health": 60, "entertainment": 80, "travel": 1307 },
+    { "month": "2025-11", "housing": 1600, "groceries": 600, "dining": 290, "transport": 200, "subscriptions": 33, "utilities": 270, "health": 70, "entertainment": 100, "travel": 1627 },
+    { "month": "2025-12", "housing": 1600, "groceries": 720, "dining": 360, "transport": 240, "subscriptions": 33, "utilities": 300, "health": 100, "entertainment": 150, "travel": 1817 },
+    { "month": "2026-01", "housing": 1600, "groceries": 540, "dining": 240, "transport": 180, "subscriptions": 33, "utilities": 230, "health": 50, "entertainment": 90, "travel": 1177 },
+    { "month": "2026-02", "housing": 1600, "groceries": 570, "dining": 260, "transport": 190, "subscriptions": 33, "utilities": 240, "health": 60, "entertainment": 100, "travel": 1327 },
+    { "month": "2026-03", "housing": 1600, "groceries": 540, "dining": 220, "transport": 180, "subscriptions": 33, "utilities": 230, "health": 50, "entertainment": 90, "travel": 1227 },
+    { "month": "2026-04", "housing": 1600, "groceries": 620, "dining": 280, "transport": 200, "subscriptions": 33, "utilities": 250, "health": 70, "entertainment": 110, "travel": 1500 },
+    { "month": "2026-05", "housing": 1600, "groceries": 540, "dining": 240, "transport": 180, "subscriptions": 33, "utilities": 260, "health": 80, "entertainment": 90, "travel": 1267 }
+  ],
+  "categories": [
+    { "id": "housing",        "name": "Housing",        "kind": "EXPENSE", "colour_slot": 5 },
+    { "id": "groceries",      "name": "Groceries",      "kind": "EXPENSE", "colour_slot": 6 },
+    { "id": "dining",         "name": "Dining",         "kind": "EXPENSE", "colour_slot": 7 },
+    { "id": "transport",      "name": "Transport",      "kind": "EXPENSE", "colour_slot": 8 },
+    { "id": "subscriptions",  "name": "Subscriptions",  "kind": "EXPENSE", "colour_slot": 9 },
+    { "id": "utilities",      "name": "Utilities",      "kind": "EXPENSE", "colour_slot": 0 },
+    { "id": "health",         "name": "Health",         "kind": "EXPENSE", "colour_slot": 1 },
+    { "id": "entertainment",  "name": "Entertainment",  "kind": "EXPENSE", "colour_slot": 2 },
+    { "id": "travel",         "name": "Travel",         "kind": "EXPENSE", "colour_slot": 3 },
+    { "id": "transfers",      "name": "Transfers",      "kind": "TRANSFER","colour_slot": 4 },
+    { "id": "salary",         "name": "Salary",         "kind": "INCOME",  "colour_slot": 7 }
+  ],
+  "transactions": [
+    { "id": "tx-salary-05", "account_id": "anz-au", "date": "2026-05-12", "amount":  6800, "description": "ACME PTY LTD SALARY",     "category_id": "salary" },
+    { "id": "tx-rent-05",   "account_id": "anz-au", "date": "2026-05-01", "amount": -2400, "description": "ANZ INT BANKING RENT",    "category_id": "housing" },
+    { "id": "tx-flat-a-05", "account_id": "anz-au", "date": "2026-05-03", "amount":   800, "description": "FROM ALEX FLATMATE",     "category_id": "transfers" },
+    { "id": "tx-flat-s-05", "account_id": "anz-au", "date": "2026-05-04", "amount":   800, "description": "FROM SAM FLATMATE",      "category_id": "transfers" },
+    { "id": "tx-woolies-1", "account_id": "anz-au", "date": "2026-05-06", "amount":  -142, "description": "WOOLWORTHS METRO",       "category_id": "groceries" },
+    { "id": "tx-woolies-2", "account_id": "anz-au", "date": "2026-05-11", "amount":  -118, "description": "WOOLWORTHS METRO",       "category_id": "groceries" },
+    { "id": "tx-coles-1",   "account_id": "anz-au", "date": "2026-04-29", "amount":   -96, "description": "COLES SUPERMARKETS",     "category_id": "groceries" },
+    { "id": "tx-uber-1",    "account_id": "anz-au", "date": "2026-05-08", "amount":   -24, "description": "UBER TRIP",              "category_id": "transport" },
+    { "id": "tx-uber-2",    "account_id": "anz-au", "date": "2026-05-09", "amount":   -38, "description": "UBER EATS",              "category_id": "dining" },
+    { "id": "tx-myki",      "account_id": "anz-au", "date": "2026-05-02", "amount":   -50, "description": "MYKI TOP UP",            "category_id": "transport" },
+    { "id": "tx-netflix",   "account_id": "anz-au", "date": "2026-05-05", "amount":   -20, "description": "NETFLIX.COM",            "category_id": "subscriptions" },
+    { "id": "tx-spotify",   "account_id": "anz-au", "date": "2026-05-05", "amount":   -13, "description": "SPOTIFY P05",            "category_id": "subscriptions" },
+    { "id": "tx-agl",       "account_id": "anz-au", "date": "2026-05-10", "amount":  -184, "description": "AGL ELECTRICITY",        "category_id": "utilities" },
+    { "id": "tx-telstra",   "account_id": "anz-au", "date": "2026-05-07", "amount":   -75, "description": "TELSTRA MOBILE",         "category_id": "utilities" },
+    { "id": "tx-dining-1",  "account_id": "anz-au", "date": "2026-05-09", "amount":   -68, "description": "BAR SOMA ST KILDA",      "category_id": "dining" },
+    { "id": "tx-dining-2",  "account_id": "anz-au", "date": "2026-04-26", "amount":   -42, "description": "GUZMAN Y GOMEZ",         "category_id": "dining" },
+    { "id": "tx-chemist",   "account_id": "anz-au", "date": "2026-05-08", "amount":   -28, "description": "CHEMIST WAREHOUSE",      "category_id": "health" },
+    { "id": "tx-cinema",    "account_id": "anz-au", "date": "2026-04-19", "amount":   -32, "description": "PALACE CINEMAS",         "category_id": "entertainment" },
+    { "id": "tx-flights",   "account_id": "anz-au", "date": "2026-04-12", "amount":  -420, "description": "AIR NZ FLIGHTS",         "category_id": "travel" },
+    { "id": "tx-salary-04", "account_id": "anz-au", "date": "2026-04-12", "amount":  6800, "description": "ACME PTY LTD SALARY",     "category_id": "salary" },
+    { "id": "tx-rent-04",   "account_id": "anz-au", "date": "2026-04-01", "amount": -2400, "description": "ANZ INT BANKING RENT",    "category_id": "housing" },
+    { "id": "tx-ks-contrib", "account_id": "kiwisaver", "date": "2026-05-12", "amount": 220, "description": "KIWISAVER CONTRIB",     "category_id": "transfers" },
+    { "id": "tx-aus-contrib", "account_id": "ausuper", "date": "2026-05-12", "amount": 680, "description": "AUSSUPER CONTRIB",       "category_id": "transfers" },
+    { "id": "tx-sav-deposit", "account_id": "anz-au-savings", "date": "2026-05-15", "amount": 1500, "description": "TRANSFER TO SAVINGS", "category_id": "transfers" }
+  ],
+  "transaction_links": [
+    { "parent_id": "tx-rent-05", "child_id": "tx-flat-a-05", "link_type": "NETS_AGAINST" },
+    { "parent_id": "tx-rent-05", "child_id": "tx-flat-s-05", "link_type": "NETS_AGAINST" }
+  ]
+}
+</script>
+
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Finance</h1>
+      <div class="page-subtitle" id="header-subtitle">May 2026 · AUD · Cashflow view</div>
+    </div>
+    <div style="display:flex; gap: var(--space-2);">
+      <button class="btn btn-ghost">Refresh</button>
+      <button class="btn btn-primary">Import statement</button>
+    </div>
+  </header>
+
+  <div class="stat-grid row">
+    <div class="stat-card">
+      <div class="stat-label">Net Worth</div>
+      <div class="stat-value" id="stat-net-worth">—</div>
+      <div class="stat-change"><span class="up" id="stat-net-worth-delta">—</span> vs 12mo ago</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Liquid</div>
+      <div class="stat-value" id="stat-liquid">—</div>
+      <div class="stat-change">Deposit accounts total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label" id="stat-saved-label">Saved this month</div>
+      <div class="stat-value" id="stat-saved">—</div>
+      <div class="stat-change">Income − Expense (Net) <span class="pill">Net Cost</span></div>
+    </div>
+  </div>
+
+  <div class="period-bar row" id="period-bar">
+    <button class="period-arrow" id="period-prev" aria-label="Previous month">‹</button>
+    <div class="period-current">
+      <span class="period-label" id="period-label">May 2026</span>
+      <button class="period-cal" id="period-cal-btn" aria-label="Pick range" title="Pick range">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="period-shortcuts" id="period-shortcuts" role="group" aria-label="Period">
+      <button type="button" class="period-shortcut" data-period="1m" aria-pressed="true">1 month</button>
+      <button type="button" class="period-shortcut" data-period="12m" aria-pressed="false">12 months</button>
+    </div>
+    <button class="period-arrow" id="period-next" aria-label="Next month">›</button>
+    <div class="period-popover" id="period-popover" hidden>
+      <label>From <input type="date" id="period-from"></label>
+      <label>To <input type="date" id="period-to"></label>
+      <div class="popover-actions">
+        <button class="btn btn-ghost" id="period-reset">This month</button>
+        <button class="btn btn-primary" id="period-apply">Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cashflow-grid row">
+    <div class="account-rail" id="account-rail">
+      <div class="card-title" style="margin-bottom: var(--space-1);">Accounts</div>
+      <div class="card-subtitle" id="account-subtitle">May 2026 · Δ in AUD</div>
+      <div id="account-list"></div>
+    </div>
+
+    <div class="card chart-card">
+      <div class="chart-toolbar">
+        <div>
+          <div class="card-title" style="margin-bottom: 2px;">Cashflow</div>
+          <div class="card-subtitle" id="chart-subtitle" style="margin-bottom: 0;">Per-account net flow · AUD</div>
+        </div>
+        <div style="display:flex; align-items:center; gap: var(--space-3);">
+          <span class="toolbar-hint" id="highlight-hint">Click a row to isolate</span>
+          <div class="toolbar-toggle" id="chart-type-toggle" role="tablist" aria-label="Chart type">
+            <button type="button" data-chart-type="line"          aria-pressed="true">Line</button>
+            <button type="button" data-chart-type="stacked-bar"   aria-pressed="false">Stacked</button>
+            <button type="button" data-chart-type="category-pie"  aria-pressed="false">Categories</button>
+          </div>
+        </div>
+      </div>
+      <div id="chart-cashflow" class="chart-hero"></div>
+    </div>
+  </div>
+
+  <div class="cashflow-tx-wrap row">
+    <div class="cashflow-tx-header">
+      <div>
+        <div class="card-title" style="margin-bottom: 2px;">Transactions</div>
+        <div class="card-subtitle" id="tx-subtitle" style="margin-bottom: 0;">Selected period</div>
+      </div>
+      <span class="toolbar-hint">Click a row to isolate that account</span>
+    </div>
+    <div class="tx-filter-banner" id="tx-filter-banner" role="status" aria-live="polite" hidden>
+      <div class="tx-filter-banner-body">
+        <div class="tx-filter-banner-title" id="tx-filter-banner-title"></div>
+        <div class="tx-filter-banner-desc" id="tx-filter-banner-desc"></div>
+      </div>
+      <button type="button" class="tx-filter-banner-clear" id="tx-filter-banner-clear">Clear filter</button>
+    </div>
+    <div class="cat-chips" id="cat-chips" role="group" aria-label="Filter by category"></div>
+    <div class="tx-table-wrap" id="tx-table-wrap"></div>
+  </div>
+</div>
+
+<script>
+  const DATA = JSON.parse(document.getElementById('finance-data').textContent);
+
+  const root = getComputedStyle(document.documentElement);
+  const cssVar = (n) => root.getPropertyValue(n).trim();
+  const SLOT = Array.from({ length: 10 }, (_, i) => cssVar(`--chart-cat-${i}`));
+  const COLOR_TEXT_SUBTLE = cssVar('--color-text-subtle');
+  const COLOR_TEXT_MUTED = cssVar('--color-text-muted');
+  const COLOR_BORDER_SOFT = cssVar('--color-border-soft');
+  const COLOR_SUCCESS = cssVar('--color-success');
+  const COLOR_DESTRUCTIVE = cssVar('--color-destructive');
+
+  const ACCOUNT_BY_ID = Object.fromEntries(DATA.accounts.map(a => [a.id, a]));
+  const CATEGORY_BY_ID = Object.fromEntries(DATA.categories.map(c => [c.id, c]));
+  const FX_BY_DATE = Object.fromEntries(DATA.fx_rates.map(r => [r.date, r.rate]));
+  const FX_DATES_SORTED = DATA.fx_rates.map(r => r.date).sort();
+
+  function toAud(amount, currency, date) {
+    if (currency === 'AUD') return amount;
+    const earlier = FX_DATES_SORTED.filter(d => d <= date);
+    const fxDate = earlier.length ? earlier[earlier.length - 1] : FX_DATES_SORTED[0];
+    return amount * FX_BY_DATE[fxDate];
+  }
+
+  const ZERO_FOR_CATEGORY = new Set();
+  const PARENT_ADJUSTMENT = {};
+  for (const link of DATA.transaction_links) {
+    if (link.link_type !== 'NETS_AGAINST') continue;
+    const child = DATA.transactions.find(t => t.id === link.child_id);
+    const parent = DATA.transactions.find(t => t.id === link.parent_id);
+    if (!child || !parent) continue;
+    ZERO_FOR_CATEGORY.add(child.id);
+    PARENT_ADJUSTMENT[parent.id] = (PARENT_ADJUSTMENT[parent.id] || 0) + Math.abs(child.amount);
+  }
+
+  const fmtAud  = (n) => new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }).format(n);
+  const fmtAud2 = (n) => new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 2 }).format(n);
+  const fmtAudSigned = (n) => `${n >= 0 ? '+' : '−'}${fmtAud(Math.abs(n))}`;
+  function shortDate(iso) { return new Date(iso).toLocaleDateString('en-AU', { day: '2-digit', month: 'short' }); }
+  function monthLabel(d) { return d.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' }); }
+  function isoDay(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  const TODAY = new Date('2026-05-12');
+  function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+  function endOfMonth(d)   { return new Date(d.getFullYear(), d.getMonth() + 1, 0); }
+
+  const state = {
+    start: startOfMonth(TODAY),
+    end:   endOfMonth(TODAY),
+    isCustomRange: false,
+    highlightedAccount: null,
+    txSort: { key: 'date', dir: 'desc' },
+    categoryFilter: null,
+    chartType: 'line',
+  };
+  function rangeDays() {
+    return Math.round((state.end - state.start) / 86400000) + 1;
+  }
+  function is1mView() { return rangeDays() <= 35; }
+  function inPeriod(isoDate) { return isoDate >= isoDay(state.start) && isoDate <= isoDay(state.end); }
+
+  function netWorthAud() {
+    return DATA.accounts.reduce((s, acc) =>
+      s + toAud(DATA.balance_snapshots_latest[acc.id] ?? 0, acc.currency, '2026-05-31'), 0);
+  }
+  function netWorth12mAgoAud() {
+    return DATA.accounts.reduce((s, acc) =>
+      s + toAud(DATA.balance_snapshots_year_ago[acc.id] ?? 0, acc.currency, '2025-05-31'), 0);
+  }
+  function savedForPeriod() {
+    let income = 0, netExpense = 0;
+    for (const tx of DATA.transactions) {
+      if (!inPeriod(tx.date)) continue;
+      const cat = CATEGORY_BY_ID[tx.category_id];
+      if (!cat) continue;
+      if (ZERO_FOR_CATEGORY.has(tx.id)) continue;
+      const acc = ACCOUNT_BY_ID[tx.account_id];
+      const aud = toAud(tx.amount, acc.currency, tx.date);
+      if (cat.kind === 'INCOME') income += aud;
+      else if (cat.kind === 'EXPENSE') {
+        const adj = PARENT_ADJUSTMENT[tx.id] || 0;
+        netExpense += Math.max(0, Math.abs(aud) - adj);
+      }
+    }
+    return income - netExpense;
+  }
+  function txForPeriod() {
+    return [...DATA.transactions]
+      .filter(tx => inPeriod(tx.date))
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }
+
+  // ============================================================
+  // PER-ACCOUNT SERIES
+  // ============================================================
+  function daysInPeriod() {
+    const out = [];
+    const cur = new Date(state.start);
+    while (cur <= state.end) {
+      out.push(isoDay(cur));
+      cur.setDate(cur.getDate() + 1);
+    }
+    return out;
+  }
+  function monthlyKeysLast12() {
+    return DATA.income_expense_by_month.map(m => m.month);
+  }
+
+  function accountSeries1m(accId) {
+    const acc = ACCOUNT_BY_ID[accId];
+    const days = daysInPeriod();
+    const txByDay = {};
+    for (const tx of DATA.transactions) {
+      if (tx.account_id !== accId) continue;
+      if (!inPeriod(tx.date)) continue;
+      const aud = toAud(tx.amount, acc.currency, tx.date);
+      txByDay[tx.date] = (txByDay[tx.date] || 0) + aud;
+    }
+    // Investment accounts get a small market-drift component, distributed daily.
+    const finalAud = toAud(DATA.balance_snapshots_latest[accId] ?? 0, acc.currency, '2026-05-31');
+    const driftPerDay = acc.account_type === 'INVESTMENT'
+      ? (finalAud * 0.008) / days.length
+      : 0;
+    let cum = 0;
+    return days.map(d => {
+      cum += (txByDay[d] || 0) + driftPerDay;
+      return Math.round(cum);
+    });
+  }
+
+  function accountSeries12m(accId) {
+    const acc = ACCOUNT_BY_ID[accId];
+    const months = monthlyKeysLast12();
+    const startAud = toAud(DATA.balance_snapshots_year_ago[accId] ?? 0, acc.currency, '2025-05-31');
+    const finalAud = toAud(DATA.balance_snapshots_latest[accId] ?? 0, acc.currency, '2026-05-31');
+    const delta = finalAud - startAud;
+    if (accId === 'anz-au') {
+      let cum = 0;
+      return DATA.income_expense_by_month.map(m => {
+        cum += (m.income - m.expense);
+        // Keep noise consistent with the snapshot delta
+        return Math.round(cum);
+      });
+    }
+    return months.map((_, i) => Math.round(delta * ((i + 1) / 12)));
+  }
+
+  function xLabels1m() {
+    return daysInPeriod().map(d => {
+      const dt = new Date(d);
+      return dt.toLocaleDateString('en-AU', { day: '2-digit' });
+    });
+  }
+  function xLabels12m() {
+    return monthlyKeysLast12().map(s => {
+      const [y, m] = s.split('-').map(Number);
+      return new Date(y, m - 1, 1).toLocaleDateString('en-AU', { month: 'short' });
+    });
+  }
+
+  // ============================================================
+  // CHART
+  // ============================================================
+  function accountTxDots(accId, lineData, is1m) {
+    const acc = ACCOUNT_BY_ID[accId];
+    const days = is1m ? daysInPeriod() : null;
+    const months = is1m ? null : monthlyKeysLast12();
+    const dots = [];
+    for (const tx of DATA.transactions) {
+      if (tx.account_id !== accId) continue;
+      if (is1m && !inPeriod(tx.date)) continue;
+      let xIndex;
+      if (is1m) {
+        xIndex = days.indexOf(tx.date);
+      } else {
+        xIndex = months.indexOf(tx.date.slice(0, 7));
+      }
+      if (xIndex < 0) continue;
+      const aud = toAud(tx.amount, acc.currency, tx.date);
+      dots.push({ value: [xIndex, lineData[xIndex]], tx, accName: acc.name, aud });
+    }
+    return dots;
+  }
+
+  let chart;
+  function periodLabelText() {
+    return state.isCustomRange
+      ? `${shortDate(isoDay(state.start))} – ${shortDate(isoDay(state.end))}`
+      : monthLabel(state.start);
+  }
+
+  function renderCashflow() {
+    syncChartTypeToggle();
+    syncPeriodShortcuts();
+    if (state.chartType === 'stacked-bar')  return renderCashflowStackedBar();
+    if (state.chartType === 'category-pie') return renderCashflowCategoryPie();
+    return renderCashflowLine();
+  }
+
+  function renderCashflowLine() {
+    const is1m = is1mView();
+    const xData = is1m ? xLabels1m() : xLabels12m();
+    const periodForLabel = is1m
+      ? (state.isCustomRange ? `${shortDate(isoDay(state.start))} – ${shortDate(isoDay(state.end))}` : monthLabel(state.start))
+      : 'Trailing 12 months';
+
+    const series = [];
+    DATA.accounts.forEach(acc => {
+      const data = is1m ? accountSeries1m(acc.id) : accountSeries12m(acc.id);
+      const colour = SLOT[acc.colour_slot];
+      const dimmed = state.highlightedAccount && state.highlightedAccount !== acc.id;
+      series.push({
+        id: acc.id,
+        name: acc.name,
+        type: 'line',
+        data,
+        smooth: true,
+        showSymbol: false,
+        lineStyle: {
+          color: colour,
+          width: state.highlightedAccount === acc.id ? 3 : 2,
+          opacity: dimmed ? 0.18 : 1,
+        },
+        itemStyle: { color: colour },
+        emphasis: { focus: 'series' },
+        z: state.highlightedAccount === acc.id ? 5 : 2,
+      });
+      const dots = accountTxDots(acc.id, data, is1m);
+      series.push({
+        id: `${acc.id}__dots`,
+        name: `${acc.name} · transactions`,
+        type: 'scatter',
+        data: dots,
+        symbolSize: state.highlightedAccount === acc.id ? 10 : 8,
+        itemStyle: {
+          color: colour,
+          borderColor: '#fff',
+          borderWidth: 1.5,
+          opacity: dimmed ? 0.18 : 1,
+        },
+        z: state.highlightedAccount === acc.id ? 6 : 3,
+        silent: !!dimmed,
+        tooltip: {
+          trigger: 'item',
+          formatter: (p) => {
+            const d = p.data;
+            const isCredit = d.aud > 0;
+            const sign = isCredit ? '+' : '−';
+            const amt = `${sign}${fmtAud2(Math.abs(d.aud))}`;
+            return `<div style="font-weight:600; margin-bottom:2px;">${d.tx.description}</div>
+                    <div style="font-size:11px; color:#4A5370;">${shortDate(d.tx.date)} · ${d.accName}</div>
+                    <div style="font-size:13px; font-family:'Geist Mono',monospace; margin-top:4px; color:${isCredit ? '#16a34a' : '#151B36'};">${amt}</div>`;
+          },
+        },
+      });
+    });
+
+    if (!chart) chart = echarts.init(document.getElementById('chart-cashflow'));
+    chart.setOption({
+      grid: { left: 64, right: 24, top: 28, bottom: 36 },
+      tooltip: {
+        trigger: 'axis',
+        valueFormatter: (v) => fmtAudSigned(v),
+      },
+      legend: {
+        show: false,
+      },
+      xAxis: {
+        type: 'category',
+        data: xData,
+        boundaryGap: false,
+        axisLine: { lineStyle: { color: COLOR_BORDER_SOFT } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: COLOR_TEXT_SUBTLE,
+          fontSize: 11,
+          fontFamily: 'Geist Mono, monospace',
+          interval: is1m ? 3 : 0,
+        },
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: {
+          color: COLOR_TEXT_SUBTLE,
+          fontSize: 11,
+          fontFamily: 'Geist Mono, monospace',
+          formatter: (v) => {
+            const abs = Math.abs(v);
+            const sign = v < 0 ? '−' : '';
+            if (abs >= 1000) return `${sign}$${Math.round(abs / 1000)}k`;
+            return `${sign}$${abs}`;
+          },
+        },
+        splitLine: { lineStyle: { color: COLOR_BORDER_SOFT, type: 'dashed' } },
+      },
+      series,
+    }, true);
+
+    document.getElementById('chart-subtitle').textContent = `Per-account net flow · ${periodForLabel}`;
+  }
+
+  function stackedBarSeriesByCategory() {
+    const cats = DATA.categories.filter(c => c.kind === 'EXPENSE');
+    return cats.map(cat => ({
+      name: cat.name,
+      type: 'bar',
+      stack: 'total',
+      data: DATA.accounts.map(acc => {
+        let total = 0;
+        for (const tx of DATA.transactions) {
+          if (tx.account_id !== acc.id) continue;
+          if (tx.category_id !== cat.id) continue;
+          if (!inPeriod(tx.date)) continue;
+          if (ZERO_FOR_CATEGORY.has(tx.id)) continue;
+          const aud = toAud(tx.amount, acc.currency, tx.date);
+          const adj = PARENT_ADJUSTMENT[tx.id] || 0;
+          total += Math.max(0, Math.abs(aud) - adj);
+        }
+        return Math.round(total);
+      }),
+      itemStyle: { color: SLOT[cat.colour_slot] },
+    })).filter(s => s.data.some(v => v > 0));
+  }
+
+  function renderCashflowStackedBar() {
+    if (!chart) chart = echarts.init(document.getElementById('chart-cashflow'));
+    const series = stackedBarSeriesByCategory();
+    chart.setOption({
+      grid: { left: 64, right: 24, top: 28, bottom: 36 },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        valueFormatter: (v) => fmtAud(v),
+      },
+      legend: {
+        show: true,
+        bottom: 0,
+        icon: 'circle',
+        itemWidth: 8,
+        itemHeight: 8,
+        textStyle: { color: COLOR_TEXT_MUTED, fontSize: 11 },
+      },
+      xAxis: {
+        type: 'category',
+        data: DATA.accounts.map(a => a.name),
+        axisLine: { lineStyle: { color: COLOR_BORDER_SOFT } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: COLOR_TEXT_SUBTLE,
+          fontSize: 11,
+          fontFamily: 'Geist Mono, monospace',
+          interval: 0,
+        },
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: {
+          color: COLOR_TEXT_SUBTLE,
+          fontSize: 11,
+          fontFamily: 'Geist Mono, monospace',
+          formatter: (v) => v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${v}`,
+        },
+        splitLine: { lineStyle: { color: COLOR_BORDER_SOFT, type: 'dashed' } },
+      },
+      series,
+    }, { notMerge: true, replaceMerge: ['series', 'xAxis', 'yAxis'] });
+    document.getElementById('chart-subtitle').textContent = `Spend by category, per account · ${periodLabelText()}`;
+  }
+
+  function categoryBreakdownForPeriod() {
+    const totals = {};
+    for (const tx of DATA.transactions) {
+      if (!inPeriod(tx.date)) continue;
+      if (state.highlightedAccount && tx.account_id !== state.highlightedAccount) continue;
+      const cat = CATEGORY_BY_ID[tx.category_id];
+      if (!cat || cat.kind !== 'EXPENSE') continue;
+      if (ZERO_FOR_CATEGORY.has(tx.id)) continue;
+      const acc = ACCOUNT_BY_ID[tx.account_id];
+      const aud = Math.abs(toAud(tx.amount, acc.currency, tx.date));
+      const adj = PARENT_ADJUSTMENT[tx.id] || 0;
+      totals[cat.id] = (totals[cat.id] || 0) + Math.max(0, aud - adj);
+    }
+    return Object.entries(totals).map(([id, value]) => {
+      const cat = CATEGORY_BY_ID[id];
+      return { name: cat.name, value: Math.round(value), itemStyle: { color: SLOT[cat.colour_slot] } };
+    }).sort((a, b) => b.value - a.value);
+  }
+
+  function renderCashflowCategoryPie() {
+    if (!chart) chart = echarts.init(document.getElementById('chart-cashflow'));
+    const slices = categoryBreakdownForPeriod();
+    chart.setOption({
+      tooltip: { trigger: 'item', valueFormatter: (v) => fmtAud(v) },
+      legend: {
+        bottom: 0,
+        type: 'scroll',
+        icon: 'circle',
+        itemWidth: 8,
+        itemHeight: 8,
+        textStyle: { color: COLOR_TEXT_MUTED, fontSize: 11 },
+      },
+      series: [{
+        type: 'pie',
+        radius: ['40%', '70%'],
+        center: ['50%', '45%'],
+        avoidLabelOverlap: false,
+        label: { show: false },
+        labelLine: { show: false },
+        data: slices,
+      }],
+    }, { notMerge: true, replaceMerge: ['series', 'xAxis', 'yAxis'] });
+    const accountSuffix = state.highlightedAccount ? ` · ${ACCOUNT_BY_ID[state.highlightedAccount].name}` : '';
+    document.getElementById('chart-subtitle').textContent = `Spend by category · ${periodLabelText()}${accountSuffix}`;
+  }
+
+  function syncChartTypeToggle() {
+    document.querySelectorAll('#chart-type-toggle button').forEach(btn => {
+      btn.setAttribute('aria-pressed', btn.dataset.chartType === state.chartType ? 'true' : 'false');
+    });
+  }
+  function wireChartTypeToggle() {
+    document.querySelectorAll('#chart-type-toggle button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.chartType = btn.dataset.chartType;
+        renderCashflow();
+      });
+    });
+  }
+
+  // ============================================================
+  // ACCOUNT RAIL
+  // ============================================================
+  function periodNetForAccount(accId) {
+    const acc = ACCOUNT_BY_ID[accId];
+    let net = 0;
+    for (const tx of DATA.transactions) {
+      if (tx.account_id !== accId) continue;
+      if (!inPeriod(tx.date)) continue;
+      net += toAud(tx.amount, acc.currency, tx.date);
+    }
+    if (acc.account_type === 'INVESTMENT') {
+      const finalAud = toAud(DATA.balance_snapshots_latest[accId] ?? 0, acc.currency, '2026-05-31');
+      net += finalAud * 0.008;
+    }
+    return Math.round(net);
+  }
+
+  function renderAccounts() {
+    const root = document.getElementById('account-list');
+    root.innerHTML = DATA.accounts.map(acc => {
+      const colour = SLOT[acc.colour_slot];
+      const balance = toAud(DATA.balance_snapshots_latest[acc.id] ?? 0, acc.currency, '2026-05-31');
+      const periodNet = periodNetForAccount(acc.id);
+      const deltaCls = periodNet >= 0 ? 'up' : 'down';
+      const typeBadge = acc.account_type === 'INVESTMENT' ? 'Investment' : 'Deposit';
+      return `
+        <div class="account-row" data-account="${acc.id}" style="--row-accent: ${colour};">
+          <div class="account-swatch" style="background: ${colour};"></div>
+          <div class="account-info">
+            <div class="account-name">${acc.name}</div>
+            <div class="account-meta">${typeBadge} · ${acc.currency}</div>
+          </div>
+          <div>
+            <div class="account-balance">${fmtAud(balance)}</div>
+            <div class="account-delta ${deltaCls}">${fmtAudSigned(periodNet)}</div>
+          </div>
+        </div>`;
+    }).join('');
+    root.querySelectorAll('.account-row').forEach(el => {
+      el.addEventListener('click', () => {
+        const accId = el.dataset.account;
+        toggleHighlight(accId);
+      });
+    });
+    document.getElementById('account-subtitle').textContent = state.isCustomRange
+      ? `${shortDate(isoDay(state.start))} → ${shortDate(isoDay(state.end))} · Δ in AUD`
+      : `${monthLabel(state.start)} · Δ in AUD`;
+  }
+
+  // ============================================================
+  // TX RAIL
+  // ============================================================
+  const SORT_KEYS = {
+    date:        (tx) => tx.date,
+    account:     (tx) => ACCOUNT_BY_ID[tx.account_id]?.name ?? '',
+    description: (tx) => tx.description ?? '',
+    category:    (tx) => CATEGORY_BY_ID[tx.category_id]?.name ?? '',
+    amount:      (tx) => toAud(tx.amount, ACCOUNT_BY_ID[tx.account_id].currency, tx.date),
+  };
+  function sortTx(list) {
+    const { key, dir } = state.txSort;
+    const get = SORT_KEYS[key] || SORT_KEYS.date;
+    const mul = dir === 'asc' ? 1 : -1;
+    return [...list].sort((a, b) => {
+      const va = get(a), vb = get(b);
+      if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * mul;
+      return String(va).localeCompare(String(vb)) * mul;
+    });
+  }
+
+  function renderTransactions() {
+    const linkedChildIds = new Set(DATA.transaction_links.map(l => l.child_id));
+    const parentIds = new Set(DATA.transaction_links.map(l => l.parent_id));
+    const list = sortTx(txForPeriod());
+    const root = document.getElementById('tx-table-wrap');
+    if (list.length === 0) {
+      root.innerHTML = `<div class="tx-empty">No transactions in this period.</div>`;
+      applyHighlightDom();
+      return;
+    }
+    const rows = list.map(tx => {
+      const acc = ACCOUNT_BY_ID[tx.account_id];
+      const cat = CATEGORY_BY_ID[tx.category_id];
+      const aud = toAud(tx.amount, acc.currency, tx.date);
+      const isCredit = aud > 0;
+      const accColour = SLOT[acc.colour_slot];
+      let note = '';
+      if (linkedChildIds.has(tx.id)) note = `<span class="tx-note">↳ nets against rent</span>`;
+      else if (parentIds.has(tx.id))  note = `<span class="tx-note">↳ partly reimbursed</span>`;
+      return `
+        <tr data-account="${acc.id}" data-category="${tx.category_id || ''}" style="--row-accent: ${accColour};">
+          <td class="tx-col-date">${shortDate(tx.date)}</td>
+          <td class="tx-col-account">${acc.name}</td>
+          <td class="tx-col-desc">${tx.description}${note}</td>
+          <td class="tx-col-category">${cat?.name || 'Uncategorised'}</td>
+          <td class="tx-col-amount ${isCredit ? 'credit' : ''}">${isCredit ? '+' : ''}${fmtAud2(aud)}</td>
+        </tr>`;
+    }).join('');
+    const headerCell = (key, label, extraClass, align) => {
+      const sortedHere = state.txSort.key === key;
+      const ariaSort = sortedHere ? (state.txSort.dir === 'asc' ? 'ascending' : 'descending') : 'none';
+      const style = align === 'right' ? ' style="text-align:right;"' : '';
+      return `<th class="${extraClass} sortable" data-sort-key="${key}" role="button" tabindex="0" aria-sort="${ariaSort}"${style}>${label}<span class="sort-indicator" aria-hidden="true"></span></th>`;
+    };
+    root.innerHTML = `
+      <table class="tx-table">
+        <thead>
+          <tr>
+            ${headerCell('date',        'Date',        'tx-col-date')}
+            ${headerCell('account',     'Account',     'tx-col-account')}
+            ${headerCell('description', 'Description', 'tx-col-desc')}
+            ${headerCell('category',    'Category',    'tx-col-category')}
+            ${headerCell('amount',      'Amount',      'tx-col-amount', 'right')}
+          </tr>
+        </thead>
+        <tbody>${rows}<tr class="tx-empty-row" id="tx-empty-filter-row" hidden><td colspan="5">No transactions match this filter.</td></tr></tbody>
+      </table>`;
+    root.querySelectorAll('.tx-table tbody tr:not(.tx-empty-row)').forEach(el => {
+      el.addEventListener('click', () => {
+        const accId = el.dataset.account;
+        toggleHighlight(accId);
+      });
+    });
+    root.querySelectorAll('.tx-table thead th.sortable').forEach(th => {
+      const handler = () => setTxSort(th.dataset.sortKey);
+      th.addEventListener('click', handler);
+      th.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
+      });
+    });
+    applyHighlightDom();
+  }
+
+  function setTxSort(key) {
+    if (state.txSort.key === key) {
+      state.txSort.dir = state.txSort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+      state.txSort = { key, dir: key === 'date' || key === 'amount' ? 'desc' : 'asc' };
+    }
+    renderTransactions();
+  }
+
+  // ============================================================
+  // CATEGORY CHIPS
+  // ============================================================
+  function renderCategoryChips() {
+    const host = document.getElementById('cat-chips');
+    host.innerHTML = DATA.categories.map(cat => {
+      const colour = SLOT[cat.colour_slot];
+      const active = state.categoryFilter === cat.id;
+      return `<button type="button" class="cat-chip" data-category="${cat.id}" aria-pressed="${active}" style="--chip-accent: ${colour};"><span class="cat-chip-dot" aria-hidden="true"></span>${cat.name}</button>`;
+    }).join('');
+    host.querySelectorAll('.cat-chip').forEach(btn => {
+      btn.addEventListener('click', () => toggleCategoryFilter(btn.dataset.category));
+    });
+  }
+  function toggleCategoryFilter(catId) {
+    state.categoryFilter = state.categoryFilter === catId ? null : catId;
+    document.querySelectorAll('#cat-chips .cat-chip').forEach(btn => {
+      btn.setAttribute('aria-pressed', btn.dataset.category === state.categoryFilter ? 'true' : 'false');
+    });
+    applyHighlightDom();
+    renderCashflow();
+  }
+
+  // ============================================================
+  // HIGHLIGHT (account ↔ chart ↔ tx)
+  // ============================================================
+  function toggleHighlight(accId) {
+    state.highlightedAccount = state.highlightedAccount === accId ? null : accId;
+    applyHighlightDom();
+    renderCashflow();
+    document.getElementById('highlight-hint').textContent = state.highlightedAccount
+      ? `Showing ${ACCOUNT_BY_ID[state.highlightedAccount].name} · click again to clear`
+      : 'Click a row to isolate';
+  }
+
+  function applyHighlightDom() {
+    const hl = state.highlightedAccount;
+    const cat = state.categoryFilter;
+    document.querySelectorAll('.account-row').forEach(el => {
+      const match = el.dataset.account === hl;
+      el.setAttribute('aria-selected', match ? 'true' : 'false');
+      el.classList.remove('dimmed');
+    });
+    let visibleCount = 0;
+    document.querySelectorAll('.tx-table tbody tr:not(.tx-empty-row)').forEach(el => {
+      const accMatch = !hl  || el.dataset.account  === hl;
+      const catMatch = !cat || el.dataset.category === cat;
+      const visible = accMatch && catMatch;
+      el.hidden = !visible;
+      if (visible) visibleCount++;
+    });
+    const emptyRow = document.getElementById('tx-empty-filter-row');
+    if (emptyRow) emptyRow.hidden = visibleCount > 0 || !(hl || cat);
+    updateFilterBanner();
+  }
+
+  function updateFilterBanner() {
+    const banner = document.getElementById('tx-filter-banner');
+    if (!banner) return;
+    const hl = state.highlightedAccount;
+    const cat = state.categoryFilter;
+    if (!hl && !cat) { banner.hidden = true; return; }
+    const acc = hl ? ACCOUNT_BY_ID[hl] : null;
+    const catObj = cat ? CATEGORY_BY_ID[cat] : null;
+    const accent = acc ? SLOT[acc.colour_slot] : (catObj ? SLOT[catObj.colour_slot] : '');
+    banner.style.setProperty('--banner-accent', accent);
+    const parts = [];
+    if (acc) parts.push(acc.name);
+    if (catObj) parts.push(catObj.name);
+    document.getElementById('tx-filter-banner-title').textContent = `Filtered: ${parts.join(' · ')}`;
+    const descBits = [];
+    if (acc) descBits.push(`Account: ${acc.name}`);
+    if (catObj) descBits.push(`Category: ${catObj.name}`);
+    document.getElementById('tx-filter-banner-desc').textContent = descBits.join(' / ');
+    banner.hidden = false;
+  }
+
+  function clearAllFilters() {
+    state.highlightedAccount = null;
+    state.categoryFilter = null;
+    document.querySelectorAll('#cat-chips .cat-chip').forEach(btn => btn.setAttribute('aria-pressed', 'false'));
+    document.getElementById('highlight-hint').textContent = 'Click a row to isolate';
+    applyHighlightDom();
+    renderCashflow();
+  }
+
+  // ============================================================
+  // STATS / HEADERS
+  // ============================================================
+  function renderStats() {
+    const nw = netWorthAud();
+    const nw12 = netWorth12mAgoAud();
+    const delta = nw - nw12;
+    const deltaPct = (delta / nw12) * 100;
+    document.getElementById('stat-net-worth').textContent = fmtAud(nw);
+    const dEl = document.getElementById('stat-net-worth-delta');
+    dEl.textContent = `${delta >= 0 ? '↑' : '↓'} ${fmtAud(Math.abs(delta))} (${deltaPct.toFixed(1)}%)`;
+    dEl.className = delta >= 0 ? 'up' : 'down';
+    document.getElementById('stat-liquid').textContent = fmtAud(DATA.liquid_now_aud);
+    document.getElementById('stat-saved').textContent = fmtAud(savedForPeriod());
+    document.getElementById('stat-saved-label').textContent = state.isCustomRange
+      ? 'Saved in range' : `Saved in ${monthLabel(state.start)}`;
+  }
+  function renderHeaderSubtitle() {
+    document.getElementById('header-subtitle').textContent = state.isCustomRange
+      ? `${shortDate(isoDay(state.start))} → ${shortDate(isoDay(state.end))} · AUD · Cashflow view`
+      : `${monthLabel(state.start)} · AUD · Cashflow view`;
+  }
+  function renderTxSubtitle() {
+    document.getElementById('tx-subtitle').textContent = state.isCustomRange
+      ? `${shortDate(isoDay(state.start))} → ${shortDate(isoDay(state.end))}`
+      : monthLabel(state.start);
+  }
+  function updatePeriodLabel() {
+    document.getElementById('period-label').textContent = state.isCustomRange
+      ? `${shortDate(isoDay(state.start))} – ${shortDate(isoDay(state.end))}`
+      : monthLabel(state.start);
+  }
+  function stepMonth(delta) {
+    const base = state.isCustomRange ? new Date() : state.start;
+    const next = new Date(base.getFullYear(), base.getMonth() + delta, 1);
+    state.start = startOfMonth(next);
+    state.end = endOfMonth(next);
+    state.isCustomRange = false;
+    refreshPeriodDependent();
+  }
+  function refreshPeriodDependent() {
+    updatePeriodLabel();
+    renderHeaderSubtitle();
+    renderTxSubtitle();
+    renderStats();
+    renderAccounts();
+    renderTransactions();
+    applyHighlightDom();
+    renderCashflow();
+    syncPeriodShortcuts();
+  }
+
+  function wirePeriodSelector() {
+    document.getElementById('period-prev').addEventListener('click', () => stepMonth(-1));
+    document.getElementById('period-next').addEventListener('click', () => stepMonth(1));
+    const popover = document.getElementById('period-popover');
+    const calBtn = document.getElementById('period-cal-btn');
+    const fromInput = document.getElementById('period-from');
+    const toInput = document.getElementById('period-to');
+    calBtn.addEventListener('click', () => {
+      fromInput.value = isoDay(state.start);
+      toInput.value = isoDay(state.end);
+      popover.hidden = !popover.hidden;
+    });
+    document.getElementById('period-reset').addEventListener('click', () => {
+      state.start = startOfMonth(TODAY);
+      state.end = endOfMonth(TODAY);
+      state.isCustomRange = false;
+      popover.hidden = true;
+      refreshPeriodDependent();
+    });
+    document.getElementById('period-apply').addEventListener('click', () => {
+      const from = fromInput.value, to = toInput.value;
+      if (!from || !to || from > to) return;
+      state.start = new Date(from);
+      state.end = new Date(to);
+      state.isCustomRange = true;
+      popover.hidden = true;
+      refreshPeriodDependent();
+    });
+    document.addEventListener('click', (e) => {
+      if (popover.hidden) return;
+      if (popover.contains(e.target) || calBtn.contains(e.target)) return;
+      popover.hidden = true;
+    });
+  }
+
+  function setPeriodMode(mode) {
+    if (mode === '1m') {
+      state.start = startOfMonth(TODAY);
+      state.end = endOfMonth(TODAY);
+      state.isCustomRange = false;
+    } else if (mode === '12m') {
+      const end = new Date(TODAY);
+      const start = new Date(TODAY);
+      start.setMonth(start.getMonth() - 11);
+      state.start = startOfMonth(start);
+      state.end = end;
+      state.isCustomRange = true;
+    }
+    refreshPeriodDependent();
+  }
+  function syncPeriodShortcuts() {
+    const is1m = is1mView();
+    const disabled = state.chartType === 'stacked-bar';
+    document.querySelectorAll('#period-shortcuts .period-shortcut').forEach(btn => {
+      const pressed = (btn.dataset.period === '1m' && is1m) || (btn.dataset.period === '12m' && !is1m);
+      btn.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+      btn.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+    });
+  }
+  function wirePeriodShortcuts() {
+    document.querySelectorAll('#period-shortcuts .period-shortcut').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.getAttribute('aria-disabled') === 'true') return;
+        setPeriodMode(btn.dataset.period);
+      });
+    });
+    syncPeriodShortcuts();
+  }
+
+  updatePeriodLabel();
+  renderHeaderSubtitle();
+  renderTxSubtitle();
+  renderStats();
+  renderAccounts();
+  renderCategoryChips();
+  renderTransactions();
+  renderCashflow();
+  wirePeriodSelector();
+  wirePeriodShortcuts();
+  wireChartTypeToggle();
+  document.getElementById('tx-filter-banner-clear').addEventListener('click', clearAllFilters);
+
+  window.addEventListener('resize', () => {
+    if (chart) chart.resize();
+  });
+</script>
+
+</body>
+</html>
