@@ -128,7 +128,9 @@ function switchTo(key) {
   if (!v) return;
   activeKey = key;
   els.frame.src = v.path;
-  clearOverlay();
+  dragStart = null;
+  dragCurrent = null;
+  pendingRect = null;
   hidePopover();
   renderTabs();
   refreshSubmitEnabled();
@@ -142,7 +144,9 @@ function annotations() {
 }
 
 function refreshSubmitEnabled() {
-  els.btnSubmit.disabled = annotations().length === 0;
+  let total = 0;
+  for (const arr of annotationsByVariant.values()) total += arr.length;
+  els.btnSubmit.disabled = total === 0;
 }
 
 function toggleAnnotate() {
@@ -152,11 +156,36 @@ function toggleAnnotate() {
   if (!annotateMode) hidePopover();
 }
 
-function resizeOverlay() {
-  const rect = els.stage.getBoundingClientRect();
-  els.overlay.width = rect.width;
-  els.overlay.height = rect.height;
+let frameResizeObserver = null;
+
+function sizeStage() {
+  const doc = els.frame.contentDocument;
+  const width = els.stage.clientWidth;
+  if (!doc || !doc.body) {
+    els.overlay.width = width;
+    els.overlay.height = els.stage.clientHeight;
+    els.overlay.style.height = `${els.stage.clientHeight}px`;
+    redraw();
+    return;
+  }
+  const contentHeight = Math.max(
+    doc.documentElement.scrollHeight,
+    doc.body.scrollHeight,
+    els.stage.clientHeight,
+  );
+  els.frame.style.height = `${contentHeight}px`;
+  els.overlay.width = width;
+  els.overlay.height = contentHeight;
+  els.overlay.style.height = `${contentHeight}px`;
   redraw();
+}
+
+function attachFrameObserver() {
+  if (frameResizeObserver) frameResizeObserver.disconnect();
+  const doc = els.frame.contentDocument;
+  if (!doc || !doc.body) return;
+  frameResizeObserver = new ResizeObserver(() => sizeStage());
+  frameResizeObserver.observe(doc.body);
 }
 
 function clientToOverlay(e) {
@@ -369,19 +398,33 @@ function buildSelector(el) {
 // ---------- Submit ----------
 
 async function submit() {
-  if (annotations().length === 0) return;
+  const annotated = manifest.variants.filter(v => (annotationsByVariant.get(v.key) || []).length > 0);
+  if (annotated.length === 0) return;
   els.btnSubmit.disabled = true;
-  els.btnSubmit.textContent = 'Capturing…';
+  const originalKey = activeKey;
   try {
     const timestamp = isoStamp();
-    const variant = manifest.variants.find(v => v.key === activeKey);
-    const screenshotBlob = await captureScreenshot();
+    const variantsOut = [];
+    const screenshots = [];
+    for (let i = 0; i < annotated.length; i++) {
+      const v = annotated[i];
+      els.btnSubmit.textContent = `Capturing ${v.key} (${i + 1}/${annotated.length})…`;
+      const blob = await loadAndScreenshot(v);
+      const filename = `${v.key}.png`;
+      screenshots.push({ filename, blob });
+      variantsOut.push({
+        key: v.key,
+        name: v.name,
+        path: v.path,
+        screenshot: filename,
+        annotations: annotationsByVariant.get(v.key) || [],
+      });
+    }
     const bundle = {
       timestamp,
       prototype: manifest.title,
-      variant,
       viewport: { w: window.innerWidth, h: window.innerHeight },
-      annotations: annotations(),
+      variants: variantsOut,
     };
     const dataJson = JSON.stringify(bundle, null, 2);
     let written = false;
@@ -391,25 +434,48 @@ async function submit() {
       const feedbackDir = await root.getDirectoryHandle('feedback', { create: true });
       const tsDir = await feedbackDir.getDirectoryHandle(timestamp, { create: true });
       await writeFile(tsDir, 'data.json', dataJson);
-      await writeFile(tsDir, 'screenshot.png', screenshotBlob);
+      for (const s of screenshots) {
+        await writeFile(tsDir, s.filename, s.blob);
+      }
       written = true;
       writePath = `${manifest.pathFromRepoRoot || 'prototype'}/feedback/${timestamp}`;
     } catch (e) {
       console.warn('FS Access write failed; falling back to download', e);
-      downloadFallback(timestamp, dataJson, screenshotBlob);
+      triggerDownload(`${timestamp}-data.json`, new Blob([dataJson], { type: 'application/json' }));
+      for (const s of screenshots) {
+        triggerDownload(`${timestamp}-${s.filename}`, s.blob);
+      }
       writePath = `~/Downloads/${timestamp}-*`;
     }
+    const keyList = annotated.map(v => v.key).join('/');
     const clipboardMsg = written
-      ? `claude, read ${writePath}/data.json and view ${writePath}/screenshot.png`
-      : `claude, read the two ${timestamp}-* files I just downloaded from the prototype harness`;
+      ? `claude, read ${writePath}/data.json and view the per-variant screenshots (${keyList})`
+      : `claude, read the ${timestamp}-* files I just downloaded from the prototype harness`;
     try { await navigator.clipboard.writeText(clipboardMsg); } catch (e) { console.warn('clipboard write failed', e); }
     toast(written
-      ? `Wrote ${writePath}/. Clipboard ready to paste into chat.`
-      : `Downloaded data.json + screenshot.png. Move them to ${manifest.pathFromRepoRoot || 'prototype'}/feedback/${timestamp}/ and tell Claude.`, 8000);
+      ? `Wrote ${writePath}/ (${annotated.length} variant${annotated.length > 1 ? 's' : ''}). Clipboard ready to paste.`
+      : `Downloaded data.json + ${annotated.length} screenshot${annotated.length > 1 ? 's' : ''}. Move them to ${manifest.pathFromRepoRoot || 'prototype'}/feedback/${timestamp}/.`, 8000);
   } finally {
+    if (activeKey !== originalKey) switchTo(originalKey);
     els.btnSubmit.textContent = 'Submit feedback';
     refreshSubmitEnabled();
   }
+}
+
+async function loadAndScreenshot(variant) {
+  if (activeKey !== variant.key) {
+    activeKey = variant.key;
+    await new Promise((resolve) => {
+      const onLoad = () => {
+        els.frame.removeEventListener('load', onLoad);
+        resolve();
+      };
+      els.frame.addEventListener('load', onLoad);
+      els.frame.src = variant.path;
+    });
+    await new Promise(r => setTimeout(r, 400));
+  }
+  return captureScreenshot();
 }
 
 async function captureScreenshot() {
@@ -423,11 +489,6 @@ async function writeFile(dirHandle, name, content) {
   const stream = await fileHandle.createWritable();
   await stream.write(content);
   await stream.close();
-}
-
-function downloadFallback(timestamp, dataJson, screenshotBlob) {
-  triggerDownload(`${timestamp}-data.json`, new Blob([dataJson], { type: 'application/json' }));
-  triggerDownload(`${timestamp}-screenshot.png`, screenshotBlob);
 }
 
 function triggerDownload(name, blob) {
@@ -484,9 +545,10 @@ els.btnClear.addEventListener('click', clearOverlay);
 els.btnSubmit.addEventListener('click', submit);
 els.btnPick.addEventListener('click', pickWinner);
 
-window.addEventListener('resize', resizeOverlay);
+window.addEventListener('resize', sizeStage);
 els.frame.addEventListener('load', () => {
-  resizeOverlay();
+  attachFrameObserver();
+  sizeStage();
 });
 
 // ---------- Init ----------
