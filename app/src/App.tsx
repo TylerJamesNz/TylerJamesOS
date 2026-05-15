@@ -6,8 +6,11 @@ import { PaletteProvider } from './context/PaletteContext'
 import { SessionProvider } from './context/SessionContext'
 import { initTjMotionTypeHeadings } from './lib/tjMotion'
 import BrandKitPage from './pages/BrandKitPage'
+import FinanceLayout from './pages/finance/FinanceLayout'
+import FinancePage from './pages/finance/FinancePage'
+import FinanceAccountsPage from './pages/finance/FinanceAccountsPage'
+import FinanceTransactionsPage from './pages/finance/FinanceTransactionsPage'
 import HomePage from './pages/HomePage'
-import PlaceholderAppPage from './pages/PlaceholderAppPage'
 import SignInPage from './pages/SignInPage'
 import TodosPage from './pages/TodosPage'
 
@@ -44,15 +47,11 @@ export default function App() {
             >
               <Route path="/" element={<HomePage />} />
               <Route path="/brand-kit" element={<BrandKitPage />} />
-              <Route
-                path="/finance"
-                element={
-                  <PlaceholderAppPage
-                    title="Finance"
-                    description="Budgeting, transactions, imports, and net worth will live here — aligned with the shared data model and design tokens."
-                  />
-                }
-              />
+              <Route element={<FinanceLayout />}>
+                <Route path="/finance" element={<FinancePage />} />
+                <Route path="/finance/transactions" element={<FinanceTransactionsPage />} />
+                <Route path="/finance/accounts" element={<FinanceAccountsPage />} />
+              </Route>
               <Route path="/todos" element={<TodosPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>

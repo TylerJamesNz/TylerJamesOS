@@ -1,0 +1,11 @@
+{
+  "title": "Finance dashboard: prototype",
+  "pathFromRepoRoot": "app/prototype",
+  "variants": [
+    {
+      "key": "A",
+      "name": "r5 Cashflow",
+      "path": "../finance-mockup-r5-cashflow.html"
+    }
+  ]
+}

@@ -1,6 +1,8 @@
 # Architecture
 
-## Status: Draft
+## Status: V1
+
+Canonical glossary: `/CONTEXT.md`. Decisions captured as ADRs in `docs/adr/`.
 
 ---
 
@@ -9,8 +11,8 @@
 Tyler James OS runs on an existing subdomain. Placeholder: `os.tylerjames.nz` (update with actual subdomain).
 
 All routes require authentication except:
-- `/login` — Google SSO entry point
-- `/brand` — optional, may be public for reference
+- `/signin`, Google SSO entry point (Supabase Auth)
+- `/brand-kit`, optional, may be public for reference
 
 ---
 
@@ -18,219 +20,163 @@ All routes require authentication except:
 
 ```
 os.tylerjames.nz/
-├── /                    → Home / Dashboard
-├── /login               → Google SSO (redirects to / on success)
-├── /finance             → Financial overview
-│   ├── /finance/transactions   → All transactions, search + filter
-│   ├── /finance/accounts       → Connected accounts
-│   └── /finance/insights       → Charts, summaries, trends
+├── /                    → Home / Hub (app tiles)
+├── /signin              → Google SSO (redirects to / on success)
+├── /finance             → Single-page dashboard (Net Worth, Liquid, Investments, monthly snapshot, category pie)
+│   ├── /finance/transactions   → All transactions, search + filter, Net Cost default
+│   └── /finance/accounts       → Per-account detail and statement upload
 ├── /todos               → Task list
 │   ├── /todos/inbox     → Uncategorised tasks
 │   └── /todos/[project] → Project view
-├── /brand               → Brand kit reference page
+├── /brand-kit           → Brand kit reference page (live)
 └── /settings            → App settings, integrations, account
 ```
+
+`/finance/insights` does not exist, its content is on the `/finance` home dashboard.
 
 ---
 
 ## Application layers
 
 ```
-┌─────────────────────────────────────────────┐
-│             Browser (Next.js)               │
-│   React components + Tailwind + shadcn/ui   │
-└──────────────────┬──────────────────────────┘
-                   │ HTTP / Server Actions
-┌──────────────────▼──────────────────────────┐
-│          Next.js API Layer                  │
-│   Route handlers + server actions + auth    │
-└──────────┬───────────────────┬──────────────┘
-           │                   │
-┌──────────▼──────┐   ┌────────▼──────────────┐
-│   PostgreSQL    │   │   External Services    │
-│   (Supabase /   │   │   - ANZ / bank API     │
-│    Neon / VPS)  │   │   - Anthropic API      │
-│                 │   │   - Google Auth        │
-└─────────────────┘   └────────────────────────┘
+┌──────────────────────────────────────────────┐
+│             Browser (Vite + React 19 SPA)    │
+│   CSS variable theme, ECharts, pdfjs-dist,   │
+│   tesseract.js (lazy-loaded)                 │
+└──────────────────┬───────────────────────────┘
+                   │ HTTPS (Supabase JS client)
+┌──────────────────▼───────────────────────────┐
+│              Supabase                        │
+│   ├── Auth (Google OAuth)                    │
+│   ├── Postgres (RLS on auth.uid())           │
+│   ├── Storage (bank-statements bucket)       │
+│   └── Edge Functions (voice-parse, fx-daily) │
+└──────────────────┬───────────────────────────┘
+                   │
+┌──────────────────▼───────────────────────────┐
+│   External (called only by Edge Functions)   │
+│   ├── OpenAI (todos voice transcript)        │
+│   └── frankfurter.app (free FX, no key)      │
+└──────────────────────────────────────────────┘
 ```
+
+Bank API integrations (Akahu, Plaid, Basiq) are explicitly **not** part of the architecture. Finance imports are file-only (PDF), parsed client-side. See `docs/adr/0002-free-only-import-pipeline.md`.
 
 ---
 
 ## Auth flow
 
-1. User visits any protected route
-2. Middleware checks for valid session cookie
-3. If no session → redirect to `/login`
-4. `/login` initiates Google OAuth via NextAuth.js
-5. On success, session created in database, user redirected to original destination
-6. Session cookie persists across all app sections (single sign-on)
+Supabase Auth with the Google provider.
+
+1. User visits any protected route.
+2. `RequireAuth` (`app/src/components/RequireAuth.tsx`) checks the Supabase session.
+3. If no session → redirect to `/signin`.
+4. `/signin` calls `supabase.auth.signInWithOAuth({ provider: 'google' })`.
+5. On success, Supabase persists session in browser storage; `SessionContext` exposes it via `useSession()`.
+6. Session cookie persists across all app sections (single sign-on within the origin).
 
 ---
 
-## Next.js project structure (planned)
+## Project structure (`app/`)
 
 ```
-/
-├── app/                        ← Next.js App Router
-│   ├── layout.tsx              ← Root layout (auth check, nav shell)
-│   ├── page.tsx                ← Home / Dashboard
-│   ├── login/page.tsx
+app/
+├── public/
 │   ├── finance/
-│   │   ├── layout.tsx
-│   │   ├── page.tsx
-│   │   ├── transactions/page.tsx
-│   │   └── insights/page.tsx
-│   ├── todos/
-│   │   ├── layout.tsx
-│   │   └── page.tsx
-│   ├── brand/page.tsx
-│   └── api/                    ← API route handlers
-│       ├── auth/[...nextauth]/
-│       ├── finance/
-│       └── todos/
-├── components/                 ← Shared UI components
-│   ├── ui/                     ← shadcn/ui components (copied in)
-│   └── [feature]/              ← Feature-specific components
-├── lib/                        ← Shared logic
-│   ├── db.ts                   ← Prisma client instance
-│   ├── auth.ts                 ← NextAuth config
-│   └── utils.ts
-├── prisma/
-│   └── schema.prisma           ← Database schema
-└── _project/                   ← This documentation folder
+│   │   ├── manifest.webmanifest    ← Finance PWA manifest
+│   │   └── icons/
+│   └── todos/
+│       ├── manifest.webmanifest    ← Todos PWA manifest
+│       └── icons/
+├── src/
+│   ├── App.tsx                     ← Routes, RequireAuth wrapper
+│   ├── main.tsx                    ← Entry, providers
+│   ├── pages/
+│   │   ├── HomePage.tsx
+│   │   ├── SignInPage.tsx
+│   │   ├── BrandKitPage.tsx
+│   │   ├── finance/                ← Finance pages
+│   │   └── todos/                  ← Todos pages
+│   ├── components/
+│   │   ├── Drawer.tsx, Chart.tsx, …
+│   │   └── finance/                ← Finance-specific
+│   ├── lib/
+│   │   ├── supabase.ts
+│   │   ├── applyPalette.ts, echartsTheme.ts
+│   │   └── finance/                ← Import, FX, categorisation
+│   ├── store/                      ← Zustand stores
+│   ├── themes/palettes.ts          ← All palette presets + chart slot ramp
+│   ├── content/brand-kit-body.html ← Live brand kit HTML
+│   └── types/db.ts                 ← Generated Supabase types
+├── vite.config.ts
+└── package.json
+
+supabase/
+├── config.toml
+├── migrations/                     ← SQL migrations
+└── functions/
+    ├── voice-parse/                ← OpenAI proxy for /todos
+    └── fx-daily/                   ← Daily FX seed
 ```
 
 ---
 
 ## Deployment
 
-**V1 (simple):** Deploy to Vercel. Connect Supabase for database. Point subdomain DNS to Vercel.
-
-**Steps:**
-1. Create Next.js project, push to GitHub
-2. Connect repo to Vercel
-3. Set environment variables (DB connection, Google OAuth credentials, Anthropic API key)
-4. Add subdomain CNAME in DNS pointing to `cname.vercel-dns.com`
-5. Done
+Vercel (static build of the Vite SPA), Supabase for data/auth/storage/functions, GitHub Actions in `.github/workflows/deploy.yml` triggers on push to `main`. See project `CLAUDE.md` for the dev/main branch model.
 
 ---
 
 ## Progressive Web App (PWA)
 
-Tyler James OS is a PWA — installable to the iPhone home screen and capable of working offline for supported sections.
+Tyler James OS uses **per-app PWA manifests** (`docs/adr/0001-per-app-pwa-manifests.md`). Each top-level app installs as its own iOS home-screen icon with a distinct name, theme colour, and start URL. The TJOS hub at `/` is not installable on its own.
 
-### What PWA gives us
-- **Add to Home Screen** on iPhone (Safari) and Android
-- Launches in standalone mode (no browser chrome — feels like a native app)
-- App icon, splash screen, theme colour — all configured via the web manifest
-- Offline support for designated sections via a Service Worker
+### How it works
 
-### iPhone-specific notes
-iOS Safari has its own PWA quirks to design around:
-- Install prompt is not automatic on iOS — users must use Share → "Add to Home Screen". Consider showing a first-time nudge with instructions.
-- Push notifications on iOS PWA require iOS 16.4+ and the app must be added to the home screen first. Don't rely on push for V1.
-- Web Speech API works in Safari on iOS — voice capture for todos should function correctly.
-- Standalone mode on iOS does not share cookies/session with Safari. The user will need to log in once inside the installed PWA.
+- `app/public/finance/manifest.webmanifest` declares `scope: "/finance/"`, `start_url: "/finance/"`, `name: "Finance"`.
+- `app/public/todos/manifest.webmanifest` declares `scope: "/todos/"`, `start_url: "/todos/"`, `name: "Todos"`.
+- The HTML head's `<link rel="manifest">` href is swapped on route change so iOS reads the manifest matching the user's current scope when they tap "Add to Home Screen".
+- A single service worker (`vite-plugin-pwa`, configured with `manifest: false`) handles caching for both scopes. It sits at the origin root.
+- Both installed PWAs share the same Supabase session because they share the origin, but iOS standalone mode does not share cookies with mobile Safari, so the first launch of each installed PWA prompts a one-off sign-in inside that scope.
 
-### Required files
-```
-/public/
-├── manifest.json           ← App name, icons, display mode, theme colour
-├── sw.js                   ← Service worker (handles caching + offline)
-└── icons/
-    ├── icon-192.png
-    ├── icon-512.png
-    └── apple-touch-icon.png  ← Required for iOS home screen icon
-```
+### iPhone notes
 
-**manifest.json (skeleton):**
-```json
-{
-  "name": "Tyler James OS",
-  "short_name": "TJOS",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#TBD",
-  "theme_color": "#TBD",
-  "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
-  ]
-}
-```
+- Install prompt is not automatic on iOS. UI nudges hint at Share → Add to Home Screen on first visit from mobile Safari.
+- Push notifications require iOS 16.4+ and the app being added to the home screen. Not used in V1.
+- Web Speech API works in Safari standalone mode (used by `/todos`).
 
 ### Offline strategy by section
 
-Not everything needs to work offline. Be deliberate:
-
-| Section | Offline support | Strategy |
+| Section | Offline | Strategy |
 |---|---|---|
 | Todos | ✅ Yes | Cache task list locally, queue mutations, sync on reconnect |
 | Finance | ⚠️ Read-only | Cache last-fetched transactions for viewing; no import offline |
-| Dashboard | ⚠️ Stale data | Show cached data with "last synced" indicator |
 | Brand kit | ❌ No | Not useful offline |
 | Settings | ❌ No | Always requires connection |
 
-### Service worker approach
-
-**Use Workbox** (Google's SW library — built into Next.js via `next-pwa` plugin). It handles cache strategy configuration without writing raw service worker code.
-
-Recommended cache strategies:
-- **App shell** (HTML, JS, CSS) → Cache First — load instantly, update in background
-- **API responses** (tasks, transactions) → Network First with offline fallback
-- **Static assets** (images, icons, fonts) → Cache First with long TTL
+Service worker uses `vite-plugin-pwa`'s default Workbox runtime caching. Strategies:
+- App shell (HTML, JS, CSS) → Cache First
+- API responses → Network First with offline fallback
+- Static assets (images, icons, fonts) → Cache First with long TTL
 
 ### Offline sync for Todos
 
-When offline, task mutations (create, complete, edit) are queued locally in **IndexedDB** and applied to a local copy of the task list. When the connection returns, the queue is replayed against the server API.
+When offline, task mutations (create, complete, edit) are queued locally in IndexedDB (Dexie.js) and applied to a local copy of the task list. When connectivity returns, the queue is drained against the Supabase API.
 
-Conflict resolution rule (simple for V1): server wins. If a task was modified on the server while offline, the server version overwrites the local version on sync. More nuanced conflict handling can be added later if needed.
+Conflict rule (V1): server wins. Single-user system, acceptable.
 
 ```
 Offline flow:
 User creates task → stored in IndexedDB queue + shown in UI
-Connection restored → queue drained → POST /api/todos for each queued item
+Connection restored → queue drained → upserted to Supabase
 UI refreshes from server response
-```
-
-**Library to handle this:** Consider `idb` (tiny IndexedDB wrapper) or Dexie.js for the offline queue.
-
-### Updated application layers (with PWA)
-
-```
-┌──────────────────────────────────────────────────────┐
-│              iPhone / Browser (PWA)                  │
-│   React + Tailwind + shadcn/ui                       │
-│   ┌──────────────────────────────────────────────┐   │
-│   │  Service Worker (Workbox)                    │   │
-│   │  - App shell cache                           │   │
-│   │  - Offline API fallback                      │   │
-│   └──────────────────────────────────────────────┘   │
-│   ┌──────────────────────────────────────────────┐   │
-│   │  IndexedDB (Dexie.js)                        │   │
-│   │  - Offline task queue                        │   │
-│   │  - Cached task/transaction data              │   │
-│   └──────────────────────────────────────────────┘   │
-└──────────────────────┬───────────────────────────────┘
-                       │ HTTP (when online)
-┌──────────────────────▼───────────────────────────────┐
-│              Next.js API Layer                       │
-└──────────┬────────────────────────┬──────────────────┘
-           │                        │
-┌──────────▼──────┐      ┌──────────▼────────────────┐
-│   PostgreSQL    │      │   External Services        │
-│   (Supabase)    │      │   - ANZ/Akahu, Claude,     │
-│                 │      │     Google Auth             │
-└─────────────────┘      └───────────────────────────┘
 ```
 
 ---
 
 ## Open questions
 
-- [ ] What is the actual subdomain?
-- [ ] Vercel or self-hosted?
-- [ ] Should `/brand` be publicly accessible?
-- [ ] Confirm Web Speech API behaviour in Safari iOS PWA standalone mode (test early)
-- [ ] Dexie.js vs raw `idb` for offline queue — decide during todos implementation
-- [ ] Show "Install to home screen" nudge on first visit from Safari mobile?
+- [ ] What is the actual production subdomain?
+- [ ] Should `/brand-kit` be publicly accessible?
+- [ ] Confirm Web Speech API behaviour in Safari iOS PWA standalone mode (test on /todos install).
+- [ ] First-visit nudge for "Add to Home Screen" on mobile Safari, worth the chrome?

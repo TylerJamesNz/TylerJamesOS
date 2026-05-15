@@ -1,0 +1,15 @@
+{
+	# Don't bind :80 (merchlab nginx already owns it; we don't need the
+	# HTTP->HTTPS redirect for a non-standard HTTPS port anyway).
+	auto_https disable_redirects
+}
+
+tylerbatchelor.local:4443 {
+	# Supabase API behind /api/* (strip prefix before forwarding to Kong)
+	handle_path /api/* {
+		reverse_proxy localhost:54321
+	}
+
+	# Vite dev server for everything else
+	reverse_proxy localhost:5173
+}
