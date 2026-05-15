@@ -78,7 +78,7 @@
       --chart-cat-5: #7c3aed;
       --chart-cat-6: #0ea5e9;
       --chart-cat-7: #0369a1;
-      --chart-cat-8: #059669;
+      --chart-cat-8: #0369a1;
       --chart-cat-9: #d97706;
     }
 
@@ -993,25 +993,6 @@
     </div>
   </div>
 
-  <div class="cashflow-tx-wrap row">
-    <div class="cashflow-tx-header">
-      <div>
-        <div class="card-title" style="margin-bottom: 2px;">Transactions</div>
-        <div class="card-subtitle" id="tx-subtitle" style="margin-bottom: 0;">Selected period</div>
-      </div>
-      <span class="toolbar-hint">Click a row to isolate that account</span>
-    </div>
-    <div class="tx-filter-banner" id="tx-filter-banner" role="status" aria-live="polite" hidden>
-      <div class="tx-filter-banner-body">
-        <div class="tx-filter-banner-title" id="tx-filter-banner-title"></div>
-        <div class="tx-filter-banner-desc" id="tx-filter-banner-desc"></div>
-      </div>
-      <button type="button" class="tx-filter-banner-clear" id="tx-filter-banner-clear">Clear filter</button>
-    </div>
-    <div class="cat-chips" id="cat-chips" role="group" aria-label="Filter by category"></div>
-    <div class="tx-table-wrap" id="tx-table-wrap"></div>
-  </div>
-
   <div class="pie-grid row">
     <div class="pie-card">
       <div class="pie-label">Net Worth</div>
@@ -1048,6 +1029,25 @@
         <div class="pie-centre" id="pie-saved-value">—</div>
       </div>
     </div>
+  </div>
+
+  <div class="cashflow-tx-wrap row">
+    <div class="cashflow-tx-header">
+      <div>
+        <div class="card-title" style="margin-bottom: 2px;">Transactions</div>
+        <div class="card-subtitle" id="tx-subtitle" style="margin-bottom: 0;">Selected period</div>
+      </div>
+      <span class="toolbar-hint">Click a row to isolate that account</span>
+    </div>
+    <div class="tx-filter-banner" id="tx-filter-banner" role="status" aria-live="polite" hidden>
+      <div class="tx-filter-banner-body">
+        <div class="tx-filter-banner-title" id="tx-filter-banner-title"></div>
+        <div class="tx-filter-banner-desc" id="tx-filter-banner-desc"></div>
+      </div>
+      <button type="button" class="tx-filter-banner-clear" id="tx-filter-banner-clear">Clear filter</button>
+    </div>
+    <div class="cat-chips" id="cat-chips" role="group" aria-label="Filter by category"></div>
+    <div class="tx-table-wrap" id="tx-table-wrap"></div>
   </div>
 </div>
 
