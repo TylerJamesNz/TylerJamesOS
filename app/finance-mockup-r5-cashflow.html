@@ -167,30 +167,68 @@
 
     .row { margin-bottom: var(--space-4); }
 
-    .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--space-4); }
-    .stat-card {
+    /* Pie row: five donuts in a single row across the top of the page */
+    .pie-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-3); }
+    .pie-card {
       background: var(--color-surface);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-lg);
-      padding: var(--space-5);
+      padding: var(--space-4) var(--space-3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
     }
-    .stat-label {
+    .pie-label {
       font-size: var(--text-xs);
       color: var(--color-text-subtle);
       text-transform: uppercase;
       letter-spacing: 0.06em;
       font-weight: var(--weight-semi);
     }
-    .stat-value {
-      font-size: var(--text-2xl);
+    .pie-chart-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      max-width: 160px;
+    }
+    .pie-chart { width: 100%; height: 100%; }
+    .pie-centre {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: var(--text-lg);
       font-weight: var(--weight-semi);
       font-family: var(--font-display);
-      margin: var(--space-1) 0;
-      line-height: 1;
+      color: var(--color-text);
+      pointer-events: none;
+      text-align: center;
+      line-height: 1.1;
     }
-    .stat-change { font-size: var(--text-xs); color: var(--color-text-muted); }
-    .stat-change .up   { color: var(--color-success); }
-    .stat-change .down { color: var(--color-destructive); }
+
+    /* Padlock affordance on investment account rows */
+    .account-lock {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-subtle);
+      margin: 0 var(--space-2);
+    }
+    .account-lock svg { display: block; }
+
+    /* Flash-on-select animation triggered when a pie slice selects an account */
+    @keyframes flash-select {
+      0%   { background: var(--color-surface); }
+      15%  { background: color-mix(in srgb, var(--row-accent, var(--color-accent)) 32%, transparent); }
+      30%  { background: color-mix(in srgb, var(--row-accent, var(--color-accent)) 6%, transparent); }
+      45%  { background: color-mix(in srgb, var(--row-accent, var(--color-accent)) 32%, transparent); }
+      60%  { background: color-mix(in srgb, var(--row-accent, var(--color-accent)) 6%, transparent); }
+      75%  { background: color-mix(in srgb, var(--row-accent, var(--color-accent)) 32%, transparent); }
+      100% { background: color-mix(in srgb, var(--row-accent, var(--color-accent)) 8%, transparent); }
+    }
+    .account-row.flash { animation: flash-select 800ms ease-out; }
 
     .period-bar {
       position: relative;
@@ -664,15 +702,16 @@
     @media (max-width: 1100px) {
       .cashflow-grid { grid-template-columns: 1fr; }
       .account-rail { max-height: 280px; }
+      .pie-grid { grid-template-columns: repeat(3, 1fr); }
     }
     @media (max-width: 760px) {
       .cashflow-grid { grid-template-columns: 1fr; }
-      .stat-grid { grid-template-columns: 1fr 1fr; }
+      .pie-grid { grid-template-columns: repeat(2, 1fr); }
       .account-rail { max-height: none; }
       .tx-col-category { display: none; }
     }
     @media (max-width: 540px) {
-      .stat-grid { grid-template-columns: 1fr; }
+      .pie-grid { grid-template-columns: 1fr; }
       .page { padding: var(--space-6) var(--space-4); }
       .period-label { min-width: 120px; font-size: var(--text-md); }
     }
@@ -787,21 +826,41 @@
     </div>
   </header>
 
-  <div class="stat-grid row">
-    <div class="stat-card">
-      <div class="stat-label">Net Worth</div>
-      <div class="stat-value" id="stat-net-worth">—</div>
-      <div class="stat-change"><span class="up" id="stat-net-worth-delta">—</span> vs 12mo ago</div>
+  <div class="pie-grid row">
+    <div class="pie-card">
+      <div class="pie-label">Net Worth</div>
+      <div class="pie-chart-wrap">
+        <div class="pie-chart" id="pie-net-worth-chart"></div>
+        <div class="pie-centre" id="pie-net-worth-value">—</div>
+      </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Liquid</div>
-      <div class="stat-value" id="stat-liquid">—</div>
-      <div class="stat-change">Deposit accounts total</div>
+    <div class="pie-card">
+      <div class="pie-label">Available</div>
+      <div class="pie-chart-wrap">
+        <div class="pie-chart" id="pie-available-chart"></div>
+        <div class="pie-centre" id="pie-available-value">—</div>
+      </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label" id="stat-saved-label">Saved this month</div>
-      <div class="stat-value" id="stat-saved">—</div>
-      <div class="stat-change">Income − Expense (Net) <span class="pill">Net Cost</span></div>
+    <div class="pie-card">
+      <div class="pie-label">Income</div>
+      <div class="pie-chart-wrap">
+        <div class="pie-chart" id="pie-income-chart"></div>
+        <div class="pie-centre" id="pie-income-value">—</div>
+      </div>
+    </div>
+    <div class="pie-card">
+      <div class="pie-label">Expense</div>
+      <div class="pie-chart-wrap">
+        <div class="pie-chart" id="pie-expense-chart"></div>
+        <div class="pie-centre" id="pie-expense-value">—</div>
+      </div>
+    </div>
+    <div class="pie-card">
+      <div class="pie-label">Saved</div>
+      <div class="pie-chart-wrap">
+        <div class="pie-chart" id="pie-saved-chart"></div>
+        <div class="pie-centre" id="pie-saved-value">—</div>
+      </div>
     </div>
   </div>
 
@@ -1342,12 +1401,21 @@
       const periodNet = periodNetForAccount(acc.id);
       const deltaCls = periodNet >= 0 ? 'up' : 'down';
       const typeBadge = acc.account_type === 'INVESTMENT' ? 'Investment' : 'Deposit';
+      const lock = acc.account_type === 'INVESTMENT'
+        ? `<span class="account-lock" title="Locked (investment account)" aria-label="Locked (investment account)">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+               <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+             </svg>
+           </span>`
+        : '';
       return `
         <div class="account-row" data-account="${acc.id}" style="--row-accent: ${colour};">
           <div class="account-info">
             <div class="account-name">${acc.name}</div>
             <div class="account-meta">${typeBadge} · ${acc.currency}</div>
           </div>
+          ${lock}
           <div>
             <div class="account-balance">${fmtAud(balance)}</div>
             <div class="account-delta ${deltaCls}">${fmtAudSigned(periodNet)}</div>
@@ -1547,19 +1615,136 @@
   // ============================================================
   // STATS / HEADERS
   // ============================================================
-  function renderStats() {
-    const nw = netWorthAud();
-    const nw12 = netWorth12mAgoAud();
-    const delta = nw - nw12;
-    const deltaPct = (delta / nw12) * 100;
-    document.getElementById('stat-net-worth').textContent = fmtAud(nw);
-    const dEl = document.getElementById('stat-net-worth-delta');
-    dEl.textContent = `${delta >= 0 ? '↑' : '↓'} ${fmtAud(Math.abs(delta))} (${deltaPct.toFixed(1)}%)`;
-    dEl.className = delta >= 0 ? 'up' : 'down';
-    document.getElementById('stat-liquid').textContent = fmtAud(DATA.liquid_now_aud);
-    document.getElementById('stat-saved').textContent = fmtAud(savedForPeriod());
-    document.getElementById('stat-saved-label').textContent = state.isCustomRange
-      ? 'Saved in range' : `Saved in ${monthLabel(state.start)}`;
+  // ============================================================
+  // PIE ROW (Net Worth · Available · Income · Expense · Saved)
+  // ============================================================
+  const pieCharts = {};
+
+  function balanceAud(acc) {
+    return toAud(DATA.balance_snapshots_latest[acc.id] ?? 0, acc.currency, '2026-05-31');
+  }
+  function accountSlice(acc, value) {
+    return {
+      name: acc.name,
+      value,
+      accountId: acc.id,
+      itemStyle: { color: SLOT[acc.colour_slot] },
+    };
+  }
+  function netWorthSlices() {
+    return DATA.accounts.map(acc => accountSlice(acc, Math.max(balanceAud(acc), 0)));
+  }
+  function availableSlices() {
+    return DATA.accounts
+      .filter(acc => acc.account_type !== 'INVESTMENT')
+      .map(acc => accountSlice(acc, Math.max(balanceAud(acc), 0)));
+  }
+  function incomeBySourceAccount() {
+    const sums = {};
+    for (const tx of DATA.transactions) {
+      if (!inPeriod(tx.date)) continue;
+      const acc = ACCOUNT_BY_ID[tx.account_id];
+      if (!acc) continue;
+      const aud = toAud(tx.amount, acc.currency, tx.date);
+      if (aud > 0) sums[acc.id] = (sums[acc.id] || 0) + aud;
+    }
+    return Object.entries(sums).map(([id, v]) => accountSlice(ACCOUNT_BY_ID[id], v));
+  }
+  function expenseByPayingAccount() {
+    const sums = {};
+    for (const tx of DATA.transactions) {
+      if (!inPeriod(tx.date)) continue;
+      const acc = ACCOUNT_BY_ID[tx.account_id];
+      if (!acc) continue;
+      const aud = toAud(tx.amount, acc.currency, tx.date);
+      if (aud < 0) sums[acc.id] = (sums[acc.id] || 0) + Math.abs(aud);
+    }
+    return Object.entries(sums).map(([id, v]) => accountSlice(ACCOUNT_BY_ID[id], v));
+  }
+  function savedDonutSlices() {
+    let income = 0, expense = 0;
+    for (const tx of DATA.transactions) {
+      if (!inPeriod(tx.date)) continue;
+      const acc = ACCOUNT_BY_ID[tx.account_id];
+      if (!acc) continue;
+      const aud = toAud(tx.amount, acc.currency, tx.date);
+      if (aud > 0) income += aud;
+      else expense += Math.abs(aud);
+    }
+    const saved = Math.max(income - expense, 0);
+    return [
+      { name: 'Saved', value: saved,   itemStyle: { color: COLOR_SUCCESS } },
+      { name: 'Spent', value: expense, itemStyle: { color: COLOR_BORDER_SOFT } },
+    ];
+  }
+  function sumSlices(slices) {
+    return slices.reduce((s, x) => s + x.value, 0);
+  }
+  function fmtAudCompact(n) {
+    if (Math.abs(n) >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'm';
+    if (Math.abs(n) >= 1_000)     return '$' + Math.round(n / 1_000) + 'k';
+    return '$' + Math.round(n);
+  }
+  function renderPie(elId, slices) {
+    const node = document.getElementById(elId);
+    if (!node) return;
+    if (!pieCharts[elId]) pieCharts[elId] = echarts.init(node);
+    const c = pieCharts[elId];
+    c.setOption({
+      tooltip: { trigger: 'item', valueFormatter: (v) => fmtAud(v) },
+      series: [{
+        type: 'pie',
+        radius: ['55%', '88%'],
+        center: ['50%', '50%'],
+        avoidLabelOverlap: false,
+        label: { show: false },
+        labelLine: { show: false },
+        data: slices,
+      }],
+    }, { notMerge: true });
+    c.off('click');
+    c.on('click', (params) => {
+      if (params.data && params.data.accountId) {
+        flashAndSelectAccount(params.data.accountId);
+      }
+    });
+  }
+  function renderPies() {
+    const nwSlices = netWorthSlices();
+    renderPie('pie-net-worth-chart', nwSlices);
+    document.getElementById('pie-net-worth-value').textContent = fmtAudCompact(sumSlices(nwSlices));
+
+    const avSlices = availableSlices();
+    renderPie('pie-available-chart', avSlices);
+    document.getElementById('pie-available-value').textContent = fmtAudCompact(sumSlices(avSlices));
+
+    const inSlices = incomeBySourceAccount();
+    renderPie('pie-income-chart', inSlices);
+    document.getElementById('pie-income-value').textContent = fmtAudCompact(sumSlices(inSlices));
+
+    const exSlices = expenseByPayingAccount();
+    renderPie('pie-expense-chart', exSlices);
+    document.getElementById('pie-expense-value').textContent = fmtAudCompact(sumSlices(exSlices));
+
+    const svSlices = savedDonutSlices();
+    renderPie('pie-saved-chart', svSlices);
+    document.getElementById('pie-saved-value').textContent = fmtAudCompact(svSlices[0].value);
+  }
+
+  function flashAndSelectAccount(accId) {
+    state.highlightedAccount = accId;
+    applyHighlightDom();
+    renderCashflow();
+    document.getElementById('highlight-hint').textContent =
+      `Showing ${ACCOUNT_BY_ID[accId].name} · click again to clear`;
+
+    const row = document.querySelector(`.account-row[data-account="${accId}"]`);
+    if (!row) return;
+    row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    row.classList.remove('flash');
+    void row.offsetWidth;
+    row.classList.add('flash');
+    row.addEventListener('animationend', () => row.classList.remove('flash'), { once: true });
   }
   function renderHeaderSubtitle() {
     document.getElementById('header-subtitle').textContent = state.isCustomRange
@@ -1588,7 +1773,7 @@
     updatePeriodLabel();
     renderHeaderSubtitle();
     renderTxSubtitle();
-    renderStats();
+    renderPies();
     renderAccounts();
     renderTransactions();
     applyHighlightDom();
@@ -1668,7 +1853,7 @@
   updatePeriodLabel();
   renderHeaderSubtitle();
   renderTxSubtitle();
-  renderStats();
+  renderPies();
   renderAccounts();
   renderCategoryChips();
   renderTransactions();
@@ -1680,6 +1865,7 @@
 
   window.addEventListener('resize', () => {
     if (chart) chart.resize();
+    Object.values(pieCharts).forEach(c => c.resize());
   });
 </script>
 
