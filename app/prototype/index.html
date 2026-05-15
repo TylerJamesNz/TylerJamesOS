@@ -30,29 +30,10 @@
       <div id="note-input" hidden>
         <textarea id="note-text" placeholder="Note"></textarea>
         <small class="note-hint">Enter to lock in · Shift+Enter for newline · Esc to cancel</small>
-        <div class="popover-refs">
-          <label class="popover-ref-upload">
-            <input id="ref-upload" type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
-            <span>📎 Add image</span>
-          </label>
-          <input id="ref-url" type="url" class="popover-ref-url" placeholder="Reference URL (https://…)">
-          <div id="ref-preview" class="popover-ref-preview" hidden>
-            <img id="ref-thumb" alt="Reference preview">
-            <button id="ref-remove" type="button" title="Remove image">×</button>
-          </div>
-        </div>
         <div class="note-actions">
           <button id="note-confirm" type="button">Save</button>
           <button id="note-cancel" type="button">Cancel</button>
-          <button id="note-delete" type="button" hidden>Delete</button>
         </div>
-      </div>
-    </div>
-    <div id="submitted-overlay" role="dialog" aria-live="polite" hidden>
-      <div class="submitted-card">
-        <div class="submitted-title">✓ Submitted</div>
-        <div class="submitted-path"></div>
-        <div class="submitted-hint">Claude is watching · click anywhere to dismiss</div>
       </div>
     </div>
   </main>
