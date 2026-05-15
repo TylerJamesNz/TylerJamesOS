@@ -321,14 +321,19 @@
       display: grid;
       grid-template-columns: minmax(220px, 1fr) minmax(0, 4fr);
       gap: var(--space-4);
+      align-items: stretch;
     }
     .account-rail {
       background: var(--color-surface);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-lg);
-      padding: var(--space-6);
-      max-height: 520px;
+      padding: var(--space-6) 0;
       overflow-y: auto;
+    }
+    .account-rail > .card-title,
+    .account-rail > .card-subtitle {
+      padding-left: var(--space-6);
+      padding-right: var(--space-6);
     }
     .cashflow-tx-wrap {
       margin-top: var(--space-4);
@@ -395,26 +400,19 @@
       display: flex;
       align-items: center;
       gap: var(--space-3);
-      padding: var(--space-3) var(--space-3) var(--space-3) calc(var(--space-3) - 3px);
-      border-left: 3px solid transparent;
+      padding: var(--space-3) var(--space-6) var(--space-3) calc(var(--space-6) - 3px);
+      border-left: 3px solid var(--row-accent, var(--color-border-soft));
       border-bottom: 1px solid var(--color-border-soft);
       cursor: pointer;
-      transition: background var(--ease-default), border-color var(--ease-default), opacity var(--ease-default);
+      transition: background var(--ease-default), opacity var(--ease-default);
     }
     .account-row:last-child { border-bottom: none; }
     .account-row:hover { background: var(--color-surface-2); }
     .account-row[aria-selected="true"] {
       background: color-mix(in srgb, var(--row-accent, var(--color-accent)) 8%, transparent);
-      border-left-color: var(--row-accent, var(--color-accent));
     }
     .account-row.dimmed { opacity: 0.35; }
 
-    .account-swatch {
-      width: 10px;
-      height: 28px;
-      border-radius: var(--radius-sm);
-      flex-shrink: 0;
-    }
     .account-info { flex: 1; min-width: 0; }
     .account-name {
       font-size: var(--text-sm);
@@ -1346,7 +1344,6 @@
       const typeBadge = acc.account_type === 'INVESTMENT' ? 'Investment' : 'Deposit';
       return `
         <div class="account-row" data-account="${acc.id}" style="--row-accent: ${colour};">
-          <div class="account-swatch" style="background: ${colour};"></div>
           <div class="account-info">
             <div class="account-name">${acc.name}</div>
             <div class="account-meta">${typeBadge} · ${acc.currency}</div>
